@@ -1,0 +1,266 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Activity Logs{% endblock %}
+{% block breadcrumb %}Activity Logs{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-clock-history"></i> System{% endblock %}
+{% block page_title %}Activity Logs{% endblock %}
+{% block page_subtitle %}Complete audit trail of all user actions across the platform.{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('activity_log.delete_all_logs') }}"
+   class="btn btn-danger btn-sm"
+   onclick="return confirm('Delete ALL activity logs? This cannot be undone.')">
+  <i class="bi bi-trash-fill"></i> Clear All
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+/* ── Stats row ── */
+.log-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 20px;
+}
+@media(max-width:900px){ .log-stats{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:500px){ .log-stats{ grid-template-columns:1fr; } }
+
+.log-stat {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); padding: 16px 18px;
+  display: flex; align-items: center; gap: 13px;
+  transition: border-color var(--t-fast);
+}
+.log-stat:hover { border-color: var(--border-base); }
+.log-stat-icon {
+  width: 36px; height: 36px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 17px; flex-shrink: 0;
+}
+.log-stat-val  { font-size: 22px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.log-stat-lbl  { font-size: 11px; color: var(--text-sec); font-weight: 500; margin-top: 2px; }
+
+/* ── Filters bar ── */
+.log-filters {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg); padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.log-filters .rf-input  { max-width: 260px; }
+.log-filters .rf-select { max-width: 160px; }
+
+/* ── Table ── */
+.log-table-wrap {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden;
+}
+.log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.log-table thead th {
+  background: rgba(255,255,255,.025); color: var(--text-dim);
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; padding: 11px 16px; text-align: left;
+  border-bottom: 1px solid var(--border-subtle); white-space: nowrap;
+}
+.log-table tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--t-fast);
+}
+.log-table tbody tr:last-child { border-bottom: none; }
+.log-table tbody tr:hover { background: rgba(255,255,255,.02); }
+.log-table td { padding: 11px 16px; color: var(--text-sec); vertical-align: middle; }
+.log-table td.td-id   { color: var(--text-dim); font-weight: 700; font-size: 11.5px; width: 52px; }
+.log-table td.td-user { color: var(--text-primary); font-weight: 600; }
+.log-table td.td-ts   { font-size: 11.5px; white-space: nowrap; color: var(--text-dim); }
+
+/* ── Module badges ── */
+{% set module_colors = {
+  'Authentication': 'badge-blue',
+  'Interview': 'badge-purple',
+  'Job': 'badge-amber',
+  'Candidate': 'badge-green',
+  'Offer': 'badge-pink',
+  'Settings': 'badge-cyan',
+  'Backup': 'badge-amber',
+  'Analytics': 'badge-blue',
+  'Recruiter': 'badge-green',
+  'Report': 'badge-purple',
+} %}
+
+/* Empty state */
+.log-empty {
+  text-align: center; padding: 56px 20px;
+  color: var(--text-dim);
+}
+.log-empty i { font-size: 36px; display: block; margin-bottom: 12px; color: var(--text-dim); }
+.log-empty p { font-size: 13.5px; margin: 0; }
+{% endblock %}
+
+{% block content %}
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  {% for category, message in messages %}
+  <div class="flash {{ 'success' if category == 'success' else 'error' if category in ['danger','error'] else 'info' }}"
+       style="margin-bottom:16px;">
+    <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category in ['danger','error'] %}x-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+    {{ message }}
+    <button class="flash-close" onclick="this.parentElement.remove()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  {% endfor %}
+{% endif %}
+{% endwith %}
+
+<!-- ── Stats Row ── -->
+{% set total = logs|length if logs else 0 %}
+{% set modules = logs|map(attribute='module')|list|unique|list if logs else [] %}
+<div class="log-stats">
+  <div class="log-stat">
+    <div class="log-stat-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+      <i class="bi bi-clock-history"></i>
+    </div>
+    <div>
+      <div class="log-stat-val">{{ total }}</div>
+      <div class="log-stat-lbl">Total Events</div>
+    </div>
+  </div>
+  <div class="log-stat">
+    <div class="log-stat-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+      <i class="bi bi-people-fill"></i>
+    </div>
+    <div>
+      <div class="log-stat-val">{{ logs|map(attribute='user_id')|reject('none')|list|unique|list|length if logs else 0 }}</div>
+      <div class="log-stat-lbl">Active Users</div>
+    </div>
+  </div>
+  <div class="log-stat">
+    <div class="log-stat-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+      <i class="bi bi-grid-3x3-gap-fill"></i>
+    </div>
+    <div>
+      <div class="log-stat-val">{{ modules|length }}</div>
+      <div class="log-stat-lbl">Modules</div>
+    </div>
+  </div>
+  <div class="log-stat">
+    <div class="log-stat-icon" style="background:rgba(139,92,246,.12);color:#a78bfa;">
+      <i class="bi bi-calendar-event-fill"></i>
+    </div>
+    <div>
+      <div class="log-stat-val">{{ logs[0].created_at.strftime('%d %b') if logs and logs[0].created_at else '—' }}</div>
+      <div class="log-stat-lbl">Latest Event</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Filters Bar ── -->
+<div class="log-filters">
+  <i class="bi bi-funnel" style="color:var(--text-dim);font-size:14px;"></i>
+  <input type="text" class="rf-input" id="logSearch"
+         placeholder="Search user, activity, module..." style="max-width:280px;" />
+  <select class="rf-select" id="moduleFilter" style="max-width:170px;">
+    <option value="">All Modules</option>
+    {% if logs %}
+      {% for mod in logs|map(attribute='module')|unique|list|sort %}
+      <option value="{{ mod|lower }}">{{ mod }}</option>
+      {% endfor %}
+    {% endif %}
+  </select>
+  <span style="margin-left:auto;font-size:11.5px;color:var(--text-dim);"
+        id="logCount">{{ total }} event{{ 's' if total != 1 else '' }}</span>
+</div>
+
+<!-- ── Table ── -->
+<div class="log-table-wrap">
+  {% if logs %}
+  <table class="log-table" id="logTable">
+    <thead>
+      <tr>
+        <th class="td-id">#</th>
+        <th>User</th>
+        <th>Module</th>
+        <th>Activity</th>
+        <th>Timestamp</th>
+        <th style="text-align:right;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      {% set mod_lower = (log.module or '')|lower %}
+      {% set badge_cls =
+        'badge-blue'   if mod_lower in ['authentication','analytics'] else
+        'badge-purple' if mod_lower in ['interview','report'] else
+        'badge-amber'  if mod_lower in ['job','backup','settings'] else
+        'badge-green'  if mod_lower in ['candidate','recruiter'] else
+        'badge-pink'   if mod_lower == 'offer' else
+        'badge-cyan'   if mod_lower == 'settings' else
+        'badge-gray'
+      %}
+      <tr data-name="{{ ((log.user.username if log.user else '') ~ ' ' ~ (log.activity or '') ~ ' ' ~ (log.module or ''))|lower }}">
+        <td class="td-id">{{ loop.index }}</td>
+        <td class="td-user">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="av av-sm" style="background:linear-gradient(135deg,var(--accent-1),var(--purple));flex-shrink:0;">
+              {{ (log.user.username[0]|upper) if log.user and log.user.username else '?' }}
+            </div>
+            {{ log.user.username if log.user else 'System' }}
+          </div>
+        </td>
+        <td>
+          <span class="badge {{ badge_cls }}">{{ log.module or '—' }}</span>
+        </td>
+        <td style="color:var(--text-primary);max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+            title="{{ log.activity or '' }}">
+          {{ log.activity or '—' }}
+        </td>
+        <td class="td-ts">
+          {% if log.created_at %}
+            {{ log.created_at.strftime('%d %b %Y, %H:%M') }}
+          {% else %}—{% endif %}
+        </td>
+        <td style="text-align:right;">
+          <a href="{{ url_for('activity_log.delete_log', log_id=log.log_id) }}"
+             class="btn btn-danger btn-sm btn-icon"
+             title="Delete this log"
+             onclick="return confirm('Delete this log entry?')">
+            <i class="bi bi-trash-fill"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="log-empty">
+    <i class="bi bi-clock-history"></i>
+    <p>No activity logs recorded yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const searchInput  = document.getElementById('logSearch');
+  const moduleFilter = document.getElementById('moduleFilter');
+  const logCount     = document.getElementById('logCount');
+
+  function filterTable() {
+    const q   = (searchInput.value || '').toLowerCase();
+    const mod = (moduleFilter.value || '').toLowerCase();
+    const rows = document.querySelectorAll('#logTable tbody tr');
+    let visible = 0;
+    rows.forEach(row => {
+      const name = row.dataset.name || '';
+      const cells = row.querySelectorAll('td');
+      const modCell = cells[2] ? cells[2].textContent.toLowerCase() : '';
+      const show = name.includes(q) && (!mod || modCell.includes(mod));
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (logCount) logCount.textContent = visible + ' event' + (visible !== 1 ? 's' : '');
+  }
+
+  searchInput?.addEventListener('input', filterTable);
+  moduleFilter?.addEventListener('change', filterTable);
+</script>
+{% endblock %}

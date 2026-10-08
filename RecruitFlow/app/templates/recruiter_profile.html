@@ -1,0 +1,289 @@
+{% extends "recruiter_base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block page_title %}
+<div>My Profile <span style="color:var(--text-sec);font-weight:400;font-size:12.5px;display:block;margin-top:2px;">Manage your account information and security settings.</span></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Profile Hero ── */
+.profile-hero {
+    background: linear-gradient(135deg, rgba(124,58,237,.16), rgba(91,33,182,.08));
+    border: 1px solid rgba(124,58,237,.22);
+    border-radius: var(--r-xl);
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.profile-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(124,58,237,.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+.profile-big-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #5b21b6);
+    display: grid;
+    place-items: center;
+    font-size: 34px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 8px 24px var(--accent-glow);
+    border: 3px solid rgba(124,58,237,.4);
+}
+.profile-hero-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -.3px;
+    margin-bottom: 5px;
+}
+.profile-hero-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(124,58,237,.2);
+    border: 1px solid rgba(124,58,237,.35);
+    border-radius: 999px;
+    padding: 4px 13px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+.profile-hero-email {
+    font-size: 13px;
+    color: var(--text-sec);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── Form Cards ── */
+.profile-form-section {
+    background: rgba(255,255,255,.025);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+}
+.profile-form-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+/* ── Password strength ── */
+#pwStrengthBar {
+    height: 4px;
+    background: rgba(255,255,255,.07);
+    border-radius: 99px;
+    margin-top: 6px;
+    overflow: hidden;
+}
+#pwStrengthFill {
+    height: 100%;
+    border-radius: 99px;
+    width: 0%;
+    transition: width .3s, background .3s;
+}
+#pwStrengthText {
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--text-dim);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Profile Hero -->
+<div class="profile-hero">
+    <div class="profile-big-avatar">
+        {{ user.username[0]|upper if user else 'R' }}
+    </div>
+    <div>
+        <div class="profile-hero-name">{{ user.username if user else 'Recruiter' }}</div>
+        <div class="profile-hero-role"><i class="bi bi-briefcase-fill"></i> Recruiter</div>
+        <div class="profile-hero-email">
+            <i class="bi bi-envelope" style="color:var(--text-dim);"></i>
+            {{ user.email if user else 'recruiter@recruitflow.ai' }}
+        </div>
+    </div>
+</div>
+
+<div class="rf-grid-2">
+
+    <!-- Update Profile Card -->
+    <div class="rf-card">
+        <div class="rf-card-header">
+            <h3 class="rf-card-title">
+                <i class="bi bi-person-gear" style="color:var(--accent2);"></i>
+                Profile Information
+            </h3>
+            <span class="rf-badge rf-badge-purple">Account</span>
+        </div>
+        <div class="rf-card-body">
+            <form action="{{ url_for('recruiter_profile.update_profile') }}" method="POST">
+
+                <div class="profile-form-section">
+                    <div class="profile-form-section-title">
+                        <i class="bi bi-person"></i> Personal Details
+                    </div>
+
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="username">Username</label>
+                        <div style="position:relative;">
+                            <input id="username" type="text" name="username"
+                                   class="rf-input" style="padding-left:38px;"
+                                   value="{{ user.username if user else '' }}" required>
+                            <i class="bi bi-at" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:14px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="email">Email Address</label>
+                        <div style="position:relative;">
+                            <input id="email" type="email" name="email"
+                                   class="rf-input" style="padding-left:38px;"
+                                   value="{{ user.email if user else '' }}" required>
+                            <i class="bi bi-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="rf-form-group" style="margin-bottom:0;">
+                        <label class="rf-label" for="role">Role</label>
+                        <div style="position:relative;">
+                            <input id="role" type="text"
+                                   class="rf-input" style="padding-left:38px;"
+                                   value="{{ user.role if user else 'Recruiter' }}" readonly>
+                            <i class="bi bi-shield-check" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent2);font-size:13px;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="rf-btn rf-btn-primary" style="width:100%;">
+                    <i class="bi bi-check2-circle"></i> Save Profile Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="rf-card">
+        <div class="rf-card-header">
+            <h3 class="rf-card-title">
+                <i class="bi bi-shield-lock" style="color:#34d399;"></i>
+                Security Settings
+            </h3>
+            <span class="rf-badge rf-badge-green">Password</span>
+        </div>
+        <div class="rf-card-body">
+            <form action="{{ url_for('recruiter_profile.change_password') }}" method="POST">
+
+                <div class="profile-form-section">
+                    <div class="profile-form-section-title">
+                        <i class="bi bi-key"></i> Change Password
+                    </div>
+
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="cur_pw">Current Password</label>
+                        <div style="position:relative;">
+                            <input id="cur_pw" type="password" name="current_password"
+                                   class="rf-input" style="padding-left:38px;"
+                                   placeholder="Enter current password" required>
+                            <i class="bi bi-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="new_pw">New Password</label>
+                        <div style="position:relative;">
+                            <input id="new_pw" type="password" name="new_password"
+                                   class="rf-input" style="padding-left:38px;"
+                                   placeholder="Minimum 8 characters" required
+                                   oninput="checkStrength(this.value)">
+                            <i class="bi bi-lock-fill" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                        </div>
+                        <div id="pwStrengthBar"><div id="pwStrengthFill"></div></div>
+                        <div id="pwStrengthText">Enter a new password</div>
+                    </div>
+
+                    <div class="rf-form-group" style="margin-bottom:0;">
+                        <label class="rf-label" for="conf_pw">Confirm New Password</label>
+                        <div style="position:relative;">
+                            <input id="conf_pw" type="password"
+                                   class="rf-input" style="padding-left:38px;"
+                                   placeholder="Re-enter new password">
+                            <i class="bi bi-lock-fill" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Tips -->
+                <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+                    <div style="font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:8px;">
+                        <i class="bi bi-lightbulb"></i> Security Tips
+                    </div>
+                    <ul style="margin:0;padding-left:16px;font-size:12px;color:var(--text-sec);line-height:1.8;">
+                        <li>Use at least 8 characters</li>
+                        <li>Mix uppercase, lowercase & numbers</li>
+                        <li>Avoid using personal information</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="rf-btn rf-btn-success" style="width:100%;">
+                    <i class="bi bi-key-fill"></i> Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function checkStrength(pw) {
+    const fill = document.getElementById('pwStrengthFill');
+    const text = document.getElementById('pwStrengthText');
+    let score = 0;
+    if (pw.length >= 8)  score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+    const levels = [
+        { w:'0%',   c:'#ef4444', t:'Too short' },
+        { w:'25%',  c:'#f87171', t:'Weak' },
+        { w:'50%',  c:'#fbbf24', t:'Fair' },
+        { w:'75%',  c:'#34d399', t:'Good' },
+        { w:'100%', c:'#10b981', t:'Strong ✓' },
+    ];
+    fill.style.width = levels[score].w;
+    fill.style.background = levels[score].c;
+    text.textContent = levels[score].t;
+    text.style.color = levels[score].c;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Database Backup{% endblock %}
+{% block breadcrumb %}Backup & Restore{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-database-fill-gear"></i> System{% endblock %}
+{% block page_title %}Database Backup &amp; Restore{% endblock %}
+{% block page_subtitle %}Create, download, and restore database backups to keep your data safe.{% endblock %}
+
+{% block extra_styles %}
+/* ── Status banner ── */
+.backup-banner {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl);
+  padding: 20px 24px;
+  display: flex; align-items: center; gap: 18px;
+  margin-bottom: 22px; flex-wrap: wrap;
+}
+.backup-banner-icon {
+  width: 48px; height: 48px; border-radius: var(--r-lg);
+  display: grid; place-items: center; font-size: 22px; flex-shrink: 0;
+}
+.backup-banner-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.backup-banner-sub   { font-size: 12px; color: var(--text-sec); word-break: break-all; }
+.backup-banner-badge { margin-left: auto; flex-shrink: 0; }
+
+/* ── Action cards ── */
+.backup-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-bottom: 22px;
+}
+@media(max-width:900px){ .backup-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:560px){ .backup-grid{ grid-template-columns:1fr; } }
+
+.backup-action-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl);
+  padding: 24px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center; text-decoration: none;
+  transition: all var(--t-base);
+  position: relative; overflow: hidden;
+}
+.backup-action-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.bac-create::after  { background: linear-gradient(90deg,#10b981,#34d399); }
+.bac-download::after{ background: linear-gradient(90deg,#3b82f6,#60a5fa); }
+.bac-restore::after { background: linear-gradient(90deg,#ef4444,#f87171); }
+
+.backup-action-card:hover {
+  border-color: var(--border-base);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+.bac-icon {
+  width: 52px; height: 52px; border-radius: var(--r-lg);
+  display: grid; place-items: center; font-size: 24px;
+}
+.bac-title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.bac-desc  { font-size: 12px; color: var(--text-sec); line-height: 1.5; }
+
+/* ── Warning note ── */
+.backup-warning {
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.25);
+  border-radius: var(--r-lg);
+  padding: 14px 18px;
+  display: flex; align-items: flex-start; gap: 12px;
+  font-size: 12.5px; color: #fbbf24;
+  margin-bottom: 20px;
+}
+.backup-warning i { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+
+/* ── Info list ── */
+.backup-info-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden;
+}
+.backup-info-header {
+  padding: 14px 20px; border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.backup-info-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+}
+.backup-info-row:last-child { border-bottom: none; }
+.backup-info-key { color: var(--text-sec); }
+.backup-info-val { color: var(--text-primary); font-weight: 600; font-size: 12.5px; word-break: break-all; text-align: right; max-width: 65%; }
+{% endblock %}
+
+{% block content %}
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  {% for category, message in messages %}
+  <div class="flash {{ 'success' if category == 'success' else 'error' if category in ['danger','error'] else 'info' }}"
+       style="margin-bottom:16px;">
+    <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category in ['danger','error'] %}x-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+    {{ message }}
+    <button class="flash-close" onclick="this.parentElement.remove()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  {% endfor %}
+{% endif %}
+{% endwith %}
+
+<!-- ── Latest Backup Status Banner ── -->
+<div class="backup-banner">
+  {% if latest_backup %}
+  <div class="bac-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+    <i class="bi bi-database-fill-check"></i>
+  </div>
+  <div>
+    <div class="backup-banner-title">Latest Backup Available</div>
+    <div class="backup-banner-sub">
+      <i class="bi bi-file-earmark-zip-fill" style="margin-right:5px;"></i>
+      {{ latest_backup.split('\\')[-1].split('/')[-1] if latest_backup else latest_backup }}
+    </div>
+  </div>
+  <span class="badge badge-green backup-banner-badge">
+    <i class="bi bi-circle-fill" style="font-size:6px;"></i> Ready
+  </span>
+  {% else %}
+  <div class="bac-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+    <i class="bi bi-database-fill-exclamation"></i>
+  </div>
+  <div>
+    <div class="backup-banner-title">No Backup Found</div>
+    <div class="backup-banner-sub">Create your first backup to secure your database.</div>
+  </div>
+  <span class="badge badge-amber backup-banner-badge">
+    <i class="bi bi-exclamation-triangle-fill"></i> No Backup
+  </span>
+  {% endif %}
+</div>
+
+<!-- ── Action Cards ── -->
+<div class="backup-grid">
+
+  <!-- Create -->
+  <a href="{{ url_for('backup.create_backup') }}" class="backup-action-card bac-create">
+    <div class="bac-icon" style="background:rgba(16,185,129,.14);color:#10b981;">
+      <i class="bi bi-cloud-arrow-down-fill"></i>
+    </div>
+    <div class="bac-title">Create Backup</div>
+    <div class="bac-desc">Generate a new snapshot of the current database and save it to the backups folder.</div>
+    <span class="btn btn-sm" style="background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.3);color:#10b981;width:100%;justify-content:center;">
+      <i class="bi bi-plus-circle-fill"></i> Create Now
+    </span>
+  </a>
+
+  <!-- Download -->
+  <a href="{{ url_for('backup.download_backup') }}" class="backup-action-card bac-download"
+     {% if not latest_backup %}onclick="return confirm('No backup available yet. Create one first.')"{% endif %}>
+    <div class="bac-icon" style="background:rgba(59,130,246,.14);color:#60a5fa;">
+      <i class="bi bi-download"></i>
+    </div>
+    <div class="bac-title">Download Backup</div>
+    <div class="bac-desc">Download the latest backup file to your local machine for off-site storage.</div>
+    <span class="btn btn-sm" style="background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.3);color:#60a5fa;width:100%;justify-content:center;"
+          {% if not latest_backup %}style="opacity:.5;"{% endif %}>
+      <i class="bi bi-file-earmark-arrow-down-fill"></i> Download
+    </span>
+  </a>
+
+  <!-- Restore -->
+  <form method="POST" action="{{ url_for('backup.restore_backup') }}" style="display:contents;">
+    <button type="submit"
+            class="backup-action-card bac-restore"
+            style="cursor:pointer;border:none;"
+            onclick="return confirm('Restore the latest backup? This will OVERWRITE all current database data and cannot be undone.')">
+      <div class="bac-icon" style="background:rgba(239,68,68,.14);color:#ef4444;">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </div>
+      <div class="bac-title">Restore Backup</div>
+      <div class="bac-desc">Overwrite the current database with the latest backup. Use with caution.</div>
+      <span class="btn btn-sm btn-danger" style="width:100%;justify-content:center;">
+        <i class="bi bi-exclamation-triangle-fill"></i> Restore
+      </span>
+    </button>
+  </form>
+
+</div>
+
+<!-- ── Warning ── -->
+<div class="backup-warning">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>
+    <strong>Important:</strong> Restoring a backup will permanently replace all current data. Ensure you have a recent backup before performing any restore operation. This action cannot be undone.
+  </div>
+</div>
+
+<!-- ── Backup Info ── -->
+<div class="backup-info-card">
+  <div class="backup-info-header">
+    <i class="bi bi-info-circle-fill" style="color:#60a5fa;"></i>
+    Backup Information
+  </div>
+  <div class="backup-info-row">
+    <span class="backup-info-key">Storage Location</span>
+    <span class="backup-info-val"><code style="font-size:11.5px;color:var(--accent-3);">backups/</code> folder</span>
+  </div>
+  <div class="backup-info-row">
+    <span class="backup-info-key">Latest Backup</span>
+    <span class="backup-info-val">
+      {% if latest_backup %}
+        {{ latest_backup.split('\\')[-1].split('/')[-1] }}
+      {% else %}
+        <span style="color:var(--text-dim);">None</span>
+      {% endif %}
+    </span>
+  </div>
+  <div class="backup-info-row">
+    <span class="backup-info-key">Format</span>
+    <span class="backup-info-val">SQL / Archive</span>
+  </div>
+  <div class="backup-info-row">
+    <span class="backup-info-key">Backup Status</span>
+    <span class="backup-info-val">
+      {% if latest_backup %}
+        <span class="badge badge-green">Available</span>
+      {% else %}
+        <span class="badge badge-amber">No Backup</span>
+      {% endif %}
+    </span>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-info text-white">
+
+            <h3>
+
+                Offer Details
+
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <tr>
+
+                    <th width="30%">
+
+                        Candidate
+
+                    </th>
+
+                    <td>
+
+                        {{ offer.candidate.full_name }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Email
+
+                    </th>
+
+                    <td>
+
+                        {{ offer.candidate.email }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Job Title
+
+                    </th>
+
+                    <td>
+
+                        {{ offer.job.job_title }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Company
+
+                    </th>
+
+                    <td>
+
+                        {{ offer.job.company }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Offered Salary
+
+                    </th>
+
+                    <td>
+
+                        {{ offer.offered_salary }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Offer Date
+
+                    </th>
+
+                    <td>
+
+                        {{ offer.offer_date }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Joining Date
+
+                    </th>
+
+                    <td>
+
+                        {{ offer.joining_date }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Status
+
+                    </th>
+
+                    <td>
+
+                        {% if offer.status == "Pending" %}
+
+                        <span class="badge bg-warning text-dark">
+
+                            Pending
+
+                        </span>
+
+                        {% elif offer.status == "Accepted" %}
+
+                        <span class="badge bg-success">
+
+                            Accepted
+
+                        </span>
+
+                        {% elif offer.status == "Rejected" %}
+
+                        <span class="badge bg-danger">
+
+                            Rejected
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge bg-secondary">
+
+                            {{ offer.status }}
+
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+        </div>
+
+        <div class="card-footer">
+
+            <a
+                href="{{ url_for('offer_management.offer_pdf', offer_id=offer.offer_id) }}"
+                class="btn btn-primary">
+
+                📄 Download PDF
+
+            </a>
+
+            <a
+                href="{{ url_for('offer_management.send_offer_email', offer_id=offer.offer_id) }}"
+                class="btn btn-success">
+
+                📧 Send Email
+
+            </a>
+
+            <a
+                href="{{ url_for('offer_management.edit_offer', offer_id=offer.offer_id) }}"
+                class="btn btn-warning">
+
+                ✏ Edit
+
+            </a>
+
+            <a
+                href="{{ url_for('offer_management.offers') }}"
+                class="btn btn-secondary">
+
+                ← Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

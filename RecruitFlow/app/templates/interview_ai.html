@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="card shadow-lg">
+
+<div class="card-header bg-primary text-white">
+
+<h2 class="mb-0">
+🤖 AI Interview Questions
+</h2>
+
+</div>
+
+<div class="card-body">
+
+<!-- Candidate Information -->
+
+<div class="row mb-4">
+
+<div class="col-md-6">
+
+<h5>Candidate Details</h5>
+
+<table class="table table-bordered">
+
+<tr>
+<th>Name</th>
+<td>{{ report.candidate.full_name }}</td>
+</tr>
+
+<tr>
+<th>Email</th>
+<td>{{ report.candidate.email }}</td>
+</tr>
+
+<tr>
+<th>Phone</th>
+<td>{{ report.candidate.phone }}</td>
+</tr>
+
+</table>
+
+</div>
+
+<div class="col-md-6">
+
+<h5>Job Details</h5>
+
+<table class="table table-bordered">
+
+<tr>
+<th>Job</th>
+<td>{{ report.job.title }}</td>
+</tr>
+
+<tr>
+<th>Company</th>
+<td>{{ report.job.company }}</td>
+</tr>
+
+<tr>
+<th>Location</th>
+<td>{{ report.job.location }}</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- Buttons -->
+
+<div class="mb-4">
+
+<a href="{{ url_for('interview_ai.regenerate',
+question_id=report.question_id) }}"
+class="btn btn-warning">
+
+🔄 Regenerate
+
+</a>
+
+<a href="{{ url_for('interview_ai.download_pdf',
+question_id=report.question_id) }}"
+class="btn btn-danger">
+
+⬇ Download PDF
+
+</a>
+
+<a href="{{ url_for('interview_ai.history') }}"
+class="btn btn-info">
+
+📜 History
+
+</a>
+
+<button
+class="btn btn-success"
+onclick="copyQuestions()">
+
+📋 Copy
+
+</button>
+
+<button
+class="btn btn-secondary"
+onclick="window.print()">
+
+🖨 Print
+
+</button>
+
+</div>
+
+<div id="questions">
+
+<!-- HR -->
+
+<div class="card mb-3">
+
+<div class="card-header bg-success text-white">
+
+<h4 class="mb-0">
+
+HR Questions
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<div style="white-space: pre-wrap;">
+
+{{ report.hr_questions }}
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Technical -->
+
+<div class="card mb-3">
+
+<div class="card-header bg-primary text-white">
+
+<h4 class="mb-0">
+
+Technical Questions
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<div style="white-space: pre-wrap;">
+
+{{ report.technical_questions }}
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Coding -->
+
+<div class="card mb-3">
+
+<div class="card-header bg-dark text-white">
+
+<h4 class="mb-0">
+
+Coding Questions
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<div style="white-space: pre-wrap;">
+
+{{ report.coding_questions }}
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Scenario -->
+
+<div class="card mb-3">
+
+<div class="card-header bg-warning">
+
+<h4 class="mb-0">
+
+Scenario Questions
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<div style="white-space: pre-wrap;">
+
+{{ report.scenario_questions }}
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Behavioral -->
+
+<div class="card mb-3">
+
+<div class="card-header bg-info text-white">
+
+<h4 class="mb-0">
+
+Behavioral Questions
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<div style="white-space: pre-wrap;">
+
+{{ report.behavioral_questions }}
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Evaluation -->
+
+<div class="card">
+
+<div class="card-header bg-danger text-white">
+
+<h4 class="mb-0">
+
+Interview Evaluation Guidelines
+
+</h4>
+
+</div>
+
+<div class="card-body">
+
+<div style="white-space: pre-wrap;">
+
+{{ report.evaluation }}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function copyQuestions(){
+
+let text = document.getElementById("questions").innerText;
+
+navigator.clipboard.writeText(text);
+
+alert("Interview Questions Copied Successfully!");
+
+}
+
+</script>
+
+{% endblock %}

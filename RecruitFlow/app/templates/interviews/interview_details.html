@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-info text-white">
+
+            <h3>
+
+                Interview Details
+
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <tr>
+
+                    <th width="30%">
+
+                        Candidate
+
+                    </th>
+
+                    <td>
+
+                        {{ interview.candidate.full_name }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Job
+
+                    </th>
+
+                    <td>
+
+                        {{ interview.job.title if interview.job else '—' }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Interview Date
+
+                    </th>
+
+                    <td>
+
+                        {{ interview.interview_date }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Interview Time
+
+                    </th>
+
+                    <td>
+
+                        {{ interview.interview_time }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Interview Mode
+
+                    </th>
+
+                    <td>
+
+                        {% if interview.mode == "Online" %}
+
+                            <span class="badge bg-primary">
+
+                                Online
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-secondary">
+
+                                Offline
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Interviewer
+
+                    </th>
+
+                    <td>
+
+                        {{ interview.interviewer }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Meeting Details
+
+                    </th>
+
+                    <td>
+
+                        {% if interview.mode == "Online" and interview.meeting_link %}
+
+                            <a
+                                href="{{ interview.meeting_link }}"
+                                target="_blank"
+                                class="btn btn-primary btn-sm">
+
+                                Join Meeting
+
+                            </a>
+
+                        {% elif interview.mode == "Offline" and interview.meeting_link %}
+
+                            <span>{{ interview.meeting_link }}</span>
+
+                        {% else %}
+
+                            <span class="text-muted">
+
+                                Not Available
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Status
+
+                    </th>
+
+                    <td>
+
+                        {% if interview.status == "Scheduled" %}
+
+                            <span class="badge bg-warning text-dark">
+
+                                Scheduled
+
+                            </span>
+
+                        {% elif interview.status == "Completed" %}
+
+                            <span class="badge bg-info">
+
+                                Completed
+
+                            </span>
+
+                        {% elif interview.status == "Selected" %}
+
+                            <span class="badge bg-success">
+
+                                Selected
+
+                            </span>
+
+                        {% elif interview.status == "Rejected" %}
+
+                            <span class="badge bg-danger">
+
+                                Rejected
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-secondary">
+
+                                {{ interview.status }}
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+            {% if interview.ai_transcript or interview.ai_recording_path %}
+            <section class="mt-4" aria-labelledby="ai-review-title">
+                <h4 id="ai-review-title">AI Interview Review</h4>
+                <p><strong>AI decision:</strong> {{ interview.status }}</p>
+                <p><strong>AI score:</strong> {{ interview.ai_final_score if interview.ai_final_score is not none else 'Unavailable' }}</p>
+                <p><strong>Duration:</strong> {{ interview.ai_duration_seconds or 0 }} seconds</p>
+                {% if interview.ai_recording_path %}
+                <video controls preload="metadata" class="w-100" style="max-height: 480px;">
+                    <source src="{{ url_for('candidate_interview.staff_ai_recording', interview_id=interview.interview_id) }}" type="video/webm">
+                </video>
+                {% endif %}
+                {% if interview.ai_transcript %}
+                <h5 class="mt-3">Full transcript</h5>
+                <pre class="border rounded p-3" style="white-space:pre-wrap;max-height:420px;overflow:auto">{{ interview.ai_transcript }}</pre>
+                {% endif %}
+            </section>
+            {% endif %}
+
+        </div>
+
+        <div class="card-footer">
+
+            <a
+                href="{{ url_for('interview_management.interviews') }}"
+                class="btn btn-secondary">
+
+                ← Back to Interview List
+
+            </a>
+
+            <a
+                href="{{ url_for('interview_management.edit_interview', interview_id=interview.interview_id) }}"
+                class="btn btn-warning">
+
+                Edit Interview
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

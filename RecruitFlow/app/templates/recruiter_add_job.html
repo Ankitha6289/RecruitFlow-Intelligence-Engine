@@ -1,0 +1,357 @@
+{% extends "recruiter_base.html" %}
+
+{% block title %}Post New Job{% endblock %}
+
+{% block page_title %}
+<div>Post New Job <span style="color:var(--text-sec);font-weight:400;font-size:12.5px;display:block;margin-top:2px;">Create a job vacancy and attract top candidates.</span></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.form-container {
+    max-width: 780px;
+    margin: 0 auto;
+}
+.form-section-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+@media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+
+/* ── Skill Tag Input ── */
+.skill-tags-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 42px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,.04);
+    border: 1.5px solid var(--border2);
+    border-radius: var(--r-sm);
+    cursor: text;
+    transition: border-color .15s, box-shadow .15s;
+    align-items: flex-start;
+}
+.skill-tags-wrap.focused {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(124,58,237,.18);
+}
+.skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(124,58,237,.18);
+    border: 1px solid rgba(124,58,237,.3);
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent3);
+}
+.skill-tag-remove {
+    cursor: pointer;
+    opacity: .6;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 13px;
+    line-height: 1;
+    padding: 0;
+    transition: opacity .15s;
+}
+.skill-tag-remove:hover { opacity: 1; }
+.skill-tag-input {
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    min-width: 120px;
+    flex: 1;
+    padding: 2px 4px;
+}
+.skill-tag-input::placeholder { color: var(--text-dim); }
+
+/* ── Preview Panel ── */
+.job-preview {
+    background: rgba(255,255,255,.025);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px;
+    position: sticky;
+    top: calc(var(--topbar-h) + 20px);
+}
+.job-preview-title-text {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+.job-preview-company {
+    font-size: 13px;
+    color: var(--text-sec);
+}
+.job-preview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+.jpm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-sec);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;">
+
+    <!-- Form -->
+    <div class="rf-card">
+        <div class="rf-card-header">
+            <h3 class="rf-card-title">
+                <i class="bi bi-briefcase-fill" style="color:var(--accent2);"></i>
+                Add New Job Posting
+            </h3>
+            <a href="{{ url_for('recruiter_job.jobs') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Jobs
+            </a>
+        </div>
+        <div class="rf-card-body">
+            <form method="POST" id="addJobForm">
+
+                <!-- Basic Info -->
+                <div style="margin-bottom:22px;">
+                    <div class="form-section-title">
+                        <i class="bi bi-info-circle"></i> Basic Information
+                    </div>
+
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="title">Job Title <span style="color:#f87171;">*</span></label>
+                        <div style="position:relative;">
+                            <input id="title" type="text" name="title"
+                                   class="rf-input" style="padding-left:38px;"
+                                   placeholder="e.g. Senior Python Developer"
+                                   oninput="updatePreview()" required>
+                            <i class="bi bi-briefcase" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="company">Company <span style="color:#f87171;">*</span></label>
+                            <div style="position:relative;">
+                                <input id="company" type="text" name="company"
+                                       class="rf-input" style="padding-left:38px;"
+                                       placeholder="Company name"
+                                       oninput="updatePreview()" required>
+                                <i class="bi bi-building" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                            </div>
+                        </div>
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="location">Location</label>
+                            <div style="position:relative;">
+                                <input id="location" type="text" name="location"
+                                       class="rf-input" style="padding-left:38px;"
+                                       placeholder="e.g. Bangalore / Remote"
+                                       oninput="updatePreview()">
+                                <i class="bi bi-geo-alt" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="rf-form-group" style="margin-bottom:0;">
+                            <label class="rf-label" for="experience">Experience Required</label>
+                            <div style="position:relative;">
+                                <input id="experience" type="text" name="experience"
+                                       class="rf-input" style="padding-left:38px;"
+                                       placeholder="e.g. 2-5 Years"
+                                       oninput="updatePreview()">
+                                <i class="bi bi-clock-history" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                            </div>
+                        </div>
+                        <div class="rf-form-group" style="margin-bottom:0;">
+                            <label class="rf-label" for="salary">Salary / CTC</label>
+                            <div style="position:relative;">
+                                <input id="salary" type="text" name="salary"
+                                       class="rf-input" style="padding-left:38px;"
+                                       placeholder="e.g. ₹6 – ₹10 LPA"
+                                       oninput="updatePreview()">
+                                <i class="bi bi-currency-rupee" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="rf-divider">
+
+                <!-- Skills -->
+                <div style="margin-bottom:22px;">
+                    <div class="form-section-title">
+                        <i class="bi bi-code-slash"></i> Required Skills
+                    </div>
+
+                    <label class="rf-label">Skills (press Enter or comma to add)</label>
+                    <div class="skill-tags-wrap" id="skillTagsWrap" onclick="document.getElementById('skillInput').focus();">
+                        <input id="skillInput" class="skill-tag-input" placeholder="Python, React, SQL…">
+                    </div>
+                    <input type="hidden" name="skills" id="skillsHidden">
+                    <div class="rf-form-hint">Press <kbd style="background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px;">Enter</kbd> or comma to add each skill. Click × to remove.</div>
+                </div>
+
+                <hr class="rf-divider">
+
+                <!-- Description -->
+                <div style="margin-bottom:22px;">
+                    <div class="form-section-title">
+                        <i class="bi bi-file-text"></i> Job Description
+                    </div>
+
+                    <div class="rf-form-group" style="margin-bottom:0;">
+                        <label class="rf-label" for="description">Description <span style="color:#f87171;">*</span></label>
+                        <textarea id="description" name="description" class="rf-textarea" rows="7"
+                                  placeholder="Describe job responsibilities, requirements, perks and team culture…"
+                                  required></textarea>
+                        <div class="rf-form-hint" id="descCount">0 / 2000 characters</div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="rf-btn rf-btn-primary rf-btn-lg" style="flex:1;">
+                        <i class="bi bi-check2-circle"></i> Post Job
+                    </button>
+                    <a href="{{ url_for('recruiter_job.jobs') }}" class="rf-btn rf-btn-outline rf-btn-lg">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Live Preview Panel -->
+    <div>
+        <div class="job-preview">
+            <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;">
+                <i class="bi bi-eye"></i> Live Preview
+            </div>
+            <div style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:14px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <div style="width:40px;height:40px;border-radius:10px;background:rgba(124,58,237,.2);display:grid;place-items:center;font-size:18px;color:var(--accent2);">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <div>
+                        <div class="job-preview-title-text" id="prevTitle">Job Title</div>
+                        <div class="job-preview-company" id="prevCompany">Company Name</div>
+                    </div>
+                </div>
+                <div class="job-preview-meta">
+                    <span class="jpm-chip" id="prevLocation"><i class="bi bi-geo-alt"></i> Location</span>
+                    <span class="jpm-chip" id="prevExp"><i class="bi bi-clock-history"></i> Experience</span>
+                    <span class="jpm-chip" id="prevSalary" style="color:#34d399;"><i class="bi bi-currency-rupee"></i> Salary</span>
+                </div>
+                <span class="rf-badge rf-badge-green" style="margin-top:10px;display:inline-flex;">
+                    <i class="bi bi-circle-fill" style="font-size:7px;"></i> Active
+                </span>
+            </div>
+
+            <div style="margin-top:14px;padding:12px 14px;background:rgba(255,255,255,.03);border-radius:8px;font-size:12px;color:var(--text-dim);line-height:1.6;">
+                <i class="bi bi-info-circle" style="color:var(--accent2);"></i>
+                Your job will be visible to all registered candidates immediately after posting.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── Skill Tags ──
+const skillInput = document.getElementById('skillInput');
+const skillWrap  = document.getElementById('skillTagsWrap');
+const skillHidden = document.getElementById('skillsHidden');
+let skills = [];
+
+function renderTags() {
+    skillWrap.querySelectorAll('.skill-tag').forEach(t => t.remove());
+    skills.forEach((s, i) => {
+        const tag = document.createElement('span');
+        tag.className = 'skill-tag';
+        tag.innerHTML = `${s}<button class="skill-tag-remove" onclick="removeSkill(${i})">×</button>`;
+        skillWrap.insertBefore(tag, skillInput);
+    });
+    skillHidden.value = skills.join(', ');
+}
+
+function addSkill(val) {
+    const v = val.trim().replace(/,+$/, '').trim();
+    if (v && !skills.includes(v)) {
+        skills.push(v);
+        renderTags();
+    }
+}
+
+function removeSkill(idx) {
+    skills.splice(idx, 1);
+    renderTags();
+}
+
+skillInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addSkill(skillInput.value); skillInput.value = ''; }
+    if (e.key === ',' || e.key === 'Tab') { e.preventDefault(); addSkill(skillInput.value.replace(',','')); skillInput.value = ''; }
+    if (e.key === 'Backspace' && !skillInput.value && skills.length) { removeSkill(skills.length - 1); }
+});
+skillInput.addEventListener('blur', () => { if (skillInput.value.trim()) { addSkill(skillInput.value); skillInput.value = ''; } });
+
+skillWrap.addEventListener('focus', () => skillWrap.classList.add('focused'), true);
+skillWrap.addEventListener('blur',  () => skillWrap.classList.remove('focused'), true);
+
+// ── Live Preview ──
+function updatePreview() {
+    const t = document.getElementById('title').value;
+    const c = document.getElementById('company').value;
+    const l = document.getElementById('location').value;
+    const e = document.getElementById('experience').value;
+    const s = document.getElementById('salary').value;
+
+    document.getElementById('prevTitle').textContent   = t || 'Job Title';
+    document.getElementById('prevCompany').textContent = c || 'Company Name';
+    document.getElementById('prevLocation').innerHTML  = `<i class="bi bi-geo-alt"></i> ${l || 'Location'}`;
+    document.getElementById('prevExp').innerHTML       = `<i class="bi bi-clock-history"></i> ${e || 'Experience'}`;
+    document.getElementById('prevSalary').innerHTML    = `<i class="bi bi-currency-rupee"></i> ${s || 'Salary'}`;
+}
+
+// ── Description Counter ──
+document.getElementById('description').addEventListener('input', function() {
+    document.getElementById('descCount').textContent = `${this.value.length} / 2000 characters`;
+});
+</script>
+{% endblock %}

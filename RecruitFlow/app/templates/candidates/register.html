@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Registration | RecruitFlow</title>
+
+    <!-- Bootstrap Icons & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #050d1a 0%, #08162b 50%, #0d1e38 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f1f5f9;
+            overflow-x: hidden;
+            position: relative;
+            padding: 2.5rem 1rem;
+        }
+
+        /* Ambient Glow Blobs */
+        .bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.12;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .blob-1 {
+            top: -12%;
+            left: -10%;
+            width: 480px;
+            height: 480px;
+            background: #0ea5e9;
+        }
+        .blob-2 {
+            bottom: -15%;
+            right: -10%;
+            width: 520px;
+            height: 520px;
+            background: #6366f1;
+        }
+
+        .register-container {
+            background: rgba(13, 30, 53, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            z-index: 10;
+            max-width: 540px;
+            width: 100%;
+            padding: 2.75rem 2.5rem;
+            position: relative;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            text-decoration: none;
+            margin-bottom: 1.75rem;
+        }
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+        }
+        .brand-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .form-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.35rem;
+            letter-spacing: -0.3px;
+        }
+        .form-header p {
+            color: #8297b8;
+            font-size: 0.92rem;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 0.45rem;
+            display: block;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 1rem;
+            transition: color 0.2s;
+            pointer-events: none;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.82rem 1rem 0.82rem 2.75rem;
+            background: rgba(10, 22, 40, 0.6);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 0.92rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .form-input:focus {
+            border-color: #0ea5e9;
+            background: rgba(10, 22, 40, 0.9);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+        }
+        .form-input:focus ~ .input-icon {
+            color: #38bdf8;
+        }
+        .form-input::placeholder {
+            color: #475569;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+        .toggle-password:hover { color: #cbd5e1; }
+
+        /* Password Strength Meter */
+        .strength-meter {
+            height: 4px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 99px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 99px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* Flash Alerts */
+        .alert-box {
+            padding: 0.85rem 1.1rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+        .alert-danger {
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #f87171;
+        }
+        .alert-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            border: none;
+            color: white;
+            border-radius: 12px;
+            padding: 0.85rem;
+            font-weight: 600;
+            font-size: 0.98rem;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 0.75rem;
+            box-shadow: 0 4px 18px rgba(14, 165, 233, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.5);
+        }
+
+        .auth-footer {
+            margin-top: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 1.5rem;
+            color: #8297b8;
+            font-size: 0.9rem;
+        }
+        .auth-footer a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .auth-footer a:hover {
+            color: #7dd3fc;
+            text-decoration: underline;
+        }
+
+        .features-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25rem;
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .feature-item i { color: #10b981; }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Blobs -->
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
+    <div class="register-container">
+
+        <!-- Brand Logo -->
+        <a href="{{ url_for('candidate_auth.login') }}" class="brand-logo">
+            <div class="brand-icon">
+                <i class="bi bi-lightning-charge-fill"></i>
+            </div>
+            <span class="brand-text">RecruitFlow</span>
+        </a>
+
+        <!-- Header -->
+        <div class="form-header">
+            <h2>Create Your Candidate Account</h2>
+            <p>Access AI interview simulators, ATS resume tools &amp; jobs</p>
+        </div>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert-box alert-{{ category if category == 'success' else 'danger' }}">
+                <i class="bi {{ 'bi-check-circle-fill' if category == 'success' else 'bi-exclamation-triangle-fill' }}"></i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Registration Form -->
+        <form method="POST" id="registerForm">
+
+            <!-- Full Name -->
+            <div class="form-group">
+                <label class="form-label" for="full_name">Full Name</label>
+                <div class="input-wrap">
+                    <input type="text" id="full_name" name="full_name" class="form-input" placeholder="e.g. Alex Johnson" required autofocus>
+                    <i class="bi bi-person-fill input-icon"></i>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <div class="input-wrap">
+                    <input type="email" id="email" name="email" class="form-input" placeholder="alex@example.com" required>
+                    <i class="bi bi-envelope-fill input-icon"></i>
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+                <label class="form-label" for="phone">Phone Number</label>
+                <div class="input-wrap">
+                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="+1 (555) 000-0000" required>
+                    <i class="bi bi-telephone-fill input-icon"></i>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-wrap">
+                    <input type="password" id="password" name="password" class="form-input" placeholder="••••••••••••" required oninput="checkStrength(this.value)">
+                    <i class="bi bi-lock-fill input-icon"></i>
+                    <button type="button" class="toggle-password" onclick="togglePass('password', this)" title="Show / Hide Password">
+                        <i class="bi bi-eye-slash"></i>
+                    </button>
+                </div>
+                <div class="strength-meter">
+                    <div class="strength-bar" id="strengthBar"></div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit">
+                <span>Create Candidate Account</span>
+                <i class="bi bi-arrow-right"></i>
+            </button>
+
+            <!-- Feature Pills -->
+            <div class="features-pill">
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Free Forever</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> AI Powered</div>
+                <div class="feature-item"><i class="bi bi-check-circle-fill"></i> Fast Apply</div>
+            </div>
+
+        </form>
+
+        <!-- Auth Footer -->
+        <div class="auth-footer">
+            Already have an account? 
+            <a href="{{ url_for('candidate_auth.login') }}">Sign In to Candidate Portal</a>
+        </div>
+
+    </div>
+
+    <script>
+        function togglePass(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            }
+        }
+
+        function checkStrength(val) {
+            const bar = document.getElementById('strengthBar');
+            let score = 0;
+            if (val.length >= 6) score += 25;
+            if (val.length >= 10) score += 25;
+            if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score += 25;
+            if (/[^A-Za-z0-9]/.test(val)) score += 25;
+
+            bar.style.width = score + '%';
+            if (score <= 25) {
+                bar.style.backgroundColor = '#f43f5e';
+            } else if (score <= 50) {
+                bar.style.backgroundColor = '#f59e0b';
+            } else if (score <= 75) {
+                bar.style.backgroundColor = '#38bdf8';
+            } else {
+                bar.style.backgroundColor = '#10b981';
+            }
+        }
+    </script>
+</body>
+</html>

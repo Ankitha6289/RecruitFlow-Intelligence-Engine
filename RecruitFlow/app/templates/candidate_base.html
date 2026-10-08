@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RecruitFlow{% endblock %} — Candidate Portal</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ── Reset & Theme Variables ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --sidebar-w: 240px;
+            --topbar-h: 60px;
+            --bg:          #050d1a;
+            --bg2:         #0a1628;
+            --bg3:         #0f223d;
+            --card-bg:     #0d1e35;
+            --card-bg2:    #112543;
+            --surface-hi:  #172e52;
+            --border:      rgba(255, 255, 255, .08);
+            --border2:     rgba(255, 255, 255, .15);
+            --text:        #f0f4ff;
+            --text-sec:    #8297b8;
+            --text-dim:    rgba(255, 255, 255, .38);
+            --accent:      #0ea5e9;
+            --accent-glow: rgba(14, 165, 233, .25);
+            --accent2:     #38bdf8;
+            --green:       #10b981;
+            --green-glow:  rgba(16, 185, 129, .2);
+            --amber:       #f59e0b;
+            --pink:        #f43f5e;
+            --purple:      #8b5cf6;
+            --indigo:      #6366f1;
+            --r-sm:        8px;
+            --r-md:        12px;
+            --r-lg:        16px;
+            --shadow-sm:   0 2px 8px rgba(0,0,0,.25);
+            --shadow-md:   0 8px 24px rgba(0,0,0,.35);
+            --shadow-glow: 0 0 20px rgba(14, 165, 233, .15);
+        }
+        html, body { min-height: 100%; }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Hanken Grotesk', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ════════════════════════════════
+           SIDEBAR
+        ════════════════════════════════ */
+        .rf-sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--surface-hi) transparent;
+        }
+        .rf-sidebar::-webkit-scrollbar { width: 4px; }
+        .rf-sidebar::-webkit-scrollbar-thumb { background: var(--surface-hi); border-radius: 4px; }
+
+        /* Brand */
+        .rf-brand {
+            padding: 18px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .rf-brand-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .rf-brand-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, .35);
+        }
+        .rf-brand-icon i { font-size: 20px; color: #fff; }
+        .rf-brand-name  { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.1; letter-spacing: -0.3px; }
+        .rf-brand-sub   { font-size: 10.5px; color: var(--accent2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+
+        /* Navigation Section */
+        .rf-nav-section {
+            padding: 16px 14px 2px;
+        }
+        .rf-nav-label {
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            padding: 0 10px;
+            margin-bottom: 6px;
+        }
+
+        /* Nav Item */
+        .rf-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--r-sm);
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all .18s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 2px;
+            position: relative;
+        }
+        .rf-nav-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+            transition: transform .18s ease;
+        }
+        .rf-nav-item:hover {
+            background: rgba(255,255,255,.05);
+            color: #fff;
+            transform: translateX(2px);
+        }
+        .rf-nav-item:hover i { transform: scale(1.1); color: var(--accent2); }
+        .rf-nav-item.active {
+            background: linear-gradient(90deg, rgba(14,165,233,.18), rgba(14,165,233,.05));
+            color: #fff;
+            font-weight: 600;
+            border-left: 3px solid var(--accent);
+            padding-left: 9px;
+        }
+        .rf-nav-item.active i { color: var(--accent2); }
+        .rf-nav-badge {
+            margin-left: auto;
+            background: rgba(14, 165, 233, .2);
+            color: var(--accent2);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 99px;
+            border: 1px solid rgba(14, 165, 233, .3);
+        }
+
+        /* Logout Item */
+        .rf-nav-item.logout {
+            color: rgba(255,255,255,.45);
+        }
+        .rf-nav-item.logout:hover {
+            background: rgba(244,63,94,.1);
+            color: #f87171;
+        }
+        .rf-nav-item.logout:hover i { color: #f87171; }
+
+        /* Sidebar Footer */
+        .rf-sidebar-footer {
+            margin-top: auto;
+            padding: 14px;
+            border-top: 1px solid var(--border);
+            position: sticky;
+            bottom: 0;
+            background: var(--bg2);
+            z-index: 10;
+            box-shadow: 0 -8px 20px rgba(0, 0, 0, .35);
+        }
+
+        /* Topbar Logout Button */
+        .rf-topbar-logout {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 14px;
+            border-radius: var(--r-sm);
+            background: rgba(244, 63, 94, .12);
+            border: 1px solid rgba(244, 63, 94, .25);
+            color: #f87171;
+            font-size: 12.5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all .18s ease;
+        }
+        .rf-topbar-logout:hover {
+            background: rgba(244, 63, 94, .24);
+            border-color: rgba(244, 63, 94, .5);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(244, 63, 94, .3);
+        }
+
+        /* ════════════════════════════════
+           TOPBAR
+        ════════════════════════════════ */
+        .rf-topbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-w);
+            right: 0;
+            height: var(--topbar-h);
+            background: rgba(10, 22, 40, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            z-index: 999;
+            gap: 16px;
+        }
+        .rf-topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .rf-topbar-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+            letter-spacing: -0.2px;
+        }
+        .rf-topbar-sub {
+            font-size: 11.5px;
+            color: var(--text-sec);
+            font-weight: 400;
+        }
+        .rf-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .rf-topbar-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--text-sec);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all .15s ease;
+            position: relative;
+        }
+        .rf-topbar-action-btn:hover {
+            color: #fff;
+            border-color: var(--border2);
+            background: var(--card-bg2);
+        }
+        .rf-topbar-action-btn .dot-indicator {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 7px;
+            height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--accent);
+        }
+        .rf-user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 999px;
+            padding: 4px 14px 4px 5px;
+            text-decoration: none;
+            transition: all .15s ease;
+        }
+        .rf-user-pill:hover {
+            background: var(--card-bg2);
+            border-color: rgba(14,165,233,.4);
+        }
+        .rf-user-avatar {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, .3);
+        }
+        .rf-user-info { display: flex; flex-direction: column; }
+        .rf-user-name { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.1; }
+        .rf-user-role {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent2);
+        }
+
+        /* ════════════════════════════════
+           MAIN CONTENT
+        ════════════════════════════════ */
+        .rf-main {
+            margin-left: var(--sidebar-w);
+            padding-top: var(--topbar-h);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .rf-content {
+            padding: 26px 32px 48px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            flex: 1;
+        }
+
+        /* ════════════════════════════════
+           FLASH ALERTS
+        ════════════════════════════════ */
+        .rf-alert {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 18px;
+            border-radius: var(--r-md);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            animation: rfSlideDown .25s ease-out;
+            backdrop-filter: blur(10px);
+        }
+        @keyframes rfSlideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .rf-alert-success {
+            background: rgba(16,185,129,.12);
+            border: 1px solid rgba(16,185,129,.3);
+            color: #34d399;
+        }
+        .rf-alert-danger {
+            background: rgba(244,63,94,.12);
+            border: 1px solid rgba(244,63,94,.3);
+            color: #f87171;
+        }
+        .rf-alert-warning {
+            background: rgba(245,158,11,.12);
+            border: 1px solid rgba(245,158,11,.3);
+            color: #fbbf24;
+        }
+        .rf-alert-info {
+            background: rgba(14,165,233,.12);
+            border: 1px solid rgba(14,165,233,.3);
+            color: #38bdf8;
+        }
+        .rf-alert-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            opacity: .6;
+            color: inherit;
+            line-height: 1;
+            padding: 0 4px;
+            transition: opacity .15s;
+        }
+        .rf-alert-close:hover { opacity: 1; }
+
+        /* ════════════════════════════════
+           GLOBAL UI DESIGN SYSTEM
+        ════════════════════════════════ */
+        /* Cards */
+        .rf-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .rf-card:hover {
+            border-color: rgba(255, 255, 255, .12);
+        }
+        .rf-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, .015);
+        }
+        .rf-card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14.5px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+            letter-spacing: -0.2px;
+        }
+        .rf-card-title i { color: var(--accent2); font-size: 16px; }
+        .rf-card-subtitle {
+            font-size: 12px;
+            color: var(--text-sec);
+            margin-top: 2px;
+            font-weight: 400;
+        }
+        .rf-card-body { padding: 22px; }
+        .rf-card-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, .15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Grid Utilities */
+        .rf-grid { display: grid; gap: 18px; }
+        .rf-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        .rf-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .rf-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .rf-grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 18px; }
+        .rf-grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
+
+        @media (max-width: 1024px) {
+            .rf-grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .rf-grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .rf-grid-1-2, .rf-grid-2-1 { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 680px) {
+            .rf-grid-4, .rf-grid-3, .rf-grid-2 { grid-template-columns: 1fr; }
+        }
+
+        /* Stat Cards */
+        .rf-stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r-md);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+        }
+        .rf-stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(14, 165, 233, .3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+        }
+        .rf-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            opacity: 0.8;
+        }
+        .rf-stat-card.stat-green::before { background: linear-gradient(90deg, #10b981, #0ea5e9); }
+        .rf-stat-card.stat-amber::before { background: linear-gradient(90deg, #f59e0b, #f43f5e); }
+        .rf-stat-card.stat-purple::before { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+
+        .rf-stat-info { display: flex; flex-direction: column; gap: 4px; }
+        .rf-stat-lbl {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--text-sec);
+        }
+        .rf-stat-val {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+        .rf-stat-sub {
+            font-size: 11.5px;
+            color: var(--text-sec);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 4px;
+        }
+        .rf-stat-icon {
+            width: 44px; height: 44px;
+            border-radius: var(--r-sm);
+            background: rgba(14, 165, 233, .12);
+            border: 1px solid rgba(14, 165, 233, .2);
+            color: var(--accent2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .stat-green .rf-stat-icon {
+            background: rgba(16, 185, 129, .12);
+            border-color: rgba(16, 185, 129, .25);
+            color: #34d399;
+        }
+        .stat-amber .rf-stat-icon {
+            background: rgba(245, 158, 11, .12);
+            border-color: rgba(245, 158, 11, .25);
+            color: #fbbf24;
+        }
+        .stat-purple .rf-stat-icon {
+            background: rgba(139, 92, 246, .12);
+            border-color: rgba(139, 92, 246, .25);
+            color: #a78bfa;
+        }
+
+        /* Form Inputs */
+        .rf-form-group { margin-bottom: 16px; }
+        .rf-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sec);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .rf-input, .rf-select, .rf-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg);
+            border: 1.5px solid var(--border2);
+            border-radius: var(--r-sm);
+            color: var(--text);
+            font-size: 13.5px;
+            font-family: inherit;
+            outline: none;
+            transition: all .15s ease;
+        }
+        .rf-input:focus, .rf-select:focus, .rf-textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, .18);
+            background: var(--bg2);
+        }
+        .rf-input::placeholder, .rf-textarea::placeholder {
+            color: var(--text-dim);
+        }
+        .rf-input[readonly], .rf-input:disabled {
+            background: rgba(255, 255, 255, .03);
+            color: var(--text-sec);
+            cursor: not-allowed;
+            border-color: var(--border);
+        }
+        .rf-helper {
+            font-size: 11px;
+            color: var(--text-sec);
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* Buttons */
+        .rf-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: var(--r-sm);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .18s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        .rf-btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(14, 165, 233, .35);
+        }
+        .rf-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(14, 165, 233, .5);
+            color: #fff;
+        }
+        .rf-btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(16, 185, 129, .35);
+        }
+        .rf-btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, .5);
+            color: #fff;
+        }
+        .rf-btn-danger {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(244, 63, 94, .35);
+        }
+        .rf-btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(244, 63, 94, .5);
+            color: #fff;
+        }
+        .rf-btn-outline {
+            background: transparent;
+            color: var(--text-sec);
+            border: 1px solid var(--border2);
+        }
+        .rf-btn-outline:hover {
+            background: rgba(255, 255, 255, .06);
+            color: #fff;
+            border-color: rgba(255, 255, 255, .25);
+        }
+        .rf-btn-ghost {
+            background: transparent;
+            color: var(--text-sec);
+            border: none;
+        }
+        .rf-btn-ghost:hover {
+            background: rgba(255, 255, 255, .05);
+            color: #fff;
+        }
+        .rf-btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+        .rf-btn-lg { padding: 12px 24px; font-size: 14.5px; border-radius: 10px; }
+        .rf-btn-block { width: 100%; }
+
+        /* Badges */
+        .rf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3.5px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .rf-badge-success { background: rgba(16,185,129,.14); color: #34d399; border: 1px solid rgba(16,185,129,.28); }
+        .rf-badge-warning { background: rgba(245,158,11,.14); color: #fbbf24; border: 1px solid rgba(245,158,11,.28); }
+        .rf-badge-danger  { background: rgba(244,63,94,.14);  color: #f87171; border: 1px solid rgba(244,63,94,.28); }
+        .rf-badge-info    { background: rgba(14,165,233,.14);  color: #38bdf8; border: 1px solid rgba(14,165,233,.28); }
+        .rf-badge-purple  { background: rgba(139,92,246,.14);  color: #a78bfa; border: 1px solid rgba(139,92,246,.28); }
+        .rf-badge-gray    { background: rgba(148,163,184,.12); color: #94a3b8; border: 1px solid rgba(148,163,184,.2); }
+
+        /* Tables */
+        .rf-table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: var(--r-md);
+        }
+        .rf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .rf-table thead th {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--text-sec);
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0, 0, 0, .18);
+            white-space: nowrap;
+        }
+        .rf-table tbody td {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border);
+            color: #cbd5e1;
+            vertical-align: middle;
+        }
+        .rf-table tbody tr:last-child td { border-bottom: none; }
+        .rf-table tbody tr:hover td { background: rgba(255, 255, 255, .025); }
+
+        /* Empty States */
+        .rf-empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .rf-empty-icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: rgba(14, 165, 233, .1);
+            border: 1px solid rgba(14, 165, 233, .2);
+            color: var(--accent2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        .rf-empty-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .rf-empty-desc {
+            font-size: 13px;
+            color: var(--text-sec);
+            max-width: 380px;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        /* Tabs Nav */
+        .rf-tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        .rf-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--r-sm);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sec);
+            cursor: pointer;
+            transition: all .15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+        .rf-tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, .04);
+        }
+        .rf-tab-btn.active {
+            color: #fff;
+            background: rgba(14, 165, 233, .15);
+            border: 1px solid rgba(14, 165, 233, .3);
+        }
+
+        /* ════════════════════════════════
+           RESPONSIVE MOBILE
+        ════════════════════════════════ */
+        .rf-hamburger {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px; height: 36px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            color: var(--text-sec);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .rf-sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+        }
+        @media (max-width: 960px) {
+            .rf-sidebar {
+                transform: translateX(-100%);
+                transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .rf-sidebar.open { transform: translateX(0); }
+            .rf-sidebar.open ~ .rf-sidebar-backdrop { display: block; }
+            .rf-main { margin-left: 0; }
+            .rf-topbar { left: 0; padding: 0 16px; }
+            .rf-content { padding: 18px 16px 36px; }
+            .rf-hamburger { display: flex; }
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Mobile Backdrop -->
+<div class="rf-sidebar-backdrop" onclick="document.getElementById('rf-sidebar').classList.remove('open')"></div>
+
+<!-- ══════════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════ -->
+<aside class="rf-sidebar" id="rf-sidebar">
+
+    <!-- Brand -->
+    <div class="rf-brand">
+        <a href="{{ url_for('candidate_dashboard.dashboard') }}" class="rf-brand-inner">
+            <div class="rf-brand-icon">
+                <i class="bi bi-lightning-charge-fill"></i>
+            </div>
+            <div>
+                <div class="rf-brand-name">RecruitFlow</div>
+                <div class="rf-brand-sub">Candidate Portal</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- MY SPACE -->
+    <div class="rf-nav-section">
+        <div class="rf-nav-label">My Space</div>
+        <a href="{{ url_for('candidate_dashboard.dashboard') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_dashboard.dashboard' %}active{% endif %}">
+            <i class="bi bi-grid-1x2"></i> <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('candidate_profile.profile') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_profile.profile' %}active{% endif %}">
+            <i class="bi bi-person-bounding-box"></i> <span>My Profile</span>
+        </a>
+        <a href="{{ url_for('candidate_resume.upload_resume') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_resume.upload_resume' %}active{% endif %}">
+            <i class="bi bi-file-earmark-arrow-up"></i> <span>Upload Resume</span>
+        </a>
+    </div>
+
+    <!-- JOBS & APPLICATIONS -->
+    <div class="rf-nav-section">
+        <div class="rf-nav-label">Career Hub</div>
+        <a href="{{ url_for('candidate_jobs.jobs') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_jobs.jobs' %}active{% endif %}">
+            <i class="bi bi-briefcase"></i> <span>Explore Jobs</span>
+        </a>
+        <a href="{{ url_for('candidate_application.my_applications') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_application.my_applications' %}active{% endif %}">
+            <i class="bi bi-send-check"></i> <span>My Applications</span>
+        </a>
+    </div>
+
+    <!-- INTERVIEWS & OFFERS -->
+    <div class="rf-nav-section">
+        <div class="rf-nav-label">Interviews &amp; Offers</div>
+        <a href="{{ url_for('candidate_interview.interviews') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_interview.interviews' %}active{% endif %}">
+            <i class="bi bi-camera-video"></i> <span>My Interviews</span>
+        </a>
+        <a href="{{ url_for('candidate_offer.offers') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_offer.offers' %}active{% endif %}">
+            <i class="bi bi-award"></i> <span>Job Offers</span>
+        </a>
+    </div>
+
+    <!-- AI TOOLS -->
+    <div class="rf-nav-section">
+        <div class="rf-nav-label">AI Preparation</div>
+        <a href="{{ url_for('candidate_interview.questions') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_interview.questions' %}active{% endif %}">
+            <i class="bi bi-robot"></i> <span>AI Mock Interview</span>
+            <span class="rf-nav-badge">AI</span>
+        </a>
+        <a href="{{ url_for('chatbot.chatbot', candidate_id=session.get('candidate_id', 0)) }}"
+           class="rf-nav-item {% if request.endpoint == 'chatbot.chatbot' %}active{% endif %}">
+            <i class="bi bi-chat-heart"></i> <span>Resume Chatbot</span>
+        </a>
+    </div>
+
+    <!-- ACCOUNT -->
+    <div class="rf-nav-section">
+        <div class="rf-nav-label">Account</div>
+        <a href="{{ url_for('candidate_notification.notifications') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_notification.notifications' %}active{% endif %}">
+            <i class="bi bi-bell"></i> <span>Notifications</span>
+        </a>
+        <a href="{{ url_for('candidate_settings.settings') }}"
+           class="rf-nav-item {% if request.endpoint == 'candidate_settings.settings' %}active{% endif %}">
+            <i class="bi bi-shield-lock"></i> <span>Security &amp; Settings</span>
+        </a>
+        <a href="{{ url_for('candidate_auth.logout') }}" class="rf-nav-item logout">
+            <i class="bi bi-box-arrow-right"></i> <span>Log Out</span>
+        </a>
+    </div>
+
+    <!-- FOOTER / LOGOUT (Pinned & Always Visible) -->
+    <div class="rf-sidebar-footer">
+        <a href="{{ url_for('candidate_auth.logout') }}" class="rf-nav-item logout" style="background: rgba(244,63,94,.1); color: #f87171; border: 1px solid rgba(244,63,94,.25); justify-content: center; font-weight: 600;">
+            <i class="bi bi-box-arrow-right" style="color: #f87171;"></i> <span>Sign Out</span>
+        </a>
+    </div>
+
+</aside>
+
+
+<!-- ══════════════════════════════════════════════
+     TOPBAR
+══════════════════════════════════════════════ -->
+<header class="rf-topbar">
+    <div class="rf-topbar-left">
+        <button class="rf-hamburger" onclick="document.getElementById('rf-sidebar').classList.toggle('open')" aria-label="Toggle Navigation">
+            <i class="bi bi-list"></i>
+        </button>
+        <div>
+            {% block page_title %}
+            <div class="rf-topbar-title">Candidate Workspace</div>
+            <div class="rf-topbar-sub">Manage your application pipeline &amp; interviews</div>
+            {% endblock %}
+        </div>
+    </div>
+    <div class="rf-topbar-right">
+        <!-- Notifications Shortcut -->
+        <a href="{{ url_for('candidate_notification.notifications') }}" class="rf-topbar-action-btn" title="View Notifications">
+            <i class="bi bi-bell"></i>
+            <span class="dot-indicator"></span>
+        </a>
+
+        <!-- Candidate Profile Pill -->
+        <a href="{{ url_for('candidate_profile.profile') }}" class="rf-user-pill" title="View Profile">
+            <div class="rf-user-avatar">
+                {{ session.candidate_name[0]|upper if session.candidate_name else 'C' }}
+            </div>
+            <div class="rf-user-info">
+                <span class="rf-user-name">{{ session.candidate_name or 'Candidate' }}</span>
+                <span class="rf-user-role">Candidate</span>
+            </div>
+            <i class="bi bi-chevron-right" style="font-size: 11px; color: var(--text-sec); margin-left: 2px;"></i>
+        </a>
+
+        <!-- Visible Topbar Logout Button -->
+        <a href="{{ url_for('candidate_auth.logout') }}" class="rf-topbar-logout" title="Sign Out from Candidate Workspace">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+</header>
+
+
+<!-- ══════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════ -->
+<main class="rf-main">
+    <div class="rf-content">
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="rf-alert rf-alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'warning' if category == 'warning' else 'info' }}">
+                <i class="bi {% if category == 'success' %}bi-check-circle-fill{% elif category == 'danger' %}bi-exclamation-circle-fill{% elif category == 'warning' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %}" style="font-size: 16px;"></i>
+                <span>{{ message }}</span>
+                <button class="rf-alert-close" onclick="this.parentElement.remove()" aria-label="Dismiss Alert">×</button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Close sidebar on mobile when clicking outside
+    document.addEventListener('click', function(e) {
+        const sidebar = document.getElementById('rf-sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+            if (!sidebar.contains(e.target) && !e.target.closest('.rf-hamburger')) {
+                sidebar.classList.remove('open');
+            }
+        }
+    });
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

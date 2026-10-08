@@ -1,0 +1,527 @@
+{% extends "candidate_base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Candidate Dashboard</div>
+<div class="rf-topbar-sub">Welcome back, {{ candidate.full_name or 'Candidate' }}! Here is your recruitment overview.</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Welcome Hero ── */
+.hero-card {
+  background: linear-gradient(135deg, rgba(14, 165, 233, .16) 0%, rgba(99, 102, 241, .1) 40%, rgba(13, 30, 53, .8) 100%);
+  border: 1px solid rgba(14, 165, 233, .25);
+  border-radius: var(--r-lg);
+  padding: 26px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: -70px; right: -70px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, rgba(14, 165, 233, .18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-portal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(14, 165, 233, .16);
+  border: 1px solid rgba(14, 165, 233, .35);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent2);
+  margin-bottom: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.hero-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+.hero-title span { color: var(--accent2); }
+.hero-subtitle {
+  font-size: 13px;
+  color: var(--text-sec);
+  max-width: 480px;
+  line-height: 1.5;
+}
+.hero-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #fff;
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(14, 165, 233, .4);
+  transition: all .2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.hero-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(14, 165, 233, .55);
+  color: #fff;
+}
+
+/* ── Upcoming Interview Banner ── */
+.interview-alert-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, .15) 0%, rgba(13, 30, 53, .9) 100%);
+  border: 1px solid rgba(245, 158, 11, .35);
+  border-radius: var(--r-md);
+  padding: 18px 22px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.interview-alert-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.interview-alert-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, .2);
+  border: 1px solid rgba(245, 158, 11, .3);
+  color: #fbbf24;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.interview-alert-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 3px;
+}
+.interview-alert-details {
+  font-size: 12.5px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── 4 KPI Stat Grid ── */
+.stat-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) {
+  .stat-bar { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .stat-bar { grid-template-columns: 1fr; }
+}
+
+/* ── Score Cards ── */
+.score-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s ease;
+}
+.score-card:hover {
+  border-color: rgba(14, 165, 233, .3);
+}
+.score-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.score-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+.score-num {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
+}
+.score-num.cyan  { color: #38bdf8; }
+.score-num.green { color: #34d399; }
+
+.score-progress-wrap {
+  height: 6px;
+  background: rgba(255, 255, 255, .08);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.score-progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width .6s ease-out;
+}
+.score-progress-bar.cyan { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+.score-progress-bar.green { background: linear-gradient(90deg, #10b981, #34d399); }
+
+.score-desc {
+  font-size: 12px;
+  color: var(--text-sec);
+  line-height: 1.5;
+}
+
+/* ── AI Roles & Summary ── */
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(14, 165, 233, .12);
+  border: 1px solid rgba(14, 165, 233, .25);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7dd3fc;
+  transition: background .15s ease;
+}
+.role-chip:hover { background: rgba(14, 165, 233, .2); }
+.profile-summary-text {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.65;
+}
+
+/* ── Navigation Hub Tiles ── */
+.nav-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+@media (max-width: 1100px) {
+  .nav-hub-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  .nav-hub-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.nav-hub-tile {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px 12px;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: all .2s ease;
+}
+.nav-hub-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(14, 165, 233, .3);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+}
+.nav-hub-tile-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  font-size: 18px;
+}
+.nav-hub-tile.blue .nav-hub-tile-icon   { background: rgba(14, 165, 233, .12); color: #38bdf8; }
+.nav-hub-tile.cyan .nav-hub-tile-icon   { background: rgba(6, 182, 212, .12); color: #22d3ee; }
+.nav-hub-tile.green .nav-hub-tile-icon  { background: rgba(16, 185, 129, .12); color: #34d399; }
+.nav-hub-tile.amber .nav-hub-tile-icon  { background: rgba(245, 158, 11, .12); color: #fbbf24; }
+.nav-hub-tile.pink .nav-hub-tile-icon   { background: rgba(244, 63, 94, .12); color: #f43f5e; }
+.nav-hub-tile.purple .nav-hub-tile-icon { background: rgba(139, 92, 246, .12); color: #a78bfa; }
+.nav-hub-tile span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Hero -->
+<div class="hero-card">
+  <div>
+    <div class="hero-portal-pill">
+      <i class="bi bi-shield-check"></i> Candidate Portal &bull; Active
+    </div>
+    <div class="hero-title">
+      Hello, <span>{{ candidate.full_name or 'Candidate' }}</span>!
+    </div>
+    <div class="hero-subtitle">
+      Track your job applications, schedule AI mock sessions, review ATS resume compatibility scores, and prepare for interviews.
+    </div>
+  </div>
+  <a href="{{ url_for('candidate_resume.upload_resume') }}" class="hero-action">
+    <i class="bi bi-cloud-arrow-up-fill"></i> Upload Latest Resume
+  </a>
+</div>
+
+<!-- Scheduled Upcoming Interview (If Any) -->
+{% if upcoming_interview %}
+<div class="interview-alert-card">
+  <div class="interview-alert-left">
+    <div class="interview-alert-icon">
+      <i class="bi bi-calendar-event"></i>
+    </div>
+    <div>
+      <div class="interview-alert-title">
+        Upcoming Interview: {{ upcoming_interview.job.title if upcoming_interview.job else 'Technical Interview' }}
+      </div>
+      <div class="interview-alert-details">
+        <span><i class="bi bi-building"></i> {{ upcoming_interview.job.company if upcoming_interview.job else 'Hiring Team' }}</span>
+        <span>&bull;</span>
+        <span><i class="bi bi-calendar3"></i> {{ upcoming_interview.interview_date }}</span>
+        <span>&bull;</span>
+        <span><i class="bi bi-clock"></i> {{ upcoming_interview.interview_time }}</span>
+        <span>&bull;</span>
+        <span class="rf-badge rf-badge-warning">{{ upcoming_interview.mode }}</span>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 8px;">
+    {% if upcoming_interview.meeting_link and upcoming_interview.mode == 'Online' %}
+    <a href="{{ upcoming_interview.meeting_link }}" target="_blank" class="rf-btn rf-btn-success rf-btn-sm">
+      <i class="bi bi-camera-video-fill"></i> Join Call
+    </a>
+    {% endif %}
+    <a href="{{ url_for('candidate_interview.questions', interview_id=upcoming_interview.interview_id) }}" class="rf-btn rf-btn-primary rf-btn-sm">
+      <i class="bi bi-robot"></i> Practice with AI
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- 4 Key Stat Tiles -->
+<div class="stat-bar">
+
+  <div class="rf-stat-card">
+    <div class="rf-stat-info">
+      <span class="rf-stat-lbl">Applications</span>
+      <span class="rf-stat-val">{{ application_count }}</span>
+      <span class="rf-stat-sub"><i class="bi bi-arrow-up-right"></i> Submitted to jobs</span>
+    </div>
+    <div class="rf-stat-icon"><i class="bi bi-send-check"></i></div>
+  </div>
+
+  <div class="rf-stat-card stat-green">
+    <div class="rf-stat-info">
+      <span class="rf-stat-lbl">Interviews</span>
+      <span class="rf-stat-val">{{ interview_count }}</span>
+      <span class="rf-stat-sub"><i class="bi bi-calendar2-check"></i> Scheduled &amp; held</span>
+    </div>
+    <div class="rf-stat-icon"><i class="bi bi-camera-video"></i></div>
+  </div>
+
+  <div class="rf-stat-card stat-amber">
+    <div class="rf-stat-info">
+      <span class="rf-stat-lbl">Offers Received</span>
+      <span class="rf-stat-val">{{ offer_count }}</span>
+      <span class="rf-stat-sub"><i class="bi bi-award"></i> Active job offers</span>
+    </div>
+    <div class="rf-stat-icon"><i class="bi bi-award-fill"></i></div>
+  </div>
+
+  <div class="rf-stat-card stat-purple">
+    <div class="rf-stat-info">
+      <span class="rf-stat-lbl">AI Questions</span>
+      <span class="rf-stat-val">{{ question_count }}</span>
+      <span class="rf-stat-sub"><i class="bi bi-robot"></i> Practice inquiries</span>
+    </div>
+    <div class="rf-stat-icon"><i class="bi bi-cpu-fill"></i></div>
+  </div>
+
+</div>
+
+
+<!-- 2-Up ATS Score + AI Match Row -->
+<div class="rf-grid-2" style="margin-bottom: 22px;">
+
+  <!-- ATS Compatibility Score -->
+  {% set ats_score = ats_analysis.ats_score | float if ats_analysis and ats_analysis.ats_score else 0 %}
+  <div class="score-card">
+    <div class="score-card-header">
+      <div class="score-card-title">
+        <i class="bi bi-shield-check" style="color: var(--accent2); font-size: 16px;"></i>
+        ATS Compatibility Score
+      </div>
+      <span class="rf-badge rf-badge-info">{{ 'Optimized' if ats_score >= 70 else 'Needs Review' if ats_score >= 40 else 'Pending Resume' }}</span>
+    </div>
+    <div class="score-num cyan">{{ ats_score | int }}%</div>
+    <div class="score-progress-wrap">
+      <div class="score-progress-bar cyan" style="width: {{ ats_score | int }}%;"></div>
+    </div>
+    <div class="score-desc">
+      Evaluates your resume against industry ATS parsing standards, keyword density, section structuring, and format compliance.
+    </div>
+  </div>
+
+  <!-- AI Suitability Rating -->
+  {% set ai_score = analysis.suitability_scores | float if analysis and analysis.suitability_scores else 0 %}
+  <div class="score-card">
+    <div class="score-card-header">
+      <div class="score-card-title">
+        <i class="bi bi-cpu" style="color: var(--green); font-size: 16px;"></i>
+        AI Skill Match Rating
+      </div>
+      <span class="rf-badge rf-badge-success">{{ 'Strong Match' if ai_score >= 75 else 'Moderate' if ai_score >= 45 else 'Pending Analysis' }}</span>
+    </div>
+    <div class="score-num green">{{ ai_score | int }}%</div>
+    <div class="score-progress-wrap">
+      <div class="score-progress-bar green" style="width: {{ ai_score | int }}%;"></div>
+    </div>
+    <div class="score-desc">
+      Deep NLP assessment across your verified skills, experience duration, and alignment with target role requisitions.
+    </div>
+  </div>
+
+</div>
+
+
+<!-- AI Recommended Roles + Profile Summary -->
+<div class="rf-grid-2" style="margin-bottom: 22px;">
+
+  <!-- AI Recommended Roles -->
+  <div class="rf-card">
+    <div class="rf-card-header">
+      <h3 class="rf-card-title">
+        <i class="bi bi-stars" style="color: var(--accent2);"></i>
+        AI Recommended Roles
+      </h3>
+    </div>
+    <div class="rf-card-body">
+      {% if analysis and analysis.recommended_roles %}
+        {% set roles_raw = analysis.recommended_roles %}
+        <div class="role-chips">
+          {% for role in roles_raw.replace('\n', ',').split(',') %}
+            {% set r = role.strip().strip('"').strip("'").strip('[').strip(']') %}
+            {% if r %}
+            <span class="role-chip">
+              <i class="bi bi-briefcase"></i> {{ r }}
+            </span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="rf-empty-state" style="padding: 20px 0;">
+          <div class="rf-empty-icon" style="width: 44px; height: 44px; font-size: 18px;">
+            <i class="bi bi-stars"></i>
+          </div>
+          <div class="rf-empty-title" style="font-size: 13.5px;">No recommendations yet</div>
+          <p class="rf-empty-desc" style="font-size: 12px; margin-bottom: 0;">Upload your resume to receive AI-powered role and department matches.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Profile Summary -->
+  <div class="rf-card">
+    <div class="rf-card-header">
+      <h3 class="rf-card-title">
+        <i class="bi bi-card-text" style="color: var(--amber);"></i>
+        AI Profile Summary
+      </h3>
+    </div>
+    <div class="rf-card-body">
+      {% if analysis and analysis.candidate_summary %}
+        <p class="profile-summary-text">{{ analysis.candidate_summary }}</p>
+      {% else %}
+        <div class="rf-empty-state" style="padding: 20px 0;">
+          <div class="rf-empty-icon" style="width: 44px; height: 44px; font-size: 18px;">
+            <i class="bi bi-card-text"></i>
+          </div>
+          <div class="rf-empty-title" style="font-size: 13.5px;">No summary generated yet</div>
+          <p class="rf-empty-desc" style="font-size: 12px; margin-bottom: 0;">Upload your resume to automatically generate an executive summary.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+
+<!-- Quick Navigation Hub -->
+<div class="rf-card">
+  <div class="rf-card-header">
+    <h3 class="rf-card-title">
+      <i class="bi bi-compass"></i>
+      Candidate Quick Navigation
+    </h3>
+    <span class="rf-badge rf-badge-gray">Fast Access</span>
+  </div>
+  <div class="rf-card-body">
+    <div class="nav-hub-grid">
+
+      <a href="{{ url_for('candidate_profile.profile') }}" class="nav-hub-tile blue">
+        <div class="nav-hub-tile-icon"><i class="bi bi-person-bounding-box"></i></div>
+        <span>My Profile</span>
+      </a>
+
+      <a href="{{ url_for('candidate_resume.upload_resume') }}" class="nav-hub-tile cyan">
+        <div class="nav-hub-tile-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+        <span>Upload Resume</span>
+      </a>
+
+      <a href="{{ url_for('candidate_jobs.jobs') }}" class="nav-hub-tile green">
+        <div class="nav-hub-tile-icon"><i class="bi bi-briefcase"></i></div>
+        <span>Browse Jobs</span>
+      </a>
+
+      <a href="{{ url_for('candidate_application.my_applications') }}" class="nav-hub-tile amber">
+        <div class="nav-hub-tile-icon"><i class="bi bi-send-check"></i></div>
+        <span>Applications</span>
+      </a>
+
+      <a href="{{ url_for('candidate_interview.interviews') }}" class="nav-hub-tile pink">
+        <div class="nav-hub-tile-icon"><i class="bi bi-camera-video"></i></div>
+        <span>Interviews</span>
+      </a>
+
+      <a href="{{ url_for('candidate_offer.offers') }}" class="nav-hub-tile purple">
+        <div class="nav-hub-tile-icon"><i class="bi bi-award"></i></div>
+        <span>Offer Letters</span>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

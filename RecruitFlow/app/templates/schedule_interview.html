@@ -1,0 +1,279 @@
+{% extends "recruiter_base.html" %}
+{% block title %}Schedule Interview{% endblock %}
+
+{% block content %}
+<style>
+/* ── Centred narrow card ── */
+.si-wrap { max-width: 580px; margin: 0 auto; }
+
+.si-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--r-xl); overflow: hidden;
+}
+
+/* Header */
+.si-card-header {
+  display: flex; align-items: center; gap: 11px;
+  padding: 18px 24px;
+  background: linear-gradient(135deg,#065f46,#059669);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.si-card-header h2 {
+  font-size: 18px; font-weight: 800; color: #fff; margin: 0;
+  letter-spacing: -.3px;
+}
+
+.si-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+/* Info alerts */
+.si-info-strip {
+  border-radius: var(--r-md); padding: 13px 16px;
+  font-size: 13px; line-height: 1.5;
+}
+.si-info-blue {
+  background: rgba(6,182,212,.08); border: 1px solid rgba(6,182,212,.25); color: #67e8f9;
+}
+.si-info-green {
+  background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.25); color: #6ee7b7;
+}
+.si-info-amber {
+  background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); color: #fde68a;
+}
+.si-info-strip strong { font-weight: 700; color: #fff; }
+
+/* Field */
+.si-label {
+  display: block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-sec); margin-bottom: 7px;
+}
+.si-input, .si-select {
+  width: 100%;
+  background: rgba(5,4,15,.65) !important;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  font-size: 13.5px; font-family: 'Inter', sans-serif;
+  color: var(--text) !important; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.si-input:focus, .si-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+  background: rgba(5,4,20,.85) !important;
+}
+.si-input::placeholder { color: var(--text-dim); }
+.si-input[type="date"]::-webkit-calendar-picker-indicator,
+.si-input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.5); cursor: pointer; }
+.si-select {
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 13px center !important;
+  background-size: 11px !important;
+  padding-right: 36px;
+}
+.si-select option { background: #110f24; color: var(--text); }
+
+/* 2-col row */
+.si-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:500px){ .si-row2{ grid-template-columns:1fr; } }
+
+/* Mode info box (shown/hidden by JS) */
+.si-mode-info {
+  border-radius: var(--r-md); padding: 13px 16px; font-size: 13px;
+  line-height: 1.55; display: none;
+}
+.si-mode-info.visible { display: block; }
+.si-mode-online  {
+  background: rgba(6,182,212,.08); border: 1px solid rgba(6,182,212,.25);
+}
+.si-mode-offline {
+  background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25);
+}
+.si-mode-title   { font-weight: 800; font-size: 13.5px; margin-bottom: 4px; }
+.si-mode-online  .si-mode-title { color: #22d3ee; }
+.si-mode-offline .si-mode-title { color: #fbbf24; }
+.si-mode-online  p { color: #a5f3fc; }
+.si-mode-offline p { color: #fde68a; }
+
+/* Footer */
+.si-footer {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 24px; border-top: 1px solid var(--border);
+  background: rgba(255,255,255,.015);
+}
+.si-btn-submit {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 22px; border-radius: var(--r-md);
+  background: linear-gradient(135deg,#065f46,#059669);
+  color: #fff; border: none; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; font-family: 'Inter',sans-serif;
+  box-shadow: 0 4px 16px rgba(5,150,105,.3);
+  transition: all .2s;
+}
+.si-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(5,150,105,.4); }
+.si-btn-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.si-btn-cancel {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 18px; border-radius: var(--r-md);
+  background: rgba(255,255,255,.05); color: var(--text-sec);
+  border: 1px solid var(--border2); font-size: 13.5px; font-weight: 600;
+  text-decoration: none; transition: all .2s;
+}
+.si-btn-cancel:hover { background: rgba(255,255,255,.09); color: var(--text); }
+</style>
+
+<div class="si-wrap">
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}{% for cat, msg in messages %}
+  <div style="display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:var(--r-md);
+              margin-bottom:14px;font-size:13px;
+              background:{{ 'rgba(16,185,129,.10)' if cat=='success' else 'rgba(239,68,68,.10)' }};
+              border:1px solid {{ 'rgba(16,185,129,.28)' if cat=='success' else 'rgba(239,68,68,.28)' }};
+              color:{{ '#6ee7b7' if cat=='success' else '#fca5a5' }};">
+    <i class="bi bi-{{ 'check-circle-fill' if cat=='success' else 'x-circle-fill' }}"></i>
+    {{ msg }}
+  </div>
+  {% endfor %}{% endif %}
+  {% endwith %}
+
+  <div class="si-card">
+
+    <!-- Card header -->
+    <div class="si-card-header">
+      <div style="width:32px;height:32px;border-radius:var(--r-sm);
+                  background:rgba(255,255,255,.12);display:grid;place-items:center;
+                  font-size:16px;color:#fff;flex-shrink:0;">
+        <i class="bi bi-calendar-plus-fill"></i>
+      </div>
+      <h2>Schedule Interview</h2>
+    </div>
+
+    <div class="si-body">
+
+      <!-- Candidate strip -->
+      <div class="si-info-strip si-info-blue">
+        <strong>Candidate:</strong> {{ candidate.full_name }}
+        {% if candidate.email %}
+        <span style="color:#a5f3fc;font-size:12px;margin-left:8px;">{{ candidate.email }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Best match strip -->
+      {% if best_match %}
+      <div class="si-info-strip si-info-green">
+        <strong>Resume-matched position:</strong>
+        {{ best_match.job.title }} at {{ best_match.job.company }}
+        <span style="color:#a7f3d0;font-size:12px;">({{ best_match.score }}% skill match)</span>
+      </div>
+      {% else %}
+      <div class="si-info-strip si-info-amber">
+        <i class="bi bi-exclamation-triangle-fill" style="margin-right:6px;"></i>
+        No suitable job could be matched. You can still schedule manually.
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('interview.schedule_interview', candidate_id=candidate.candidate_id) }}">
+    <div class="si-body">
+
+      <!-- Candidate strip -->
+      <div class="si-info-strip si-info-blue">
+        <strong>Candidate:</strong> {{ candidate.full_name }}
+        {% if candidate.email %}
+        <span style="color:#a5f3fc;font-size:12px;margin-left:8px;">{{ candidate.email }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Best match strip -->
+      {% if best_match %}
+      <div class="si-info-strip si-info-green">
+        <strong>Resume-matched position:</strong>
+        {{ best_match.job.title }} at {{ best_match.job.company }}
+        <span style="color:#a7f3d0;font-size:12px;">({{ best_match.score }}% skill match)</span>
+      </div>
+      {% else %}
+      <div class="si-info-strip si-info-amber">
+        <i class="bi bi-exclamation-triangle-fill" style="margin-right:6px;"></i>
+        No suitable job could be matched. You can still schedule manually.
+      </div>
+      {% endif %}
+
+      <!-- Interviewer -->
+      <div>
+        <label class="si-label" for="interviewer">Interviewer</label>
+        <input type="text" id="interviewer" name="interviewer" class="si-input"
+               placeholder="Enter interviewer name" required />
+      </div>
+
+      <!-- Date + Time -->
+      <div class="si-row2">
+        <div>
+          <label class="si-label" for="interview_date">Interview Date</label>
+          <input type="date" id="interview_date" name="interview_date"
+                 class="si-input" required />
+        </div>
+        <div>
+          <label class="si-label" for="interview_time">Interview Time</label>
+          <input type="time" id="interview_time" name="interview_time"
+                 class="si-input" required />
+        </div>
+      </div>
+
+      <!-- Mode -->
+      <div>
+        <label class="si-label" for="modeSelect">Interview Mode</label>
+        <select id="modeSelect" name="mode" class="si-select" required
+                onchange="handleMode(this.value)">
+          <option value="Online">Online</option>
+          <option value="Offline">Offline</option>
+        </select>
+      </div>
+
+      <!-- Online info -->
+      <div id="onlineInfo" class="si-mode-info si-mode-online">
+        <div class="si-mode-title">
+          <i class="bi bi-camera-video-fill" style="margin-right:6px;"></i>Online Interview
+        </div>
+        <p>A meeting room link will be <strong style="color:#fff;">automatically generated</strong>
+           and emailed to the candidate.</p>
+      </div>
+
+      <!-- Offline info -->
+      <div id="offlineInfo" class="si-mode-info si-mode-offline">
+        <div class="si-mode-title">
+          <i class="bi bi-geo-alt-fill" style="margin-right:6px;"></i>Offline Interview
+        </div>
+        <p>The candidate will be asked to attend <strong style="color:#fff;">in person</strong>
+           at the company office.</p>
+      </div>
+
+    </div><!-- /.si-body -->
+
+    <!-- Footer -->
+    <div class="si-footer">
+      <button type="submit" class="si-btn-submit">
+        <i class="bi bi-calendar-check-fill"></i> Schedule Interview
+      </button>
+      <a href="{{ url_for('search.search') }}" class="si-btn-cancel">
+        Cancel
+      </a>
+    </div>
+    </form>
+
+  </div><!-- /.si-card -->
+</div>
+
+<script>
+  function handleMode(mode) {
+    document.getElementById('onlineInfo').classList.toggle('visible', mode === 'Online');
+    document.getElementById('offlineInfo').classList.toggle('visible', mode === 'Offline');
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    handleMode(document.getElementById('modeSelect').value);
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,331 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Analytics{% endblock %}
+{% block breadcrumb %}Analytics{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-bar-chart-line-fill"></i> Insights{% endblock %}
+{% block page_title %}Analytics Dashboard{% endblock %}
+{% block page_subtitle %}Deep-dive into your recruitment performance, pipeline trends, and AI-driven insights.{%
+endblock %}
+
+{% block page_actions %}
+<select class="rf-select" style="max-width:160px;">
+  <option>Last 30 days</option>
+  <option>Last 3 months</option>
+  <option>Last 6 months</option>
+  <option>This year</option>
+</select>
+<button class="btn btn-primary"><i class="bi bi-download"></i> Export Report</button>
+{% endblock %}
+
+{% block extra_styles %}
+/* Chart placeholder */
+.chart-placeholder {
+width: 100%; height: 220px;
+display: flex; align-items: center; justify-content: center;
+flex-direction: column; gap: 10px;
+background: rgba(59,130,246,.04);
+border: 1px dashed rgba(59,130,246,.2);
+border-radius: var(--r-lg);
+color: var(--text-dim);
+font-size: 13px;
+}
+.chart-placeholder i { font-size: 28px; color: var(--accent-2); opacity: .5; }
+
+/* Mini bar chart */
+.mini-bar-chart {
+display: flex;
+align-items: flex-end;
+gap: 8px;
+height: 80px;
+padding: 0 4px;
+}
+.mini-bar {
+flex: 1;
+border-radius: 4px 4px 0 0;
+background: linear-gradient(180deg, var(--accent-2) 0%, rgba(59,130,246,.4) 100%);
+min-width: 8px;
+transition: height .6s ease, opacity .2s;
+cursor: pointer;
+}
+.mini-bar:hover { opacity: 0.8; }
+.mini-bar.green { background: linear-gradient(180deg, var(--green) 0%, rgba(16,185,129,.4) 100%); }
+.mini-bar.amber { background: linear-gradient(180deg, var(--amber) 0%, rgba(245,158,11,.4) 100%); }
+
+/* Funnel block */
+.funnel-block {
+text-align: center; padding: 14px 10px;
+border-radius: var(--r-md); margin-bottom: 8px;
+transition: transform var(--t-fast);
+}
+.funnel-block:hover { transform: scale(1.01); }
+.funnel-block-label { font-size: 12px; color: var(--text-sec); font-weight: 600; margin-bottom: 4px; }
+.funnel-block-val { font-size: 22px; font-weight: 900; line-height: 1; }
+.funnel-block-pct { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+
+/* Insight chip */
+.insight-chip {
+display: flex; align-items: flex-start; gap: 12px;
+padding: 14px; background: rgba(255,255,255,.025);
+border: 1px solid var(--border-subtle); border-radius: var(--r-lg);
+margin-bottom: 10px;
+}
+.insight-icon {
+width: 38px; height: 38px; border-radius: var(--r-sm);
+display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+}
+.insight-body {}
+.insight-title { font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.insight-desc { font-size: 12px; color: var(--text-sec); line-height: 1.5; }
+{% endblock %}
+
+{% block content %}
+
+<!-- Top KPIs -->
+<div class="stat-grid section-gap">
+  {% set kpis = [
+  ('Total Applications', stats.total_applications or 142, 'bi-send-fill', 'accent-3', 'rgba(59,130,246,.12)', '+24%',
+  'up'),
+  ('Interviews Conducted', stats.total_interviews or 58, 'bi-camera-video-fill', 'purple', 'purple-bg', '+12%', 'up'),
+  ('Offers Made', stats.total_offers or 18, 'bi-file-earmark-check-fill', 'green', 'green-bg', '+6%', 'up'),
+  ('Avg Time to Hire', '18 days', 'bi-clock-fill', 'amber', 'amber-bg', '-2d', 'up'),
+  ('Hire Rate', stats.hire_rate or '12.7%', 'bi-percent', 'pink', 'pink-bg', '+1.2%', 'up'),
+  ('Rejection Rate', '42%', 'bi-x-circle-fill', 'red', 'red-bg', '-3%', 'up'),
+  ] %}
+  {% for label, val, icon, color, bg, change, dir in kpis %}
+  <div class="stat-card" data-accent="{{ color }}" data-bg="{{ bg }}">
+    <div class="stat-header">
+      <span class="stat-label">{{ label }}</span>
+      <div class="stat-icon"><i class="bi {{ icon }}"></i></div>
+    </div>
+    <div class="stat-value">{{ val }}</div>
+    <div class="stat-footer">
+      <span class="stat-change {{ dir }}">
+        <i class="bi bi-arrow-{{ 'up' if dir == 'up' else 'down' }}-short"></i>{{ change }}
+      </span>
+      <span>vs prev period</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Charts row -->
+<div class="grid-2 section-gap">
+
+  <!-- Applications trend -->
+  <div class="rf-card">
+    <div class="rf-card-header">
+      <div class="rf-card-title"><i class="bi bi-graph-up-arrow" style="color:var(--accent-3);"></i> Application Trend
+      </div>
+      <span class="badge badge-blue">Monthly</span>
+    </div>
+    <div class="rf-card-body">
+      <div style="display:flex;align-items:flex-end;gap:6px;height:160px;padding:0 4px;margin-bottom:8px;">
+        {% set months =
+        [('Jan',35),('Feb',42),('Mar',38),('Apr',55),('May',47),('Jun',60),('Jul',72),('Aug',58),('Sep',84),('Oct',68),('Nov',91),('Dec',142)]
+        %}
+        {% for month, val in months %}
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="flex:1;width:100%;display:flex;align-items:flex-end;">
+            <div style="width:100%;min-height:4px;border-radius:4px 4px 0 0;transition:height .7s ease;"
+              data-height="{{ (val / 142 * 140)|int }}"></div>
+          </div>
+          <span style="font-size:9px;color:var(--text-dim);">{{ month }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Status breakdown -->
+  <div class="rf-card">
+    <div class="rf-card-header">
+      <div class="rf-card-title"><i class="bi bi-pie-chart-fill" style="color:var(--amber);"></i> Application Status
+        Breakdown</div>
+      <span class="badge badge-amber">Current</span>
+    </div>
+    <div class="rf-card-body">
+      {% set statuses = [
+      ('Applied', stats.total_applications or 142, '#3b82f6', 100),
+      ('Shortlisted', 68, '#8b5cf6', 48),
+      ('Interview', stats.total_interviews or 58, '#f59e0b', 41),
+      ('Selected', 32, '#10b981', 23),
+      ('Offered', stats.total_offers or 18, '#ec4899', 13),
+      ('Rejected', 60, '#ef4444', 42),
+      ] %}
+      {% for label, count, color, pct in statuses %}
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <span style="font-size:13px;font-weight:600;color:var(--text-primary);">{{ label }}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:var(--text-dim);">{{ pct }}%</span>
+            <span style="font-size:13px;font-weight:800;" data-color="{{ color }}">{{ count }}</span>
+          </div>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
+          <div style="height:100%;border-radius:99px;transition:width .8s ease;" data-color="{{ color }}"
+            data-width="{{ pct }}"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Pipeline Funnel -->
+<div class="rf-card section-gap">
+  <div class="rf-card-header">
+    <div class="rf-card-title"><i class="bi bi-funnel-fill" style="color:var(--amber);"></i> Recruitment Funnel Overview
+    </div>
+    <span class="badge badge-amber">Full Pipeline</span>
+  </div>
+  <div class="rf-card-body">
+    <div style="display:flex;gap:10px;align-items:stretch;">
+      {% set funnel = [
+      ('Applications', stats.total_applications or 142, '#3b82f6', '100%', 'rgba(59,130,246,.15)'),
+      ('Screened', 98, '#8b5cf6', '69%', 'rgba(139,92,246,.15)'),
+      ('Shortlisted', 68, '#06b6d4', '48%', 'rgba(6,182,212,.15)'),
+      ('Interviewed', stats.total_interviews or 58, '#f59e0b', '41%', 'rgba(245,158,11,.15)'),
+      ('Selected', 32, '#10b981', '23%', 'rgba(16,185,129,.15)'),
+      ('Offered', stats.total_offers or 18, '#ec4899', '13%', 'rgba(236,72,153,.15)'),
+      ] %}
+      {% for label, val, color, pct, bg in funnel %}
+      <div class="funnel-block" data-color="{{ color }}" data-bg="{{ bg }}">
+        <div class="funnel-block-label">{{ label }}</div>
+        <div class="funnel-block-val" data-color="{{ color }}">{{ val }}</div>
+        <div class="funnel-block-pct">{{ pct }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Bottom row: insights + skills -->
+<div class="grid-2 section-gap">
+
+  <!-- AI Insights -->
+  <div class="rf-card">
+    <div class="rf-card-header">
+      <div class="rf-card-title"><i class="bi bi-robot" style="color:var(--green);"></i> AI-Powered Insights</div>
+      <span class="badge badge-green">AI</span>
+    </div>
+    <div class="rf-card-body" style="padding-top:12px;">
+      {% set insights = [
+      ('bi-graph-up-arrow', 'green-bg', 'green', 'Application volume up 24%', 'Highest spike on Mondays and Thursdays.
+      Consider increasing recruiter availability on these days.'),
+      ('bi-clock-history', 'amber-bg', 'amber', 'Time-to-hire improvement', 'Average time-to-hire reduced by 2 days
+      compared to last month — primarily in engineering roles.'),
+      ('bi-shield-exclamation', 'red-bg', 'red', '3 proctor violations detected', 'Multiple tab-switches and
+      face-detection failures detected in session #42, #37, and #51.'),
+      ('bi-star-fill', 'purple-bg', 'purple', 'Top skill: Python (87 candidates)', 'Python leads all skill mentions.
+      Consider creating specialized Python-track interview flows.'),
+      ] %}
+      {% for icon, bg, color, title, desc in insights %}
+      <div class="insight-chip">
+        <div class="insight-icon" data-bg="{{ bg }}" data-color="{{ color }}">
+          <i class="bi {{ icon }}"></i>
+        </div>
+        <div class="insight-body">
+          <div class="insight-title">{{ title }}</div>
+          <div class="insight-desc">{{ desc }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recruiter performance -->
+  <div class="rf-card">
+    <div class="rf-card-header">
+      <div class="rf-card-title"><i class="bi bi-trophy-fill" style="color:var(--amber);"></i> Recruiter Leaderboard
+      </div>
+      <span class="badge badge-amber">This Month</span>
+    </div>
+    <div class="rf-card-body" style="padding:0;">
+      <table class="rf-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Recruiter</th>
+            <th>Jobs</th>
+            <th>Apps</th>
+            <th>Hired</th>
+            <th>Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set leaderboard = [
+          ('Aarav Sharma', 12, 47, 5, '10.6%'),
+          ('Priya Nair', 8, 33, 3, '9.1%'),
+          ('Rahul Gupta', 5, 21, 2, '9.5%'),
+          ('Anita Rao', 6, 18, 1, '5.6%'),
+          ] %}
+          {% for name, jobs, apps, hired, rate in leaderboard %}
+          <tr>
+            <td>
+              {% if loop.index == 1 %}<span style="color:#fbbf24;">🥇</span>
+              {% elif loop.index == 2 %}<span style="color:#94a3b8;">🥈</span>
+              {% elif loop.index == 3 %}<span style="color:#cd7f32;">🥉</span>
+              {% else %}<span style="color:var(--text-dim);font-weight:700;">{{ loop.index }}</span>{% endif %}
+            </td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="av"
+                  style="background:linear-gradient(135deg,var(--accent-1),var(--purple));width:28px;height:28px;font-size:11px;">
+                  {{ name[0] }}</div>
+                <span style="color:var(--text-primary);font-weight:600;font-size:13px;">{{ name }}</span>
+              </div>
+            </td>
+            <td style="color:var(--accent-3);font-weight:700;">{{ jobs }}</td>
+            <td style="color:var(--purple);font-weight:700;">{{ apps }}</td>
+            <td style="color:var(--green);font-weight:700;">{{ hired }}</td>
+            <td>
+              <span class="badge badge-green">{{ rate }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Apply data-color → color
+  document.querySelectorAll('[data-color]').forEach(el => {
+    el.style.color = el.dataset.color;
+    if (el.dataset.width !== undefined) el.style.width = el.dataset.width + '%';
+    if (el.dataset.bg !== undefined) el.style.background = el.dataset.bg;
+  });
+  // Apply funnel blocks: data-bg + data-color border
+  document.querySelectorAll('.funnel-block[data-bg]').forEach(el => {
+    el.style.flex = '1';
+    el.style.background = el.dataset.bg;
+    el.style.border = '1px solid ' + el.dataset.color + '44';
+  });
+  // stat-card data-accent + data-bg → CSS vars
+  document.querySelectorAll('.stat-card[data-accent]').forEach(el => {
+    el.style.setProperty('--stat-accent', 'var(--' + el.dataset.accent + ')');
+    el.style.setProperty('--stat-bg', 'var(--' + el.dataset.bg + ')');
+  });
+  // insight-icon data-bg + data-color
+  document.querySelectorAll('.insight-icon[data-bg]').forEach(el => {
+    el.style.background = 'var(--' + el.dataset.bg + ')';
+    el.style.color = 'var(--' + el.dataset.color + ')';
+  });
+  // bar chart heights
+  document.querySelectorAll('[data-height]').forEach(el => {
+    el.style.height = el.dataset.height + 'px';
+    el.style.background = 'linear-gradient(180deg, var(--accent-2) 0%, rgba(59,130,246,.3) 100%)';
+  });
+  // status bars: data-width only
+  document.querySelectorAll('[data-color][data-width]').forEach(el => {
+    el.style.background = el.dataset.color;
+    el.style.width = el.dataset.width + '%';
+  });
+</script>
+{% endblock %}

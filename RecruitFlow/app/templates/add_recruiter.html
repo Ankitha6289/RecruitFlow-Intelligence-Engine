@@ -1,0 +1,201 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Add Recruiter{% endblock %}
+{% block breadcrumb %}Add Recruiter{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-person-badge-fill"></i> People{% endblock %}
+{% block page_title %}Add Recruiter{% endblock %}
+{% block page_subtitle %}Create a new recruiter account and grant access to the platform.{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('recruiter.recruiters') }}" class="btn btn-secondary btn-sm">
+  <i class="bi bi-arrow-left"></i> Back to Recruiters
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+.rf-form-card {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden; margin-bottom: 16px;
+  max-width: 620px;
+}
+.rf-form-card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 20px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+.rf-form-card-icon {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+}
+.rf-form-card-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.rf-form-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.rf-flabel {
+  display: block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-sec); margin-bottom: 7px;
+}
+.rf-finput {
+  width: 100%;
+  background: rgba(5,12,30,.65) !important;
+  border: 1.5px solid var(--border-base);
+  border-radius: var(--r-md);
+  padding: 10px 42px 10px 14px;
+  font-size: 13.5px; font-family: 'Inter', sans-serif;
+  color: var(--text-primary) !important;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.rf-finput:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.13);
+  background: rgba(5,12,35,.85) !important;
+}
+.rf-finput::placeholder { color: var(--text-dim); }
+.rf-fwrap { position: relative; }
+.rf-ficon {
+  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+  color: var(--text-dim); font-size: 15px; pointer-events: none;
+}
+.rf-feye { cursor: pointer; }
+.rf-feye:hover { color: var(--accent-3); }
+.rf-fhint { font-size: 11px; color: var(--text-dim); margin-top: 5px; }
+.rf-form-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 16px 20px; border-top: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+/* Strength bar */
+.pw-strength { display:none; margin-top:8px; }
+.pw-bars { display:flex; gap:4px; margin-bottom:4px; }
+.pw-bar  { flex:1; height:3px; border-radius:99px; background:rgba(255,255,255,.08); transition:background .25s; }
+.pw-lbl  { font-size:10.5px; color:var(--text-dim); }
+{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}{% for cat, msg in messages %}
+<div class="flash {{ 'success' if cat=='success' else 'error' if cat in ['danger','error'] else 'info' }}" style="margin-bottom:14px;">
+  <i class="bi bi-{% if cat=='success' %}check-circle-fill{% elif cat in ['danger','error'] %}x-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+  {{ msg }}
+  <button class="flash-close" onclick="this.parentElement.remove()"><i class="bi bi-x-lg"></i></button>
+</div>
+{% endfor %}{% endif %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('recruiter.add_recruiter') }}" id="addRecForm" novalidate>
+
+  <!-- Account Info -->
+  <div class="rf-form-card">
+    <div class="rf-form-card-header">
+      <div class="rf-form-card-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+        <i class="bi bi-person-badge-fill"></i>
+      </div>
+      <span class="rf-form-card-title">Account Information</span>
+    </div>
+    <div class="rf-form-body">
+      <div>
+        <label class="rf-flabel" for="username">Username <span style="color:var(--red);">*</span></label>
+        <div class="rf-fwrap">
+          <input type="text" id="username" name="username" class="rf-finput"
+                 placeholder="e.g. john_recruiter" required minlength="3" autocomplete="off" />
+          <i class="bi bi-person rf-ficon"></i>
+        </div>
+      </div>
+      <div>
+        <label class="rf-flabel" for="email">Email Address <span style="color:var(--red);">*</span></label>
+        <div class="rf-fwrap">
+          <input type="email" id="email" name="email" class="rf-finput"
+                 placeholder="recruiter@company.com" required autocomplete="off" />
+          <i class="bi bi-envelope rf-ficon"></i>
+        </div>
+      </div>
+      <div>
+        <label class="rf-flabel" for="password">Password <span style="color:var(--red);">*</span></label>
+        <div class="rf-fwrap">
+          <input type="password" id="password" name="password" class="rf-finput"
+                 placeholder="Create a strong password" required minlength="6"
+                 oninput="checkStrength(this.value)" />
+          <i class="bi bi-eye rf-ficon rf-feye" id="eyeBtn" onclick="toggleEye()"></i>
+        </div>
+        <div class="pw-strength" id="pwStrength">
+          <div class="pw-bars">
+            <div class="pw-bar" id="pb1"></div><div class="pw-bar" id="pb2"></div>
+            <div class="pw-bar" id="pb3"></div><div class="pw-bar" id="pb4"></div>
+          </div>
+          <span class="pw-lbl" id="pwLabel"></span>
+        </div>
+      </div>
+      <div>
+        <label class="rf-flabel" for="confirm_password">Confirm Password <span style="color:var(--red);">*</span></label>
+        <div class="rf-fwrap">
+          <input type="password" id="confirm_password" name="confirm_password" class="rf-finput"
+                 placeholder="Re-enter password" required minlength="6"
+                 oninput="checkMatch()" />
+          <i class="bi bi-shield-lock rf-ficon"></i>
+        </div>
+        <div id="matchMsg" style="display:none;margin-top:6px;font-size:11.5px;font-weight:600;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="rf-form-card">
+    <div class="rf-form-footer">
+      <a href="{{ url_for('recruiter.recruiters') }}" class="btn btn-secondary btn-sm">
+        <i class="bi bi-x-lg"></i> Cancel
+      </a>
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="bi bi-person-plus-fill"></i> Add Recruiter
+      </button>
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function toggleEye() {
+    const inp = document.getElementById('password');
+    const ico = document.getElementById('eyeBtn');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    ico.className = inp.type === 'text'
+      ? 'bi bi-eye-slash rf-ficon rf-feye'
+      : 'bi bi-eye rf-ficon rf-feye';
+  }
+  function checkStrength(v) {
+    const wrap = document.getElementById('pwStrength');
+    const bars = ['pb1','pb2','pb3','pb4'].map(id => document.getElementById(id));
+    const lbl  = document.getElementById('pwLabel');
+    if (!v) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    let s = 0;
+    if (v.length >= 6) s++;
+    if (v.length >= 10) s++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
+    if (/[0-9]/.test(v) && /[^a-zA-Z0-9]/.test(v)) s++;
+    const cfg = [
+      {c:'#ef4444',t:'Weak'},{c:'#f59e0b',t:'Fair'},
+      {c:'#3b82f6',t:'Good'},{c:'#10b981',t:'Strong'}
+    ];
+    const cur = cfg[s-1] || cfg[0];
+    bars.forEach((b,i) => b.style.background = i < s ? cur.c : 'rgba(255,255,255,.08)');
+    lbl.textContent = cur.t; lbl.style.color = cur.c;
+  }
+  function checkMatch() {
+    const np  = document.getElementById('password').value;
+    const cp  = document.getElementById('confirm_password').value;
+    const msg = document.getElementById('matchMsg');
+    if (!cp) { msg.style.display = 'none'; return; }
+    msg.style.display = 'block';
+    msg.innerHTML = np === cp
+      ? '<i class="bi bi-check-circle-fill" style="color:#10b981;margin-right:5px;"></i><span style="color:#10b981;">Passwords match</span>'
+      : '<i class="bi bi-x-circle-fill" style="color:#ef4444;margin-right:5px;"></i><span style="color:#ef4444;">Passwords do not match</span>';
+  }
+  document.getElementById('addRecForm')?.addEventListener('submit', function(e) {
+    const np = document.getElementById('password').value;
+    const cp = document.getElementById('confirm_password').value;
+    if (np !== cp) { e.preventDefault(); checkMatch(); }
+  });
+</script>
+{% endblock %}

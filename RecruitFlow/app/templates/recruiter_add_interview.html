@@ -1,0 +1,287 @@
+{% extends "recruiter_base.html" %}
+
+{% block title %}Schedule Interview{% endblock %}
+
+{% block page_title %}
+<div>Schedule Interview <span style="color:var(--text-sec);font-weight:400;font-size:12.5px;display:block;margin-top:2px;">Set up an interview session for the shortlisted candidate.</span></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.form-container { max-width: 700px; }
+
+/* ── Candidate Info Banner ── */
+.cand-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(59,130,246,.1);
+    border: 1px solid rgba(59,130,246,.22);
+    border-radius: var(--r-md);
+    padding: 14px 18px;
+    margin-bottom: 18px;
+}
+.cand-banner-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+}
+.cand-banner-name { font-size: 14.5px; font-weight: 700; color: var(--text); }
+.cand-banner-sub  { font-size: 12px;   color: var(--text-sec); margin-top: 2px; }
+
+/* ── Mode Toggle ── */
+.mode-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.mode-option {
+    position: relative;
+}
+.mode-option input[type=radio] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+}
+.mode-option label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: rgba(255,255,255,.04);
+    border: 2px solid var(--border2);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: all .18s;
+    text-align: center;
+}
+.mode-option input:checked + label {
+    border-color: var(--accent2);
+    background: rgba(124,58,237,.12);
+    box-shadow: 0 0 0 3px rgba(124,58,237,.18);
+}
+.mode-option label i { font-size: 22px; }
+.mode-option label span { font-size: 13px; font-weight: 600; color: var(--text); }
+.mode-option label small { font-size: 11px; color: var(--text-sec); }
+
+/* ── Info Boxes ── */
+.info-box {
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    display: none;
+    margin-top: 14px;
+}
+.info-box.visible { display: flex; align-items: flex-start; gap: 12px; animation: alertIn .25s ease; }
+.info-box-online {
+    background: rgba(59,130,246,.1);
+    border: 1px solid rgba(59,130,246,.25);
+    color: #60a5fa;
+}
+.info-box-offline {
+    background: rgba(245,158,11,.1);
+    border: 1px solid rgba(245,158,11,.25);
+    color: #fbbf24;
+}
+.info-box i { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+.info-box-text { font-size: 13px; line-height: 1.6; }
+.info-box-text strong { display: block; margin-bottom: 3px; font-weight: 700; }
+
+/* ── Match Badge ── */
+.match-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16,185,129,.12);
+    border: 1px solid rgba(16,185,129,.25);
+    border-radius: 8px;
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #34d399;
+    margin-top: 6px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <!-- Candidate Info Banner -->
+    <div class="cand-banner">
+        <div class="cand-banner-avatar">
+            {{ application.candidate.full_name[0]|upper }}
+        </div>
+        <div>
+            <div class="cand-banner-name">{{ application.candidate.full_name }}</div>
+            <div class="cand-banner-sub">
+                <i class="bi bi-envelope" style="opacity:.6;"></i> {{ application.candidate.email }}
+            </div>
+        </div>
+        <span class="rf-badge rf-badge-blue" style="margin-left:auto;">
+            <i class="bi bi-person-check"></i> Shortlisted
+        </span>
+    </div>
+
+    <!-- Form Card -->
+    <div class="rf-card">
+        <div class="rf-card-header">
+            <h3 class="rf-card-title">
+                <i class="bi bi-calendar-plus" style="color:var(--accent2);"></i>
+                Schedule Interview
+            </h3>
+            <a href="{{ url_for('recruiter_application.applications') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+        <div class="rf-card-body">
+            <form method="POST">
+
+                <!-- Candidate (readonly) -->
+                <div class="rf-form-group">
+                    <label class="rf-label">Candidate</label>
+                    <div style="position:relative;">
+                        <input type="text" class="rf-input" style="padding-left:38px;"
+                               value="{{ application.candidate.full_name }}" readonly>
+                        <i class="bi bi-person" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                    </div>
+                </div>
+
+                <!-- Job Position (auto-matched) -->
+                <div class="rf-form-group">
+                    <label class="rf-label">Job Position (AI-Matched)</label>
+                    <div style="position:relative;">
+                        <input type="text" class="rf-input" style="padding-left:38px;"
+                               value="{{ recommended_job.title }}" readonly>
+                        <i class="bi bi-briefcase" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                    </div>
+                    {% if best_match %}
+                    <div class="match-badge">
+                        <i class="bi bi-cpu"></i>
+                        {{ recommended_job.company }} &bull; {{ best_match.score }}% resume skill match
+                    </div>
+                    {% else %}
+                    <div class="rf-form-hint">
+                        <i class="bi bi-info-circle" style="color:var(--accent2);"></i>
+                        No parsed resume skills found — using the application's position.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Interviewer -->
+                <div class="rf-form-group">
+                    <label class="rf-label" for="interviewer">Interviewer Name <span style="color:#f87171;">*</span></label>
+                    <div style="position:relative;">
+                        <input id="interviewer" type="text" name="interviewer" class="rf-input" style="padding-left:38px;"
+                               placeholder="Enter the interviewer's full name" required>
+                        <i class="bi bi-person-badge" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                    </div>
+                </div>
+
+                <!-- Date & Time -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" class="rf-form-group">
+                    <div>
+                        <label class="rf-label" for="interview_date">Interview Date <span style="color:#f87171;">*</span></label>
+                        <div style="position:relative;">
+                            <input id="interview_date" type="date" name="interview_date"
+                                   class="rf-input" style="padding-left:38px;" required>
+                            <i class="bi bi-calendar3" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="rf-label" for="interview_time">Interview Time <span style="color:#f87171;">*</span></label>
+                        <div style="position:relative;">
+                            <input id="interview_time" type="time" name="interview_time"
+                                   class="rf-input" style="padding-left:38px;" required>
+                            <i class="bi bi-clock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mode -->
+                <div class="rf-form-group">
+                    <label class="rf-label">Interview Mode <span style="color:#f87171;">*</span></label>
+                    <div class="mode-options">
+                        <div class="mode-option">
+                            <input type="radio" name="mode" id="modeOnline" value="Online" checked
+                                   onchange="handleModeChange('Online')">
+                            <label for="modeOnline">
+                                <i class="bi bi-camera-video-fill" style="color:#60a5fa;"></i>
+                                <span>Online</span>
+                                <small>Auto link generated</small>
+                            </label>
+                        </div>
+                        <div class="mode-option">
+                            <input type="radio" name="mode" id="modeOffline" value="Offline"
+                                   onchange="handleModeChange('Offline')">
+                            <label for="modeOffline">
+                                <i class="bi bi-building" style="color:#fbbf24;"></i>
+                                <span>Offline</span>
+                                <small>In-person at office</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Online info -->
+                    <div class="info-box info-box-online visible" id="onlineInfo">
+                        <i class="bi bi-camera-video-fill"></i>
+                        <div class="info-box-text">
+                            <strong>Online Interview</strong>
+                            A unique secure meeting room link will be <strong>automatically generated</strong> and sent to the candidate via email. AI proctoring will be active.
+                        </div>
+                    </div>
+
+                    <!-- Offline info -->
+                    <div class="info-box info-box-offline" id="offlineInfo">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <div class="info-box-text">
+                            <strong>Offline / In-Person Interview</strong>
+                            Venue: <strong>{{ application.job.location or 'Company Office' }}</strong><br>
+                            <span style="font-size:11.5px;opacity:.8;">This location will be included in the confirmation email sent to the candidate.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display:flex;gap:10px;margin-top:6px;">
+                    <button type="submit" class="rf-btn rf-btn-primary rf-btn-lg" style="flex:1;">
+                        <i class="bi bi-calendar-check"></i> Schedule Interview
+                    </button>
+                    <a href="{{ url_for('recruiter_application.applications') }}"
+                       class="rf-btn rf-btn-outline rf-btn-lg">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function handleModeChange(mode) {
+    const onlineBox  = document.getElementById('onlineInfo');
+    const offlineBox = document.getElementById('offlineInfo');
+    if (mode === 'Online') {
+        onlineBox.classList.add('visible');
+        offlineBox.classList.remove('visible');
+    } else {
+        onlineBox.classList.remove('visible');
+        offlineBox.classList.add('visible');
+    }
+}
+// Set today as min date
+document.getElementById('interview_date').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

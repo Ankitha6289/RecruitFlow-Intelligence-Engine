@@ -1,0 +1,234 @@
+{% extends "recruiter_base.html" %}
+
+{% block title %}Interviews{% endblock %}
+
+{% block page_title %}
+<div>Interview Management <span style="color:var(--text-sec);font-weight:400;font-size:12.5px;display:block;margin-top:2px;">Track, proctored interviews and candidate results.</span></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Risk Badge Overrides ── */
+.risk-safe     { background:rgba(16,185,129,.15);  color:#34d399; border-color:rgba(16,185,129,.25); }
+.risk-suspect  { background:rgba(245,158,11,.15);  color:#fbbf24; border-color:rgba(245,158,11,.25); }
+.risk-high     { background:rgba(239,68,68,.15);   color:#f87171; border-color:rgba(239,68,68,.25); }
+
+/* ── Filter Bar ── */
+.if-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+}
+.rf-filter-select {
+    padding: 8px 12px;
+    background: rgba(255,255,255,.04);
+    border: 1.5px solid var(--border2);
+    border-radius: 9px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+.rf-filter-select:focus { border-color: var(--accent2); }
+.rf-filter-select option { background: #1e1b3a; }
+
+/* ── Interview row avatar ── */
+.int-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+.datetime-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 11.5px;
+    color: var(--text-sec);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Filter Bar -->
+<div class="if-filter-bar">
+    <form method="get" action="{{ url_for('recruiter_interview_list.interviews') }}" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <i class="bi bi-funnel" style="color:var(--text-dim);font-size:14px;"></i>
+            <span style="font-size:13px;font-weight:600;color:var(--text-sec);">Filter by Risk:</span>
+        </div>
+        <select name="risk" class="rf-filter-select">
+            <option value="all"       {% if risk_filter == 'all'       %}selected{% endif %}>All Risk Levels</option>
+            <option value="Safe"      {% if risk_filter == 'Safe'      %}selected{% endif %}>✅ Safe</option>
+            <option value="Suspicious"{% if risk_filter == 'Suspicious'%}selected{% endif %}>⚠️ Suspicious</option>
+            <option value="High Risk" {% if risk_filter == 'High Risk' %}selected{% endif %}>🚨 High Risk</option>
+        </select>
+        <button type="submit" class="rf-btn rf-btn-primary rf-btn-sm">
+            <i class="bi bi-funnel-fill"></i> Apply
+        </button>
+        {% if risk_filter and risk_filter != 'all' %}
+        <a href="{{ url_for('recruiter_interview_list.interviews') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+            <i class="bi bi-x"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+    <span class="rf-badge rf-badge-purple">{{ interviews|length }} Interviews</span>
+</div>
+
+<!-- Interviews Table -->
+<div class="rf-card">
+    <div class="rf-card-header">
+        <h3 class="rf-card-title">
+            <i class="bi bi-calendar-check" style="color:var(--accent2);"></i>
+            Scheduled Interviews
+        </h3>
+        <div style="display:flex;gap:8px;">
+            <span class="rf-badge rf-badge-green" style="gap:6px;">
+                <i class="bi bi-circle-fill" style="font-size:7px;"></i> Live Tracking
+            </span>
+        </div>
+    </div>
+
+    <div class="rf-table-wrap" style="border:none;border-radius:0;">
+        <table class="rf-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Candidate</th>
+                    <th>Job Position</th>
+                    <th>Interviewer</th>
+                    <th>Date & Time</th>
+                    <th>Mode</th>
+                    <th>Status</th>
+                    <th>Risk Level</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for interview in interviews %}
+                <tr>
+                    <td><span style="font-size:11px;font-weight:700;color:var(--text-dim);">#{{ interview.interview_id }}</span></td>
+
+                    <td>
+                        <div style="display:flex;align-items:center;gap:9px;">
+                            <div class="int-avatar">{{ interview.candidate.full_name[0]|upper }}</div>
+                            <span style="font-size:13px;font-weight:600;color:var(--text);">{{ interview.candidate.full_name }}</span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span style="font-size:13px;color:var(--text-sec);">{{ interview.job.title }}</span>
+                    </td>
+
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-sec);">
+                            <i class="bi bi-person-badge" style="color:var(--text-dim);"></i>
+                            {{ interview.interviewer }}
+                        </div>
+                    </td>
+
+                    <td>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <span class="datetime-chip"><i class="bi bi-calendar3"></i> {{ interview.interview_date }}</span>
+                            <span class="datetime-chip"><i class="bi bi-clock"></i> {{ interview.interview_time }}</span>
+                        </div>
+                    </td>
+
+                    <td>
+                        {% if interview.mode == 'Online' %}
+                            <span class="rf-badge rf-badge-blue"><i class="bi bi-camera-video"></i> Online</span>
+                        {% else %}
+                            <span class="rf-badge rf-badge-amber"><i class="bi bi-building"></i> Offline</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if interview.status == 'Scheduled' %}
+                            <span class="rf-badge rf-badge-amber"><i class="bi bi-clock"></i> Scheduled</span>
+                        {% elif interview.status == 'Completed' %}
+                            <span class="rf-badge rf-badge-blue"><i class="bi bi-check-circle"></i> Completed</span>
+                        {% elif interview.status == 'Selected' %}
+                            <span class="rf-badge rf-badge-green"><i class="bi bi-trophy"></i> Selected</span>
+                        {% elif interview.status == 'Rejected' %}
+                            <span class="rf-badge rf-badge-red"><i class="bi bi-x-circle"></i> Rejected</span>
+                        {% else %}
+                            <span class="rf-badge rf-badge-gray">{{ interview.status }}</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% set risk = interview.proctor_risk or 'Safe' %}
+                        {% if risk == 'High Risk' %}
+                            <span class="rf-badge risk-high"><i class="bi bi-shield-x"></i> High Risk</span>
+                        {% elif risk == 'Suspicious' %}
+                            <span class="rf-badge risk-suspect"><i class="bi bi-shield-exclamation"></i> Suspicious</span>
+                        {% else %}
+                            <span class="rf-badge risk-safe"><i class="bi bi-shield-check"></i> Safe</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                            <a href="{{ url_for('recruiter_interview_list.complete', interview_id=interview.interview_id) }}"
+                               class="rf-btn rf-btn-blue rf-btn-sm">
+                                <i class="bi bi-check2"></i> Complete
+                            </a>
+                            <a href="{{ url_for('recruiter_interview_list.select', interview_id=interview.interview_id) }}"
+                               class="rf-btn rf-btn-success rf-btn-sm">
+                                <i class="bi bi-trophy"></i> Select
+                            </a>
+                            <a href="{{ url_for('recruiter_interview_list.reject', interview_id=interview.interview_id) }}"
+                               class="rf-btn rf-btn-amber rf-btn-sm">
+                                <i class="bi bi-x"></i> Reject
+                            </a>
+                            <a href="{{ url_for('recruiter_interview_list.proctor_summary', interview_id=interview.interview_id) }}"
+                               class="rf-btn rf-btn-outline rf-btn-sm">
+                                {% if interview.ai_recording_path %}
+                                    <i class="bi bi-robot"></i> AI Review
+                                {% else %}
+                                    <i class="bi bi-shield"></i> Proctor
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('recruiter_interview_list.delete', interview_id=interview.interview_id) }}"
+                               class="rf-btn rf-btn-danger rf-btn-sm"
+                               onclick="return confirm('Delete this interview record?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9">
+                        <div class="rf-empty">
+                            <div class="rf-empty-icon"><i class="bi bi-calendar-x"></i></div>
+                            <div class="rf-empty-title">No Interviews Scheduled</div>
+                            <p class="rf-empty-desc">Schedule interviews from the Applications page once you've shortlisted candidates.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

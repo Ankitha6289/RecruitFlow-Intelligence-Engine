@@ -1,0 +1,161 @@
+{% extends "recruiter_base.html" %}
+
+{% block title %}Edit Job{% endblock %}
+
+{% block page_title %}
+<div>Edit Job <span style="color:var(--text-sec);font-weight:400;font-size:12.5px;display:block;margin-top:2px;">Update the details for: <strong style="color:var(--accent2);">{{ job.title }}</strong></span></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+@media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+.form-section-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="max-width:780px;">
+
+    <!-- Alert Banner -->
+    <div style="display:flex;align-items:center;gap:12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);border-radius:var(--r-md);padding:13px 16px;margin-bottom:20px;">
+        <i class="bi bi-pencil-square" style="color:#fbbf24;font-size:18px;flex-shrink:0;"></i>
+        <div>
+            <div style="font-size:13px;font-weight:700;color:#fbbf24;">Editing Job: {{ job.title }}</div>
+            <div style="font-size:12px;color:var(--text-sec);margin-top:2px;">Changes will be reflected immediately for candidates browsing jobs.</div>
+        </div>
+    </div>
+
+    <div class="rf-card">
+        <div class="rf-card-header">
+            <h3 class="rf-card-title">
+                <i class="bi bi-briefcase" style="color:var(--amber);"></i>
+                Update Job Details
+            </h3>
+            <a href="{{ url_for('recruiter_job.jobs') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Jobs
+            </a>
+        </div>
+        <div class="rf-card-body">
+            <form method="POST">
+
+                <!-- Basic Info -->
+                <div style="margin-bottom:22px;">
+                    <div class="form-section-title">
+                        <i class="bi bi-info-circle"></i> Basic Information
+                    </div>
+
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="title">Job Title <span style="color:#f87171;">*</span></label>
+                        <div style="position:relative;">
+                            <input id="title" type="text" name="title" class="rf-input"
+                                   style="padding-left:38px;"
+                                   value="{{ job.title }}" required>
+                            <i class="bi bi-briefcase" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="company">Company <span style="color:#f87171;">*</span></label>
+                            <div style="position:relative;">
+                                <input id="company" type="text" name="company" class="rf-input"
+                                       style="padding-left:38px;"
+                                       value="{{ job.company }}" required>
+                                <i class="bi bi-building" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                            </div>
+                        </div>
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="location">Location</label>
+                            <div style="position:relative;">
+                                <input id="location" type="text" name="location" class="rf-input"
+                                       style="padding-left:38px;"
+                                       value="{{ job.location }}">
+                                <i class="bi bi-geo-alt" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="rf-form-group" style="margin-bottom:0;">
+                            <label class="rf-label" for="experience">Experience</label>
+                            <div style="position:relative;">
+                                <input id="experience" type="text" name="experience" class="rf-input"
+                                       style="padding-left:38px;"
+                                       value="{{ job.experience }}">
+                                <i class="bi bi-clock-history" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                            </div>
+                        </div>
+                        <div class="rf-form-group" style="margin-bottom:0;">
+                            <label class="rf-label" for="salary">Salary</label>
+                            <div style="position:relative;">
+                                <input id="salary" type="text" name="salary" class="rf-input"
+                                       style="padding-left:38px;"
+                                       value="{{ job.salary }}">
+                                <i class="bi bi-currency-rupee" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="rf-divider">
+
+                <!-- Skills -->
+                <div style="margin-bottom:22px;">
+                    <div class="form-section-title">
+                        <i class="bi bi-code-slash"></i> Required Skills
+                    </div>
+                    <div class="rf-form-group" style="margin-bottom:0;">
+                        <label class="rf-label" for="skills">Skills</label>
+                        <textarea id="skills" name="skills" class="rf-textarea" rows="3"
+                                  placeholder="Python, Flask, React, MySQL…">{{ job.skills }}</textarea>
+                        <div class="rf-form-hint">Comma-separated list of required skills.</div>
+                    </div>
+                </div>
+
+                <hr class="rf-divider">
+
+                <!-- Description -->
+                <div style="margin-bottom:22px;">
+                    <div class="form-section-title">
+                        <i class="bi bi-file-text"></i> Job Description
+                    </div>
+                    <div class="rf-form-group" style="margin-bottom:0;">
+                        <label class="rf-label" for="description">Description</label>
+                        <textarea id="description" name="description" class="rf-textarea" rows="7">{{ job.description }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="rf-btn rf-btn-amber rf-btn-lg" style="flex:1;">
+                        <i class="bi bi-check2-circle"></i> Save Changes
+                    </button>
+                    <a href="{{ url_for('recruiter_job.jobs') }}" class="rf-btn rf-btn-outline rf-btn-lg">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

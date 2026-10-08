@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="row">
+
+        <!-- Candidate Information -->
+
+        <div class="col-lg-4">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h4>
+
+                        <i class="bi bi-person-circle"></i>
+
+                        Candidate Profile
+
+                    </h4>
+
+                </div>
+
+                <div class="card-body text-center">
+
+                    <img src="{{ url_for('static', filename='images/default_user.png') }}"
+                         width="120"
+                         class="rounded-circle mb-3">
+
+                    <h4>{{ candidate.full_name }}</h4>
+
+                    <p class="text-muted">
+
+                        {{ candidate.email }}
+
+                    </p>
+
+                    <hr>
+
+                    <p>
+
+                        <strong>Phone</strong><br>
+
+                        {{ candidate.phone }}
+
+                    </p>
+
+                    <p>
+
+                        <strong>LinkedIn</strong><br>
+
+                        <a href="{{ candidate.linkedin }}" target="_blank">
+
+                            {{ candidate.linkedin }}
+
+                        </a>
+
+                    </p>
+
+                    <p>
+
+                        <strong>GitHub</strong><br>
+
+                        <a href="{{ candidate.github }}" target="_blank">
+
+                            {{ candidate.github }}
+
+                        </a>
+
+                    </p>
+
+                    <p>
+
+                        <strong>Portfolio</strong><br>
+
+                        <a href="{{ candidate.portfolio }}" target="_blank">
+
+                            {{ candidate.portfolio }}
+
+                        </a>
+
+                    </p>
+
+                    <span class="badge bg-success">
+
+                        {{ candidate.status }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Candidate Details -->
+
+        <div class="col-lg-8">
+
+            <!-- Resume -->
+
+            <div class="card shadow mb-3">
+
+                <div class="card-header bg-success text-white">
+
+                    Resume
+
+                </div>
+
+                <div class="card-body">
+
+                    {% if candidate.resume_path %}
+
+                    <a href="{{ url_for('candidate_profile.download_resume', candidate_id=candidate.candidate_id) }}"
+                       class="btn btn-success">
+
+                        <i class="bi bi-download"></i>
+
+                        Download Resume
+
+                    </a>
+
+                    {% else %}
+
+                    <p>No Resume Uploaded</p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- AI Analysis -->
+
+            <div class="card shadow mb-3">
+
+                <div class="card-header bg-info text-white">
+
+                    AI Resume Analysis
+
+                </div>
+
+                <div class="card-body">
+
+                    {% if ai %}
+
+                    <p>
+
+                        <strong>Summary</strong><br>
+
+                        {{ ai.candidate_summary }}
+
+                    </p>
+
+                    <p>
+
+                        <strong>Suitability Score</strong><br>
+
+                        {{ ai.suitability_scores }}
+
+                    </p>
+
+                    <p>
+
+                        <strong>Recommended Role</strong><br>
+
+                        {{ ai.recommended_roles }}
+
+                    </p>
+
+                    {% else %}
+
+                    <p>No AI Analysis Available</p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- Skills -->
+
+            <div class="card shadow mb-3">
+
+                <div class="card-header">
+
+                    Skills
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for skill in skills %}
+
+                    <span class="badge bg-primary">
+
+                        {{ skill.skill_name }}
+
+                    </span>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <!-- Education -->
+
+            <div class="card shadow mb-3">
+
+                <div class="card-header">
+
+                    Education
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for edu in education %}
+
+                    <p>
+
+                        {{ edu.degree }}
+
+                    </p>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <!-- Experience -->
+
+            <div class="card shadow mb-3">
+
+                <div class="card-header">
+
+                    Experience
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for exp in experience %}
+
+                    <p>
+
+                        {{ exp.company_name }}
+
+                        -
+
+                        {{ exp.role }}
+
+                    </p>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <div class="card shadow">
+
+    <div class="card-header bg-warning">
+
+        Recruiter Actions
+
+    </div>
+
+    <div class="card-body">
+
+        <a href="{{ url_for('candidate.shortlist_candidate',
+                            candidate_id=candidate.candidate_id) }}"
+           class="btn btn-success">
+
+            Shortlist
+
+        </a>
+
+        <a href="{{ url_for('candidate.schedule_interview',
+                            candidate_id=candidate.candidate_id) }}"
+           class="btn btn-primary">
+
+            Interview
+
+        </a>
+
+        <a href="{{ url_for('candidate.generate_offer',
+                            candidate_id=candidate.candidate_id) }}"
+           class="btn btn-info">
+
+            Offer
+
+        </a>
+
+        <a href="{{ url_for('candidate.reject_candidate',
+                            candidate_id=candidate.candidate_id) }}"
+           class="btn btn-danger">
+
+            Reject
+
+        </a>
+
+        <a href="{{ url_for('candidate.hire_candidate',
+                            candidate_id=candidate.candidate_id) }}"
+           class="btn btn-dark">
+
+            Hire
+
+        </a>
+
+    </div>
+
+</div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

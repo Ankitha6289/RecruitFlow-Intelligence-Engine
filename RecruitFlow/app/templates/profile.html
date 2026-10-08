@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">Candidate Profile</h2>
+
+<div class="card shadow">
+
+    <div class="card-header bg-primary text-white">
+
+        <h3>{{ data.candidate.full_name }}</h3>
+
+    </div>
+<div class="mb-3">
+
+    <h5>
+
+        Current Status :
+
+        <span class="badge bg-primary">
+
+            {{ data.candidate.status }}
+
+        </span>
+
+    </h5>
+
+</div>
+
+<div class="mb-4">
+
+    <a href="/candidate/status/{{ data.candidate.candidate_id }}/Applied"
+       class="btn btn-secondary btn-sm">
+
+        Applied
+
+    </a>
+
+    <a href="/candidate/status/{{ data.candidate.candidate_id }}/Shortlisted"
+       class="btn btn-info btn-sm">
+
+        Shortlisted
+
+    </a>
+
+    <a href="/candidate/status/{{ data.candidate.candidate_id }}/Interview Scheduled"
+       class="btn btn-warning btn-sm">
+
+        Interview Scheduled
+
+    </a>
+
+    <a href="/candidate/status/{{ data.candidate.candidate_id }}/Interview Completed"
+       class="btn btn-primary btn-sm">
+
+        Interview Completed
+
+    </a>
+
+    <a href="/candidate/status/{{ data.candidate.candidate_id }}/Selected"
+       class="btn btn-success btn-sm">
+
+        Selected
+
+    </a>
+
+    <a href="/candidate/status/{{ data.candidate.candidate_id }}/Rejected"
+       class="btn btn-danger btn-sm">
+
+        Rejected
+
+    </a>
+
+    <a href="/candidate/status/{{ data.candidate.candidate_id }}/Offer Released"
+       class="btn btn-dark btn-sm">
+
+        Offer Released
+
+    </a>
+
+</div>
+    <div class="card-body">
+
+        <div class="mb-3">
+
+            <a href="/candidate/{{ data.candidate.candidate_id }}/pdf"
+               class="btn btn-danger">
+
+                Download PDF Report
+
+            </a>
+
+            <a href="/interviews/add/{{ data.candidate.candidate_id }}"
+               class="btn btn-primary">
+
+                Schedule Interview
+
+            </a>
+            <a href="/offers/add"
+               class="btn btn-success">
+
+                Generate Offer
+
+            </a>
+           <a href="{{ url_for('interview_ai.history') }}"
+   class="btn btn-success">
+
+    AI Interview History
+
+</a>
+
+        </div>
+
+        <table class="table table-bordered">
+
+            <tr>
+                <th width="200">Email</th>
+                <td>{{ data.candidate.email }}</td>
+            </tr>
+
+            <tr>
+                <th>Phone</th>
+                <td>{{ data.candidate.phone }}</td>
+            </tr>
+
+            <tr>
+                <th>LinkedIn</th>
+                <td>{{ data.candidate.linkedin }}</td>
+            </tr>
+
+            <tr>
+                <th>GitHub</th>
+                <td>{{ data.candidate.github }}</td>
+            </tr>
+
+        </table>
+
+    </div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+    <div class="col-md-4">
+
+        <div class="card shadow">
+
+            <div class="card-header bg-success text-white">
+
+                <h5 class="mb-0">Education</h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <ul class="list-group">
+
+                    {% for item in data.education %}
+
+                    <li class="list-group-item">
+
+                        {{ item.degree }}
+
+                    </li>
+
+                    {% else %}
+
+                    <li class="list-group-item">
+
+                        No Education Details
+
+                    </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow">
+
+            <div class="card-header bg-warning">
+
+                <h5 class="mb-0">Experience</h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <ul class="list-group">
+
+                    {% for item in data.experience %}
+
+                    <li class="list-group-item">
+
+                        {{ item.role }}
+
+                    </li>
+
+                    {% else %}
+
+                    <li class="list-group-item">
+
+                        No Experience
+
+                    </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow">
+
+            <div class="card-header bg-info text-white">
+
+                <h5 class="mb-0">Skills</h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <ul class="list-group">
+
+                    {% for item in data.skills %}
+
+                    <li class="list-group-item">
+
+                        {{ item.skill_name }}
+
+                    </li>
+
+                    {% else %}
+
+                    <li class="list-group-item">
+
+                        No Skills Found
+
+                    </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<br>
+
+<div class="card shadow">
+
+    <div class="card-header bg-dark text-white">
+
+        <h4>AI Resume Analysis</h4>
+
+    </div>
+
+    <div class="card-body">
+
+        {% if data.analysis %}
+
+        <table class="table table-bordered">
+
+            <tr>
+
+                <th width="220">Candidate Summary</th>
+
+                <td>{{ data.analysis.candidate_summary }}</td>
+
+            </tr>
+
+            <tr>
+
+                <th>Recommended Roles</th>
+
+                <td>{{ data.analysis.recommended_roles }}</td>
+
+            </tr>
+
+            <tr>
+
+                <th>Suitability Score</th>
+
+                <td>
+
+                    <span class="badge bg-success fs-6">
+
+                        {{ data.analysis.suitability_scores }}/10
+
+                    </span>
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <th>Technical Strengths</th>
+
+                <td>{{ data.analysis.strengths }}</td>
+
+            </tr>
+
+            <tr>
+
+                <th>Weaknesses</th>
+
+                <td>{{ data.analysis.weaknesses }}</td>
+
+            </tr>
+
+        </table>
+
+        {% else %}
+
+        <div class="alert alert-warning">
+
+            No AI Analysis Available.
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

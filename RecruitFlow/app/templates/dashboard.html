@@ -1,0 +1,347 @@
+{% extends "base_dark.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block page_subtitle %}Overview of recruitment activity{% endblock %}
+
+{% block content %}
+
+<!-- ── 4 Metric Cards (horizontal row like screenshot) ── -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-md mb-lg">
+
+  <a href="{{ url_for('candidate_management.candidates') }}"
+     class="rounded-xl p-lg flex flex-col items-center justify-center gap-sm shadow-lg border border-blue-500/20 bg-blue-950/20 hover:bg-blue-950/40 text-blue-300 hover:scale-[1.02] transition-all">
+    <span class="material-symbols-outlined text-5xl" style="font-variation-settings:'FILL' 1; font-size:52px;">group</span>
+    <span class="text-headline-md font-semibold">Candidates</span>
+    <span class="text-headline-xl font-bold leading-none text-white">{{ data.total_candidates }}</span>
+  </a>
+
+  <a href="{{ url_for('recruiter.recruiters') }}"
+     class="rounded-xl p-lg flex flex-col items-center justify-center gap-sm shadow-lg border border-emerald-500/20 bg-emerald-950/20 hover:bg-emerald-950/40 text-emerald-300 hover:scale-[1.02] transition-all">
+    <span class="material-symbols-outlined text-5xl" style="font-variation-settings:'FILL' 1; font-size:52px;">badge</span>
+    <span class="text-headline-md font-semibold">Recruiters</span>
+    <span class="text-headline-xl font-bold leading-none text-white">{{ data.total_recruiters if data.total_recruiters is defined else 0 }}</span>
+  </a>
+
+  <a href="{{ url_for('job_management.jobs') }}"
+     class="rounded-xl p-lg flex flex-col items-center justify-center gap-sm shadow-lg border border-amber-500/20 bg-amber-950/20 hover:bg-amber-950/40 text-amber-300 hover:scale-[1.02] transition-all">
+    <span class="material-symbols-outlined text-5xl" style="font-variation-settings:'FILL' 1; font-size:52px;">work</span>
+    <span class="text-headline-md font-semibold">Jobs</span>
+    <span class="text-headline-xl font-bold leading-none text-white">{{ data.total_jobs }}</span>
+  </a>
+
+  <a href="{{ url_for('interview_management.interviews') }}"
+     class="rounded-xl p-lg flex flex-col items-center justify-center gap-sm shadow-lg border border-rose-500/20 bg-rose-950/20 hover:bg-rose-950/40 text-rose-300 hover:scale-[1.02] transition-all">
+    <span class="material-symbols-outlined text-5xl" style="font-variation-settings:'FILL' 1; font-size:52px;">event_available</span>
+    <span class="text-headline-md font-semibold">Interviews</span>
+    <span class="text-headline-xl font-bold leading-none text-white">{{ data.total_interviews }}</span>
+  </a>
+
+</div>
+
+<!-- ── Quick Actions + Recruitment Summary (side by side) ── -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-lg mb-lg">
+
+  <!-- Quick Actions -->
+  <div class="rounded-xl overflow-hidden shadow-md border border-outline-variant/30">
+    <div class="px-md py-sm text-white font-bold text-headline-md" style="background-color:#1a73e8;">
+      Quick Actions
+    </div>
+    <div class="bg-surface-container p-md flex flex-col gap-sm">
+
+      <a href="{{ url_for('candidate_management.candidates') }}"
+         class="w-full text-white font-body-md font-semibold py-3 rounded-lg flex items-center justify-center gap-sm transition-all hover:opacity-90 shadow-sm"
+         style="background-color:#188038;">
+        <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 1;">group</span>
+        Manage Candidates
+      </a>
+
+      <a href="{{ url_for('job_management.jobs') }}"
+         class="w-full text-white font-body-md font-semibold py-3 rounded-lg flex items-center justify-center gap-sm transition-all hover:opacity-90 shadow-sm"
+         style="background-color:#1a73e8;">
+        <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 1;">work</span>
+        Add Job
+      </a>
+
+      <a href="{{ url_for('interview_management.interviews') }}"
+         class="w-full text-white font-body-md font-semibold py-3 rounded-lg flex items-center justify-center gap-sm transition-all hover:opacity-90 shadow-sm"
+         style="background-color:#00bcd4;">
+        <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 1;">event</span>
+        Manage Interviews
+      </a>
+
+      <a href="{{ url_for('offer_management.offers') }}"
+         class="w-full font-body-md font-semibold py-3 rounded-lg flex items-center justify-center gap-sm transition-all hover:opacity-90 shadow-sm"
+         style="background-color:#ffc107; color:#1a1a1a;">
+        <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 1;">description</span>
+        Manage Offers
+      </a>
+
+      <a href="{{ url_for('match.job_matching') }}"
+         class="w-full text-white font-body-md font-semibold py-3 rounded-lg flex items-center justify-center gap-sm transition-all hover:opacity-90 shadow-sm"
+         style="background-color:#607d8b;">
+        <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 1;">psychology</span>
+        AI Job Matching
+      </a>
+
+      <a href="{{ url_for('admin_analytics.analytics') }}"
+         class="w-full text-white font-body-md font-semibold py-3 rounded-lg flex items-center justify-center gap-sm transition-all hover:opacity-90 shadow-sm"
+         style="background-color:#212121;">
+        <span class="material-symbols-outlined" style="font-size:20px; font-variation-settings:'FILL' 1;">bar_chart</span>
+        Analytics
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Recruitment Summary -->
+  <div class="rounded-xl overflow-hidden shadow-md border border-outline-variant/30">
+    <div class="px-md py-sm text-white font-bold text-headline-md" style="background-color:#188038;">
+      Recruitment Summary
+    </div>
+    <div class="bg-surface-container flex flex-col divide-y divide-outline-variant/20">
+      <div class="flex justify-between items-center px-md py-sm bg-surface-container-high">
+        <span class="font-body-md font-semibold text-on-surface">Applied</span>
+        <span class="font-body-md font-bold text-on-surface">{{ data.total_candidates }}</span>
+      </div>
+      <div class="flex justify-between items-center px-md py-sm">
+        <span class="font-body-md font-semibold text-on-surface">Selected</span>
+        <span class="font-body-md font-bold text-[#34d399]">{{ data.selected }}</span>
+      </div>
+      <div class="flex justify-between items-center px-md py-sm bg-surface-container-high">
+        <span class="font-body-md font-semibold text-on-surface">Rejected</span>
+        <span class="font-body-md font-bold text-error">{{ data.rejected }}</span>
+      </div>
+      <div class="flex justify-between items-center px-md py-sm">
+        <span class="font-body-md font-semibold text-on-surface">Scheduled Interviews</span>
+        <span class="font-body-md font-bold text-[#ca8a04]">{{ data.scheduled }}</span>
+      </div>
+      <div class="flex justify-between items-center px-md py-sm bg-surface-container-high">
+        <span class="font-body-md font-semibold text-on-surface">Completed Interviews</span>
+        <span class="font-body-md font-bold text-primary">{{ data.completed }}</span>
+      </div>
+      <div class="flex justify-between items-center px-md py-sm">
+        <span class="font-body-md font-semibold text-on-surface">Pending Offers</span>
+        <span class="font-body-md font-bold text-[#fb923c]">{{ data.pending_offers }}</span>
+      </div>
+      <div class="flex justify-between items-center px-md py-sm bg-surface-container-high">
+        <span class="font-body-md font-semibold text-on-surface">Accepted Offers</span>
+        <span class="font-body-md font-bold text-[#34d399]">{{ data.accepted_offers }}</span>
+      </div>
+      <div class="flex justify-between items-center px-md py-sm">
+        <span class="font-body-md font-semibold text-on-surface">Declined Offers</span>
+        <span class="font-body-md font-bold text-error">{{ data.declined_offers }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts row ── -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg mb-lg">
+
+  <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm flex flex-col">
+    <div class="flex items-center gap-xs mb-sm">
+      <span class="material-symbols-outlined text-[#fb923c]">pie_chart</span>
+      <h3 class="text-headline-sm font-bold text-on-surface">Interview Status</h3>
+    </div>
+    <div class="flex-1 flex items-center justify-center min-h-[200px]">
+      <canvas id="statusChart" class="max-w-[200px]"></canvas>
+    </div>
+  </div>
+
+  <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm flex flex-col">
+    <div class="flex items-center gap-xs mb-sm">
+      <span class="material-symbols-outlined text-primary">bar_chart</span>
+      <h3 class="text-headline-sm font-bold text-on-surface">Top Skills</h3>
+    </div>
+    <div class="flex-1 flex items-center justify-center min-h-[200px] w-full">
+      <canvas id="skillChart" class="w-full max-h-[200px]"></canvas>
+    </div>
+  </div>
+
+  <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm flex flex-col">
+    <div class="flex items-center gap-xs mb-sm">
+      <span class="material-symbols-outlined text-[#fb7185]">assignment_turned_in</span>
+      <h3 class="text-headline-sm font-bold text-on-surface">Offer Status</h3>
+    </div>
+    <div class="flex flex-col gap-sm flex-1 justify-center">
+      <div class="flex justify-between items-center p-sm rounded-lg bg-surface-container-low border border-[#fb923c]/20">
+        <span class="text-body-sm font-semibold text-[#fb923c] flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:16px;">hourglass_empty</span>Pending
+        </span>
+        <span class="font-bold text-[#fb923c]">{{ data.pending_offers }}</span>
+      </div>
+      <div class="flex justify-between items-center p-sm rounded-lg bg-surface-container-low border border-[#34d399]/20">
+        <span class="text-body-sm font-semibold text-[#34d399] flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>Accepted
+        </span>
+        <span class="font-bold text-[#34d399]">{{ data.accepted_offers }}</span>
+      </div>
+      <div class="flex justify-between items-center p-sm rounded-lg bg-surface-container-low border border-error/20">
+        <span class="text-body-sm font-semibold text-error flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:16px;">cancel</span>Declined
+        </span>
+        <span class="font-bold text-error">{{ data.declined_offers }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Top Skills Table ── -->
+<div class="mb-lg">
+  <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+    <div class="flex items-center gap-xs mb-md">
+      <span class="material-symbols-outlined text-primary">hotel_class</span>
+      <h3 class="text-headline-sm font-bold text-on-surface">Top Skills in Database</h3>
+    </div>
+    <table class="w-full text-left text-body-sm">
+      <thead>
+        <tr class="border-b border-outline-variant/30 text-secondary font-semibold">
+          <th class="py-2 pr-2">#</th>
+          <th class="py-2">Skill</th>
+          <th class="py-2 text-right">Count</th>
+          <th class="py-2 pl-4">Bar</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/20">
+        {% for skill, count in data.top_skills %}
+        <tr class="text-on-surface">
+          <td class="py-2 pr-2 text-secondary font-mono">{{ loop.index }}</td>
+          <td class="py-2 font-semibold">{{ skill }}</td>
+          <td class="py-2 text-right">{{ count }}</td>
+          <td class="py-2 pl-4">
+            <div class="bg-surface-container-high rounded-full h-1.5 w-24 overflow-hidden">
+              <div class="bg-primary h-full rounded-full skill-bar" data-width="{{ [count * 10, 100]|min }}"></div>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center text-secondary py-6">No skill data yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── AI Recommended Roles (full width) ── -->
+<div class="mb-lg">
+  <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+    <div class="flex items-center gap-xs mb-md">
+      <span class="material-symbols-outlined text-primary">auto_awesome</span>
+      <h3 class="text-headline-sm font-bold text-on-surface">AI Recommended Roles</h3>
+    </div>
+    <div class="flex flex-col divide-y divide-outline-variant/20">
+      {% for item in data.recommended_roles[:8] %}
+      {% set roles = item.recommended_roles.split(',') if item.recommended_roles else [] %}
+      <div class="py-sm">
+        <!-- Candidate name row -->
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center font-bold text-[11px] text-primary shrink-0">
+            {{ item.candidate.full_name[0]|upper if item.candidate else '?' }}
+          </div>
+          <span class="text-body-sm font-bold text-on-surface">{{ item.candidate.full_name if item.candidate else '—' }}</span>
+        </div>
+        <!-- Each role on its own full-width line -->
+        {% if roles %}
+        <div class="flex flex-col gap-1 pl-9">
+          {% for role in roles %}
+          <div class="text-body-sm text-on-surface bg-surface-container-high border border-outline-variant/20 rounded-lg px-3 py-1.5 w-full">
+            {{ role.strip() }}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <span class="text-secondary text-body-sm pl-9">—</span>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="text-center text-secondary py-6 text-body-sm">No AI data yet</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="application/json" id="chart-data">
+{
+    "scheduled": {{ data.scheduled }},
+    "completed": {{ data.completed }},
+    "selected": {{ data.selected }},
+    "rejected": {{ data.rejected }},
+    "skillLabels": [{% for skill, count in data.top_skills %}"{{ skill }}"{% if not loop.last %},{% endif %}{% endfor %}],
+    "skillCounts": [{% for skill, count in data.top_skills %}{{ count }}{% if not loop.last %},{% endif %}{% endfor %}]
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".skill-bar").forEach(function (el) {
+            el.style.width = el.dataset.width + "%";
+        });
+
+        const d = JSON.parse(document.getElementById("chart-data").textContent);
+
+        const statusCtx = document.getElementById("statusChart");
+        if (statusCtx) {
+            new Chart(statusCtx, {
+                type: "doughnut",
+                data: {
+                    labels: ["Scheduled", "Completed", "Selected", "Rejected"],
+                    datasets: [{
+                        data: [d.scheduled, d.completed, d.selected, d.rejected],
+                        backgroundColor: ["#ca8a04", "#adc6ff", "#34d399", "#ff8a8a"],
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: "72%",
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: { color: "#bec6e0", font: { family: "Hanken Grotesk", size: 10 }, padding: 10 }
+                        }
+                    }
+                }
+            });
+        }
+
+        const skillCtx = document.getElementById("skillChart");
+        if (skillCtx) {
+            new Chart(skillCtx, {
+                type: "bar",
+                data: {
+                    labels: d.skillLabels,
+                    datasets: [{
+                        label: "Candidates",
+                        data: d.skillCounts,
+                        backgroundColor: "#4d8eff",
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: "rgba(255,255,255,0.06)" },
+                            ticks: { color: "#bec6e0", font: { family: "Hanken Grotesk", size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: "#bec6e0", font: { family: "Hanken Grotesk", size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>RecruitFlow - {% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#8c909f",
+                    "surface-tint": "#adc6ff",
+                    "on-primary-container": "#00285d",
+                    "on-tertiary-container": "#1f2a3c",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#273647",
+                    "on-primary-fixed": "#001a42",
+                    "secondary": "#bec6e0",
+                    "on-error": "#690005",
+                    "surface-bright": "#2c3a4c",
+                    "inverse-primary": "#005ac2",
+                    "surface-variant": "#273647",
+                    "on-surface": "#d4e4fa",
+                    "on-primary": "#002e6a",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "tertiary-container": "#8691a7",
+                    "surface-dim": "#051424",
+                    "on-tertiary": "#263143",
+                    "on-tertiary-fixed-variant": "#3c475a",
+                    "surface-container-high": "#1c2b3c",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "primary-fixed": "#d8e2ff",
+                    "surface": "#051424",
+                    "tertiary-fixed-dim": "#bcc7de",
+                    "on-tertiary-fixed": "#111c2d",
+                    "on-primary-fixed-variant": "#004395",
+                    "error": "#ffb4ab",
+                    "surface-container": "#122131",
+                    "tertiary-fixed": "#d8e3fb",
+                    "background": "#051424",
+                    "inverse-on-surface": "#233143",
+                    "on-secondary": "#283044",
+                    "secondary-fixed": "#dae2fd",
+                    "primary-container": "#4d8eff",
+                    "tertiary": "#bcc7de",
+                    "on-background": "#d4e4fa",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-lowest": "#010f1f",
+                    "surface-container-low": "#0d1c2d",
+                    "primary": "#adc6ff",
+                    "secondary-container": "#3f465c",
+                    "on-surface-variant": "#c2c6d6",
+                    "inverse-surface": "#d4e4fa",
+                    "on-secondary-fixed": "#131b2e",
+                    "on-secondary-container": "#adb4ce",
+                    "outline-variant": "#424754",
+                    "primary-fixed-dim": "#adc6ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "xs": "4px",
+                    "max-width": "1440px",
+                    "gutter": "24px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "margin": "32px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"],
+                    "body-sm": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "label-md": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "headline-xl": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                    "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                    "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                    "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                    "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                    "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                    "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        body {
+          min-height: max(884px, 100dvh);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row antialiased dark">
+<!-- Top App Bar (Mobile Only) -->
+<header class="md:hidden bg-surface-container/90 border-b border-outline-variant docked full-width top-0 sticky backdrop-blur-md flex justify-between items-center w-full px-margin h-16 z-50">
+    <div class="flex items-center gap-sm">
+        <span class="material-symbols-outlined text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bolt</span>
+        <span class="text-headline-lg-mobile font-headline-lg-mobile font-bold text-primary">RecruitFlow</span>
+    </div>
+    <div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden flex items-center justify-center text-primary font-bold">
+        {{ session.username[0]|upper if session.username else 'A' }}
+    </div>
+</header>
+
+<!-- Navigation Drawer (Desktop Only) -->
+<nav class="hidden md:flex flex-col h-full py-lg bg-surface-container shadow-xl h-full w-72 rounded-r-xl shadow-2xl z-40 fixed">
+    <div class="px-lg pb-lg border-b border-outline-variant/30 flex items-center gap-sm">
+        <span class="material-symbols-outlined text-primary text-headline-xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bolt</span>
+        <div>
+            <h1 class="text-headline-md font-headline-md font-bold text-primary">RecruitFlow</h1>
+            <p class="text-label-md font-label-md text-secondary">Intelligence Engine</p>
+        </div>
+    </div>
+    <div class="flex-1 overflow-y-auto py-sm flex flex-col gap-xs">
+        <div class="px-md py-xs text-label-md font-label-md text-secondary uppercase tracking-widest">Core</div>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if request.endpoint == 'admin_dashboard.admin_dashboard' or request.endpoint == 'auth.admin_dashboard' or request.endpoint == 'dashboard.dashboard' %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('admin_dashboard.admin_dashboard') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">dashboard</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Dashboard</span>
+        </a>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if request.endpoint == 'upload.home' or request.endpoint == 'upload.upload_resume' %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('upload.home') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">cloud_upload</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Upload Resumes</span>
+        </a>
+        
+        <div class="px-md py-xs mt-sm text-label-md font-label-md text-secondary uppercase tracking-widest">People</div>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if request.endpoint == 'recruiter.recruiters' %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('recruiter.recruiters') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">person_search</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Recruiters</span>
+        </a>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if 'candidate_management' in request.endpoint and request.endpoint != 'candidate_management.scoring_dashboard' %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('candidate_management.candidates') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">group</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Candidates</span>
+        </a>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if request.endpoint == 'candidate_management.scoring_dashboard' %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('candidate_management.scoring_dashboard') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">analytics</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Scoring Dashboard</span>
+        </a>
+        
+        <div class="px-md py-xs mt-sm text-label-md font-label-md text-secondary uppercase tracking-widest">Recruitment</div>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if 'job' in request.endpoint %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('job_management.jobs') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">work</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Jobs</span>
+        </a>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if 'interview' in request.endpoint %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('interview_management.interviews') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">calendar_today</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Interviews</span>
+        </a>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if 'offer' in request.endpoint %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('offer_management.offers') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">assignment_turned_in</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Offers</span>
+        </a>
+        
+        <div class="px-md py-xs mt-sm text-label-md font-label-md text-secondary uppercase tracking-widest">AI Tools</div>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if 'match' in request.endpoint %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('match.job_matching') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">psychology</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Job Matching</span>
+        </a>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if 'skill_gap' in request.endpoint %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('skill_gap.skill_gap') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">extension</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Skill Gap</span>
+        </a>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if 'ai_interview' in request.endpoint or 'candidate_interview' in request.endpoint %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('candidate_interview.interviews') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">smart_toy</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">AI Interview</span>
+        </a>
+        
+        <div class="px-md py-xs mt-sm text-label-md font-label-md text-secondary uppercase tracking-widest">Insights</div>
+        
+        <a class="flex items-center gap-sm mx-2 px-4 py-3 rounded-full group {% if 'report' in request.endpoint %}bg-primary-container text-on-primary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %}" href="{{ url_for('report.reports') }}">
+            <span class="material-symbols-outlined group-hover:text-primary">assessment</span>
+            <span class="font-body-md text-body-md group-hover:text-primary">Reports</span>
+        </a>
+    </div>
+    
+    <div class="p-4 mt-auto border-t border-outline-variant/30 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold">
+            {{ session.username[0]|upper if session.username else 'A' }}
+        </div>
+        <div>
+            <p class="text-body-md font-body-md font-semibold text-on-surface">{{ session.username or 'Admin User' }}</p>
+            <p class="text-label-md font-label-md text-secondary">{{ session.email or 'admin@recruitflow.ai' }}</p>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 flex flex-col pb-24 md:pb-0 min-h-screen">
+    <!-- Header Section -->
+    <div class="px-margin py-md flex flex-col md:flex-row md:items-center justify-between gap-sm border-b border-outline-variant/30 bg-background/50 backdrop-blur-sm sticky top-16 md:top-0 z-30">
+        <div>
+            <h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface">
+                {% block page_title %}{% endblock %}
+            </h2>
+            <p class="text-body-md font-body-md text-secondary">
+                {% block page_subtitle %}{% endblock %}
+            </p>
+        </div>
+        <div class="hidden md:flex items-center gap-sm">
+            <a href="{{ url_for('notification.notifications') }}" class="w-10 h-10 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors relative">
+                <span class="material-symbols-outlined">notifications</span>
+                {% if notification_count %}
+                <span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+                {% endif %}
+            </a>
+        </div>
+    </div>
+    
+    <!-- Flash message container -->
+    <div class="px-margin mt-md">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="flex items-center gap-sm p-4 mb-4 rounded-lg bg-surface-container border {% if category == 'success' %}border-primary/50 text-primary{% else %}border-error/50 text-error{% endif %}">
+                <span class="material-symbols-outlined shrink-0">
+                    {{ 'check_circle' if category == 'success' else 'error' }}
+                </span>
+                <div class="text-body-md font-body-md flex-1">{{ message }}</div>
+                <button onclick="this.parentElement.remove()" class="shrink-0 text-secondary hover:text-on-surface">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Content Grid -->
+    <div class="p-margin max-w-7xl mx-auto w-full flex-1">
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden bg-surface-container/95 border-t border-outline-variant backdrop-blur-lg shadow-lg flex justify-around items-center w-full px-gutter fixed bottom-0 z-50 h-20 pb-safe">
+    <a class="flex flex-col items-center justify-center {% if request.endpoint == 'admin_dashboard.admin_dashboard' or request.endpoint == 'auth.admin_dashboard' or request.endpoint == 'dashboard.dashboard' %}text-primary font-semibold{% else %}text-secondary opacity-70 hover:text-primary{% endif %} w-16" href="{{ url_for('admin_dashboard.admin_dashboard') }}">
+        <span class="material-symbols-outlined mb-1">dashboard</span>
+        <span class="text-label-md font-label-md">Home</span>
+    </a>
+    <a class="flex flex-col items-center justify-center {% if request.endpoint == 'upload.home' or request.endpoint == 'upload.upload_resume' %}text-primary font-semibold{% else %}text-secondary opacity-70 hover:text-primary{% endif %} w-16" href="{{ url_for('upload.home') }}">
+        <span class="material-symbols-outlined mb-1">cloud_upload</span>
+        <span class="text-label-md font-label-md">Upload</span>
+    </a>
+    <a class="flex flex-col items-center justify-center {% if 'candidate_management' in request.endpoint and request.endpoint != 'candidate_management.scoring_dashboard' %}text-primary font-semibold{% else %}text-secondary opacity-70 hover:text-primary{% endif %} w-16" href="{{ url_for('candidate_management.candidates') }}">
+        <span class="material-symbols-outlined mb-1">group</span>
+        <span class="text-label-md font-label-md">Candidates</span>
+    </a>
+    <a class="flex flex-col items-center justify-center {% if request.endpoint == 'candidate_management.scoring_dashboard' %}text-primary font-semibold{% else %}text-secondary opacity-70 hover:text-primary{% endif %} w-16" href="{{ url_for('candidate_management.scoring_dashboard') }}">
+        <span class="material-symbols-outlined mb-1">analytics</span>
+        <span class="text-label-md font-label-md">Scores</span>
+    </a>
+    <a class="flex flex-col items-center justify-center {% if 'job' in request.endpoint %}text-primary font-semibold{% else %}text-secondary opacity-70 hover:text-primary{% endif %} w-16" href="{{ url_for('job_management.jobs') }}">
+        <span class="material-symbols-outlined mb-1">work</span>
+        <span class="text-label-md font-label-md">Jobs</span>
+    </a>
+</nav>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

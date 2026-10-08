@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-7">
+
+        <div class="card shadow">
+
+            <div class="card-header bg-warning text-dark">
+
+                <h3 class="mb-0">Edit Interview</h3>
+
+            </div>
+
+            <div class="card-body">
+
+                <form method="POST">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Interviewer
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="interviewer"
+                            value="{{ interview.interviewer }}"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+
+                                    Interview Date
+
+                                </label>
+
+                                <input
+                                    type="date"
+                                    name="interview_date"
+                                    value="{{ interview.interview_date }}"
+                                    class="form-control"
+                                    required>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+
+                                    Interview Time
+
+                                </label>
+
+                                <input
+                                    type="time"
+                                    name="interview_time"
+                                    value="{{ interview.interview_time }}"
+                                    class="form-control"
+                                    required>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Interview Mode
+
+                        </label>
+
+                        <select
+                            name="mode"
+                            class="form-select">
+
+                            <option value="Online"
+                            {% if interview.mode == "Online" %}selected{% endif %}>
+
+                                Online
+
+                            </option>
+
+                            <option value="Offline"
+                            {% if interview.mode == "Offline" %}selected{% endif %}>
+
+                                Offline
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+
+                            Interview Status
+
+                        </label>
+
+                        <select
+                            name="status"
+                            class="form-select">
+
+                            <option value="Scheduled"
+                            {% if interview.status == "Scheduled" %}selected{% endif %}>
+
+                                Scheduled
+
+                            </option>
+
+                            <option value="Completed"
+                            {% if interview.status == "Completed" %}selected{% endif %}>
+
+                                Completed
+
+                            </option>
+
+                            <option value="Selected"
+                            {% if interview.status == "Selected" %}selected{% endif %}>
+
+                                Selected
+
+                            </option>
+
+                            <option value="Rejected"
+                            {% if interview.status == "Rejected" %}selected{% endif %}>
+
+                                Rejected
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-warning">
+
+                        Update Interview
+
+                    </button>
+
+                    <a
+                        href="/interviews"
+                        class="btn btn-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

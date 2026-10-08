@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="card shadow-lg">
+
+<div class="card-header bg-dark text-white">
+
+<h2 class="mb-0">
+📜 AI Interview History
+</h2>
+
+</div>
+
+<div class="card-body">
+
+{% if reports %}
+
+<table class="table table-bordered table-hover align-middle">
+
+<thead class="table-primary">
+
+<tr>
+
+<th>ID</th>
+
+<th>Candidate</th>
+
+<th>Job</th>
+
+<th>Company</th>
+
+<th>Date</th>
+
+<th width="280">Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for report in reports %}
+
+<tr>
+
+<td>
+
+{{ report.question_id }}
+
+</td>
+
+<td>
+
+{{ report.candidate.full_name }}
+
+</td>
+
+<td>
+
+{{ report.job.title }}
+
+</td>
+
+<td>
+
+{{ report.job.company }}
+
+</td>
+
+<td>
+
+{{ report.created_at.strftime("%d-%m-%Y %H:%M") }}
+
+</td>
+
+<td>
+
+<a href="{{ url_for('interview_ai.view',
+question_id=report.question_id) }}"
+class="btn btn-success btn-sm">
+
+👁 View
+
+</a>
+
+<a href="{{ url_for('interview_ai.regenerate',
+question_id=report.question_id) }}"
+class="btn btn-warning btn-sm">
+
+🔄 Regenerate
+
+</a>
+
+<a href="{{ url_for('interview_ai.download_pdf',
+question_id=report.question_id) }}"
+class="btn btn-primary btn-sm">
+
+⬇ PDF
+
+</a>
+
+<a href="{{ url_for('interview_ai.delete',
+question_id=report.question_id) }}"
+class="btn btn-danger btn-sm"
+onclick="return confirm('Delete this interview report?');">
+
+🗑 Delete
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% else %}
+
+<div class="alert alert-info">
+
+No interview questions have been generated yet.
+
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

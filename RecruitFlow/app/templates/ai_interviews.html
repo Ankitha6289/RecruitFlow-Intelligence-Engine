@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+
+            <h3 class="mb-0">
+                <i class="fa fa-robot me-2"></i> AI Interviews
+            </h3>
+
+            <a href="{{ url_for('ai_interview.add_interview') }}" class="btn btn-light btn-sm">
+                <i class="fa fa-plus me-1"></i> Schedule AI Interview
+            </a>
+
+        </div>
+
+        <div class="card-body">
+
+            {% if interviews %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Candidate</th>
+
+                            <th>Job</th>
+
+                            <th>Scheduled Date</th>
+
+                            <th>Scheduled Time</th>
+
+                            <th>Status</th>
+
+                            <th>Interview Link</th>
+
+                            <th>Created</th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for interview in interviews %}
+
+                        <tr>
+
+                            <td>{{ interview.candidate.full_name }}</td>
+
+                            <td>{{ interview.job.title }}</td>
+
+                            <td>
+                                {% if interview.scheduled_date %}
+                                    {{ interview.scheduled_date.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                    <span class="text-muted">Not scheduled</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if interview.scheduled_time %}
+                                    {{ interview.scheduled_time.strftime('%H:%M') }}
+                                {% else %}
+                                    <span class="text-muted">Not scheduled</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if interview.status == 'Pending' %}
+                                    <span class="badge bg-warning">{{ interview.status }}</span>
+                                {% elif interview.status == 'Completed' %}
+                                    <span class="badge bg-success">{{ interview.status }}</span>
+                                {% elif interview.status == 'In Progress' %}
+                                    <span class="badge bg-info">{{ interview.status }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ interview.status }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <code>{{ interview.interview_link[:20] }}...</code>
+                            </td>
+
+                            <td>
+                                {{ interview.created_at.strftime('%Y-%m-%d') }}
+                            </td>
+
+                            <td>
+                                <a href="{{ url_for('ai_interview.preview_interview', interview_id=interview.interview_id) }}" 
+                                   class="btn btn-sm btn-info" target="_blank">
+                                    <i class="fa fa-external-link-alt"></i> Open
+                                </a>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="text-center py-5">
+
+                <i class="fa fa-robot fa-3x text-muted mb-3"></i>
+
+                <h5 class="text-muted">No AI Interviews Scheduled</h5>
+
+                <p class="text-muted">Click the button above to schedule an AI interview.</p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

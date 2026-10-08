@@ -1,0 +1,267 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Job Matching{% endblock %}
+{% block breadcrumb %}Job Matching{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-diagram-3-fill"></i> AI Tools{% endblock %}
+{% block page_title %}AI Job Matching{% endblock %}
+{% block page_subtitle %}Automatically find the best-fit job for any candidate using AI-powered skill analysis.{% endblock %}
+
+{% block extra_styles %}
+/* ── Selector card ── */
+.jm-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden; margin-bottom: 20px;
+}
+.jm-card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 22px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+.jm-card-icon {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+}
+.jm-card-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.jm-body { padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+
+/* ── Form fields ── */
+.jm-label {
+  display: block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-sec); margin-bottom: 7px;
+}
+.jm-select {
+  width: 100%;
+  background: rgba(5,12,30,.65) !important;
+  border: 1.5px solid var(--border-base);
+  border-radius: var(--r-md);
+  padding: 11px 36px 11px 14px;
+  font-size: 13.5px; font-family: 'Inter', sans-serif;
+  color: var(--text-primary) !important;
+  outline: none;
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%238ba4c8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 13px center !important;
+  background-size: 11px !important;
+  transition: border-color .2s, box-shadow .2s;
+}
+.jm-select:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.13);
+  background-color: rgba(5,12,35,.85) !important;
+}
+.jm-select option { background: #0f1f35; color: var(--text-primary); }
+
+/* ── Best match status chip ── */
+.jm-best-match {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2);
+  border-radius: var(--r-md); font-size: 12.5px; color: #6ee7b7;
+  min-height: 40px; transition: all .2s;
+}
+.jm-best-match.loading { color: var(--text-dim); background: rgba(255,255,255,.03); border-color: var(--border-subtle); }
+.jm-best-match.error   { color: #fca5a5; background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.2); }
+.jm-best-match i { font-size: 15px; flex-shrink: 0; }
+
+/* ── Row ── */
+.jm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:700px){ .jm-row{ grid-template-columns: 1fr; } }
+
+/* ── Match score pill on the job select ── */
+.jm-score-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; color: #10b981;
+  background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.22);
+  border-radius: 99px; padding: 2px 9px; margin-left: 8px;
+}
+
+/* ── How it works ── */
+.jm-how-card {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden;
+}
+.jm-how-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+.jm-steps {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 0;
+}
+@media(max-width:700px){ .jm-steps{ grid-template-columns: 1fr; } }
+.jm-step {
+  padding: 18px 20px; border-right: 1px solid var(--border-subtle);
+  display: flex; gap: 13px; align-items: flex-start;
+}
+.jm-step:last-child { border-right: none; }
+.jm-step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(59,130,246,.14); color: var(--blue-3);
+  display: grid; place-items: center; font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.jm-step-title { font-size: 12.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.jm-step-desc  { font-size: 11.5px; color: var(--text-sec); line-height: 1.5; }
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Matching Form ── -->
+<div class="jm-card">
+  <div class="jm-card-header">
+    <div class="jm-card-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+      <i class="bi bi-sliders"></i>
+    </div>
+    <span class="jm-card-title">Select Candidate &amp; Job</span>
+  </div>
+  <div class="jm-body">
+    <div class="jm-row">
+      <!-- Candidate -->
+      <div>
+        <label class="jm-label" for="candidate">Candidate</label>
+        <select id="candidate" class="jm-select" onchange="updateBestJob()">
+          {% for c in candidates %}
+          <option value="{{ c.candidate_id }}">{{ c.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Job (auto-selected by AI best match) -->
+      <div>
+        <label class="jm-label" for="job">
+          Job Position
+          <span id="bestScorePill" class="jm-score-pill" style="display:none;">
+            <i class="bi bi-stars"></i> <span id="bestScoreVal"></span>% match
+          </span>
+        </label>
+        <select id="job" class="jm-select">
+          <option value="">— Select a job —</option>
+          {% for job in jobs %}
+          <option value="{{ job.job_id }}">{{ job.title }}{% if job.company %} — {{ job.company }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- AI Best Match Status -->
+    <div id="bestMatchStatus" class="jm-best-match loading" aria-live="polite">
+      <i class="bi bi-robot"></i>
+      <span>Select a candidate to auto-detect the best matching job.</span>
+    </div>
+
+    <!-- Action -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button type="button" class="btn btn-primary" onclick="startMatch()">
+        <i class="bi bi-diagram-3-fill"></i> Match Candidate
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="updateBestJob()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh AI Match
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── How It Works ── -->
+<div class="jm-how-card">
+  <div class="jm-how-header">
+    <div class="jm-card-icon" style="background:rgba(139,92,246,.12);color:#a78bfa;">
+      <i class="bi bi-info-circle-fill"></i>
+    </div>
+    <span class="jm-card-title" style="font-size:12.5px;">How AI Job Matching Works</span>
+  </div>
+  <div class="jm-steps">
+    <div class="jm-step">
+      <div class="jm-step-num">1</div>
+      <div>
+        <div class="jm-step-title">Resume Parsing</div>
+        <div class="jm-step-desc">The system extracts skills, experience, and qualifications from the candidate's parsed resume.</div>
+      </div>
+    </div>
+    <div class="jm-step">
+      <div class="jm-step-num">2</div>
+      <div>
+        <div class="jm-step-title">Skill Matching</div>
+        <div class="jm-step-desc">Candidate skills are compared against job requirements to calculate a percentage match score.</div>
+      </div>
+    </div>
+    <div class="jm-step">
+      <div class="jm-step-num">3</div>
+      <div>
+        <div class="jm-step-title">Best Match Found</div>
+        <div class="jm-step-desc">The highest-scoring job is auto-selected. Review and confirm, or manually choose a different role.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const bestJobUrl = {{ url_for("match.best_matching_job") | tojson }};
+
+  async function updateBestJob() {
+    const candidateVal = document.getElementById('candidate').value;
+    const jobSelect    = document.getElementById('job');
+    const statusDiv    = document.getElementById('bestMatchStatus');
+    const scorePill    = document.getElementById('bestScorePill');
+    const scoreVal     = document.getElementById('bestScoreVal');
+
+    if (!candidateVal) {
+      statusDiv.className = 'jm-best-match loading';
+      statusDiv.innerHTML = '<i class="bi bi-robot"></i><span>Select a candidate to auto-detect the best matching job.</span>';
+      scorePill.style.display = 'none';
+      return;
+    }
+
+    statusDiv.className = 'jm-best-match loading';
+    statusDiv.innerHTML = '<i class="bi bi-arrow-repeat" style="animation:spin 1s linear infinite;"></i><span>Finding best match…</span>';
+    scorePill.style.display = 'none';
+
+    try {
+      const res = await fetch(`${bestJobUrl}?candidate_id=${encodeURIComponent(candidateVal)}`);
+      if (!res.ok) throw new Error('Request failed');
+      const data = await res.json();
+
+      if (!data.job_id) {
+        jobSelect.value = '';
+        statusDiv.className = 'jm-best-match loading';
+        statusDiv.innerHTML = '<i class="bi bi-info-circle"></i><span>No matching job found for this candidate\'s skill set.</span>';
+        return;
+      }
+
+      jobSelect.value = String(data.job_id);
+      statusDiv.className = 'jm-best-match';
+      statusDiv.innerHTML = `<i class="bi bi-stars"></i><span>Best match found: <strong style="color:#fff;">${data.title}</strong> at <strong style="color:#fff;">${data.company}</strong> — ${data.score}% skill match.</span>`;
+      scoreVal.textContent = data.score;
+      scorePill.style.display = 'inline-flex';
+
+    } catch (err) {
+      statusDiv.className = 'jm-best-match error';
+      statusDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i><span>Could not load best match. Please try again.</span>';
+    }
+  }
+
+  function startMatch() {
+    const candidate = document.getElementById('candidate').value;
+    const job       = document.getElementById('job').value;
+    if (!candidate || !job) {
+      const statusDiv = document.getElementById('bestMatchStatus');
+      statusDiv.className = 'jm-best-match error';
+      statusDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i><span>Please select both a candidate and a job before matching.</span>';
+      return;
+    }
+    window.location.href = '/match/' + candidate + '/' + job;
+  }
+
+  /* Spin animation for loading */
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }';
+  document.head.appendChild(style);
+
+  /* Auto-load on page ready */
+  document.addEventListener('DOMContentLoaded', updateBestJob);
+</script>
+{% endblock %}

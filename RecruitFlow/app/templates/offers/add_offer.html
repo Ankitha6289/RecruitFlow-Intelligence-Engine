@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-success text-white">
+
+            <h3>
+
+                Create Offer Letter
+
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Candidate
+
+                        </label>
+
+                        <select
+                            name="candidate_id"
+                            class="form-select"
+                            required>
+
+                            <option value="">
+                                Select Candidate
+                            </option>
+
+                            {% for candidate in candidates %}
+
+                            <option value="{{ candidate.candidate_id }}">
+
+                                {{ candidate.full_name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Job
+
+                        </label>
+
+                        <select
+                            name="job_id"
+                            class="form-select"
+                            required>
+
+                            <option value="">
+                                Select Job
+                            </option>
+
+                            {% for job in jobs %}
+
+                            <option value="{{ job.job_id }}">
+
+                                {{ job.job_title }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Offered Salary
+
+                        </label>
+
+                        <input
+                            type="number"
+                            name="offered_salary"
+                            class="form-control"
+                            placeholder="Enter Salary"
+                            required>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Offer Date
+
+                        </label>
+
+                        <input
+                            type="date"
+                            name="offer_date"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Joining Date
+
+                        </label>
+
+                        <input
+                            type="date"
+                            name="joining_date"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                </div>
+
+                <br>
+
+                <button
+                    type="submit"
+                    class="btn btn-success">
+
+                    Create Offer
+
+                </button>
+
+                <a
+                    href="{{ url_for('offer_management.offers') }}"
+                    class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

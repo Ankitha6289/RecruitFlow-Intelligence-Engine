@@ -1,0 +1,35 @@
+<div class="interview-header">
+
+    <div class="company">
+
+        <img
+            src="{{ url_for('static',filename='images/company_logo.png') }}"
+            class="company-logo">
+
+        <div>
+
+            <h3>RecruitFlow Intelligence Engine</h3>
+
+            <small>{{ interview.job.company }}</small>
+
+        </div>
+
+    </div>
+
+    <div class="candidate">
+
+        <img
+            src="{{ interview.candidate.photo or url_for('static',filename='images/default_user.png') }}"
+            class="candidate-photo">
+
+        <div>
+
+            <h5>{{ interview.candidate.full_name }}</h5>
+
+            <small>{{ interview.job.title }}</small>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,156 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Add Job{% endblock %}
+{% block breadcrumb %}Add Job{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-briefcase-fill"></i> Recruitment{% endblock %}
+{% block page_title %}Post a New Job{% endblock %}
+{% block page_subtitle %}Fill in the details below to create a new job opening on the platform.{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('job_management.jobs') }}" class="btn btn-secondary btn-sm">
+  <i class="bi bi-arrow-left"></i> Back to Jobs
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+.jf-card {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden; margin-bottom: 16px;
+}
+.jf-card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 20px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+.jf-card-icon {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+}
+.jf-card-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.jf-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.jf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:700px){ .jf-row{ grid-template-columns: 1fr; } }
+.jf-label {
+  display: block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-sec); margin-bottom: 7px;
+}
+.jf-input, .jf-textarea, .jf-select {
+  width: 100%;
+  background: rgba(5,12,30,.65) !important;
+  border: 1.5px solid var(--border-base);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: 13.5px; font-family: 'Inter', sans-serif;
+  color: var(--text-primary) !important;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.jf-input:focus, .jf-textarea:focus, .jf-select:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.13);
+  background: rgba(5,12,35,.85) !important;
+}
+.jf-input::placeholder, .jf-textarea::placeholder { color: var(--text-dim); }
+.jf-textarea { resize: vertical; }
+.jf-hint { font-size: 11px; color: var(--text-dim); margin-top: 5px; }
+.jf-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 16px 20px; border-top: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}{% for cat, msg in messages %}
+<div class="flash {{ 'success' if cat=='success' else 'error' if cat in ['danger','error'] else 'info' }}" style="margin-bottom:14px;">
+  <i class="bi bi-{% if cat=='success' %}check-circle-fill{% elif cat in ['danger','error'] %}x-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+  {{ msg }}
+  <button class="flash-close" onclick="this.parentElement.remove()"><i class="bi bi-x-lg"></i></button>
+</div>
+{% endfor %}{% endif %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('job_management.add_job') }}">
+
+  <!-- Basic Info -->
+  <div class="jf-card">
+    <div class="jf-card-header">
+      <div class="jf-card-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+        <i class="bi bi-briefcase-fill"></i>
+      </div>
+      <span class="jf-card-title">Basic Information</span>
+    </div>
+    <div class="jf-body">
+      <div class="jf-row">
+        <div>
+          <label class="jf-label" for="title">Job Title <span style="color:var(--red);">*</span></label>
+          <input type="text" id="title" name="title" class="jf-input"
+                 placeholder="e.g. Senior Python Developer" required />
+        </div>
+        <div>
+          <label class="jf-label" for="company">Company <span style="color:var(--red);">*</span></label>
+          <input type="text" id="company" name="company" class="jf-input"
+                 placeholder="e.g. Infosys" required />
+        </div>
+      </div>
+      <div class="jf-row">
+        <div>
+          <label class="jf-label" for="location">Location</label>
+          <input type="text" id="location" name="location" class="jf-input"
+                 placeholder="e.g. Bangalore, Remote" />
+        </div>
+        <div>
+          <label class="jf-label" for="salary">Salary</label>
+          <input type="text" id="salary" name="salary" class="jf-input"
+                 placeholder="e.g. ₹12 LPA" />
+        </div>
+      </div>
+      <div class="jf-row">
+        <div>
+          <label class="jf-label" for="experience">Experience Required</label>
+          <input type="text" id="experience" name="experience" class="jf-input"
+                 placeholder="e.g. 2+ Years" />
+        </div>
+        <div>
+          <label class="jf-label" for="skills">Required Skills</label>
+          <input type="text" id="skills" name="skills" class="jf-input"
+                 placeholder="Python, Flask, SQL, React" />
+          <p class="jf-hint">Comma-separated list of required technologies / skills.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="jf-card">
+    <div class="jf-card-header">
+      <div class="jf-card-icon" style="background:rgba(139,92,246,.12);color:#a78bfa;">
+        <i class="bi bi-file-text-fill"></i>
+      </div>
+      <span class="jf-card-title">Job Description</span>
+    </div>
+    <div class="jf-body">
+      <div>
+        <label class="jf-label" for="description">Full Description</label>
+        <textarea id="description" name="description" class="jf-textarea" rows="7"
+                  placeholder="Describe responsibilities, requirements, benefits…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="jf-card">
+    <div class="jf-footer">
+      <a href="{{ url_for('job_management.jobs') }}" class="btn btn-secondary btn-sm">
+        <i class="bi bi-x-lg"></i> Cancel
+      </a>
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle-fill"></i> Post Job
+      </button>
+    </div>
+  </div>
+
+</form>
+{% endblock %}

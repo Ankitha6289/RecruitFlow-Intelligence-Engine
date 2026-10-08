@@ -1,0 +1,966 @@
+{% extends "base_dark.html" %}
+
+{% block title %}AI Interview Monitor{% endblock %}
+
+{% block page_title %}AI Interview Monitor{% endblock %}
+{% block page_subtitle %}Live session — admin view{% endblock %}
+
+{% block content %}
+
+<!-- =========================================================
+     INTERVIEW DATA
+     Pass Jinja data through HTML instead of JavaScript.
+     This avoids VS Code JavaScript/Jinja syntax errors.
+     ========================================================= -->
+
+<div id="interview-config"
+     data-interview-id="{{ interview.interview_id }}"
+     style="display:none;">
+</div>
+
+
+<!-- =========================================================
+     CANDIDATE & JOB INFORMATION
+     ========================================================= -->
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md mb-lg">
+
+    <!-- Candidate -->
+    <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+
+        <p class="text-label-md text-secondary mb-xs">
+            Candidate
+        </p>
+
+        <p class="text-headline-sm font-bold text-on-surface">
+            {{ candidate.full_name }}
+        </p>
+
+        <p class="text-body-sm text-secondary">
+            {{ candidate.email }}
+        </p>
+
+    </div>
+
+
+    <!-- Job -->
+    <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+
+        <p class="text-label-md text-secondary mb-xs">
+            Position
+        </p>
+
+        <p class="text-headline-sm font-bold text-on-surface">
+            {{ interview.job.title }}
+        </p>
+
+        <p class="text-body-sm text-secondary">
+            {{ interview.job.company }}
+        </p>
+
+    </div>
+
+
+    <!-- Status -->
+    <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+
+        <p class="text-label-md text-secondary mb-xs">
+            Status
+        </p>
+
+        {% if interview.status == "Completed" %}
+
+            <span id="interview-status-badge"
+                  class="inline-block px-sm py-xs rounded-full text-label-md font-semibold"
+                  style="background:#064e3b;color:#6ee7b7;">
+                Completed
+            </span>
+
+        {% elif interview.status == "In Progress" %}
+
+            <span id="interview-status-badge"
+                  class="inline-block px-sm py-xs rounded-full text-label-md font-semibold"
+                  style="background:rgba(99,102,241,.20);color:#818cf8;">
+                In Progress
+            </span>
+
+        {% else %}
+
+            <span id="interview-status-badge"
+                  class="inline-block px-sm py-xs rounded-full text-label-md font-semibold"
+                  style="background:#3d2e00;color:#fbbf24;">
+                {{ interview.status }}
+            </span>
+
+        {% endif %}
+
+
+        <p class="text-body-sm text-secondary mt-xs">
+
+            Scheduled:
+            {{ interview.scheduled_date or "—" }}
+
+            {% if interview.scheduled_time %}
+                at {{ interview.scheduled_time }}
+            {% endif %}
+
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MAIN INTERVIEW AREA
+     ========================================================= -->
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-lg mb-lg">
+
+
+    <!-- =====================================================
+         AI GENERATED QUESTIONS
+         ===================================================== -->
+
+    <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+
+        <div class="flex items-center gap-xs mb-md">
+
+            <span class="material-symbols-outlined text-primary">
+                quiz
+            </span>
+
+            <h3 class="text-headline-sm font-bold text-on-surface">
+                AI Generated Questions
+            </h3>
+
+        </div>
+
+
+        <div class="flex flex-col gap-sm max-h-[600px] overflow-y-auto pr-1">
+
+            {% for section, items in questions.items() %}
+
+                {% if section != "evaluation" and items %}
+
+                    <div class="bg-surface-container-low border border-outline-variant/20 rounded-xl overflow-hidden">
+
+                        <div class="px-sm py-xs border-b border-outline-variant/20 flex items-center gap-xs"
+                             style="background-color:rgba(99,102,241,.10);">
+
+                            <span class="material-symbols-outlined text-primary"
+                                  style="font-size:16px;">
+                                help_outline
+                            </span>
+
+                            <span class="text-label-md font-semibold text-primary">
+                                {{ section.replace("_", " ") | title }}
+                            </span>
+
+                        </div>
+
+
+                        <ol class="list-decimal list-inside p-sm flex flex-col gap-xs">
+
+                            {% for q in items %}
+
+                                <li class="text-body-sm text-on-surface leading-relaxed">
+                                    {{ q }}
+                                </li>
+
+                            {% endfor %}
+
+                        </ol>
+
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         LIVE MONITOR
+         ===================================================== -->
+
+    <div class="flex flex-col gap-md">
+
+
+        <!-- =================================================
+             CURRENT QUESTION
+             ================================================= -->
+
+        <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+
+            <div class="flex items-center gap-xs mb-sm">
+
+                <span class="material-symbols-outlined"
+                      style="color:#fb923c;">
+                    record_voice_over
+                </span>
+
+                <h3 class="text-headline-sm font-bold text-on-surface">
+                    Current Question
+                </h3>
+
+            </div>
+
+
+            <div id="admin-current-question"
+                 class="bg-surface-container-low border border-outline-variant/20 rounded-lg p-sm text-on-surface text-body-sm min-h-[60px]">
+
+                Waiting for interview to start…
+
+            </div>
+
+
+            <div class="flex items-center gap-sm mt-sm">
+
+                <span class="text-label-md text-secondary">
+                    Section:
+                </span>
+
+                <span id="admin-current-section"
+                      class="text-label-md text-primary font-semibold">
+                    —
+                </span>
+
+
+                <span class="text-label-md text-secondary ml-auto">
+                    Question:
+                </span>
+
+                <span id="admin-question-index"
+                      class="text-label-md text-primary font-semibold">
+                    —
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             LIVE SIGNALS
+             ================================================= -->
+
+        <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+
+            <div class="flex items-center gap-xs mb-sm">
+
+                <span class="material-symbols-outlined"
+                      style="color:#34d399;">
+                    monitoring
+                </span>
+
+                <h3 class="text-headline-sm font-bold text-on-surface">
+                    Live Signals
+                </h3>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-sm">
+
+
+                <!-- Emotion -->
+                <div class="bg-surface-container-low rounded-lg p-sm">
+
+                    <p class="text-label-md text-secondary">
+                        Emotion
+                    </p>
+
+                    <p id="admin-emotion"
+                       class="text-body-sm font-semibold text-on-surface">
+                        —
+                    </p>
+
+                </div>
+
+
+                <!-- Eye Contact -->
+                <div class="bg-surface-container-low rounded-lg p-sm">
+
+                    <p class="text-label-md text-secondary">
+                        Eye Contact
+                    </p>
+
+                    <p id="admin-eye-contact"
+                       class="text-body-sm font-semibold text-on-surface">
+                        —
+                    </p>
+
+                </div>
+
+
+                <!-- Face Count -->
+                <div class="bg-surface-container-low rounded-lg p-sm">
+
+                    <p class="text-label-md text-secondary">
+                        Faces in Frame
+                    </p>
+
+                    <p id="admin-face-count"
+                       class="text-body-sm font-semibold text-on-surface">
+                        —
+                    </p>
+
+                </div>
+
+
+                <!-- Recommendation -->
+                <div class="bg-surface-container-low rounded-lg p-sm">
+
+                    <p class="text-label-md text-secondary">
+                        AI Recommendation
+                    </p>
+
+                    <p id="admin-recommendation"
+                       class="text-body-sm font-semibold text-primary">
+                        —
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PROCTORING
+             ================================================= -->
+
+        <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+
+            <div class="flex items-center gap-xs mb-sm">
+
+                <span class="material-symbols-outlined"
+                      style="color:#ef4444;">
+                    security
+                </span>
+
+                <h3 class="text-headline-sm font-bold text-on-surface">
+                    Proctoring Events
+                </h3>
+
+            </div>
+
+
+            <div id="admin-proctor-log"
+                 class="flex flex-col gap-xs">
+
+                <p class="text-body-sm text-secondary">
+                    No events yet.
+                </p>
+
+            </div>
+
+
+            <div class="flex items-center gap-sm mt-sm pt-sm border-t border-outline-variant/20">
+
+                <span class="text-label-md text-secondary">
+                    Fraud Score:
+                </span>
+
+                <span id="admin-fraud-score"
+                      class="text-label-md font-bold text-on-surface">
+                    0
+                </span>
+
+
+                <span class="text-label-md text-secondary ml-sm">
+                    Risk:
+                </span>
+
+                <span id="admin-risk-level"
+                      class="text-label-md font-bold"
+                      style="color:#34d399;">
+                    Safe
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             AI EVALUATION
+             ================================================= -->
+
+        {% if questions.get("evaluation") %}
+
+            <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md shadow-sm">
+
+                <div class="flex items-center gap-xs mb-sm">
+
+                    <span class="material-symbols-outlined text-primary">
+                        auto_awesome
+                    </span>
+
+                    <h3 class="text-headline-sm font-bold text-on-surface">
+                        AI Evaluation Guidance
+                    </h3>
+
+                </div>
+
+
+                <ul class="flex flex-col gap-xs list-disc list-inside">
+
+                    {% for item in questions.get("evaluation", []) %}
+
+                        <li class="text-body-sm text-on-surface leading-relaxed">
+                            {{ item }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     BACK BUTTON
+     ========================================================= -->
+
+<a href="{{ url_for('ai_interview.interviews') }}"
+   class="inline-flex items-center gap-xs px-md py-sm rounded-lg border border-outline-variant/30 text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors text-body-sm font-semibold">
+
+    <span class="material-symbols-outlined"
+          style="font-size:18px;">
+        arrow_back
+    </span>
+
+    Back to AI Interviews
+
+</a>
+
+
+{% endblock %}
+
+
+
+<!-- =========================================================
+     JAVASCRIPT
+     IMPORTANT:
+     NO JINJA VARIABLES ARE USED INSIDE JAVASCRIPT.
+     ========================================================= -->
+
+{% block extra_scripts %}
+
+<script>
+
+(function () {
+
+    "use strict";
+
+
+    /* ---------------------------------------------------------
+       Get interview ID from HTML data attribute
+       --------------------------------------------------------- */
+
+    const configElement =
+        document.getElementById("interview-config");
+
+
+    if (!configElement) {
+        console.error("Interview configuration element not found.");
+        return;
+    }
+
+
+    const interviewId =
+        configElement.dataset.interviewId;
+
+
+    if (!interviewId) {
+        console.error("Interview ID not found.");
+        return;
+    }
+
+
+    /* ---------------------------------------------------------
+       Local storage key
+       --------------------------------------------------------- */
+
+    const storageKey =
+        "rf_interview_" + interviewId;
+
+
+
+    /* ---------------------------------------------------------
+       Helper function
+       --------------------------------------------------------- */
+
+    function getElement(id) {
+
+        return document.getElementById(id);
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update current question
+       --------------------------------------------------------- */
+
+    function updateCurrentQuestion(state) {
+
+        const element =
+            getElement("admin-current-question");
+
+
+        if (!element) {
+            return;
+        }
+
+
+        if (state.currentQuestion) {
+
+            element.textContent =
+                state.currentQuestion;
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update section
+       --------------------------------------------------------- */
+
+    function updateSection(state) {
+
+        const element =
+            getElement("admin-current-section");
+
+
+        if (!element) {
+            return;
+        }
+
+
+        if (state.currentSection) {
+
+            const formatted =
+                String(state.currentSection)
+                    .replace(/_/g, " ")
+                    .replace(/\b\w/g, function (letter) {
+                        return letter.toUpperCase();
+                    });
+
+
+            element.textContent =
+                formatted;
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update question number
+       --------------------------------------------------------- */
+
+    function updateQuestionIndex(state) {
+
+        const element =
+            getElement("admin-question-index");
+
+
+        if (!element) {
+            return;
+        }
+
+
+        if (state.questionIndex !== undefined) {
+
+            element.textContent =
+                state.questionIndex;
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update emotion
+       --------------------------------------------------------- */
+
+    function updateEmotion(state) {
+
+        const element =
+            getElement("admin-emotion");
+
+
+        if (!element) {
+            return;
+        }
+
+
+        if (state.emotion) {
+
+            element.textContent =
+                state.emotion;
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update eye contact
+       --------------------------------------------------------- */
+
+    function updateEyeContact(state) {
+
+        const element =
+            getElement("admin-eye-contact");
+
+
+        if (!element) {
+            return;
+        }
+
+
+        if (state.eyeContact) {
+
+            element.textContent =
+                state.eyeContact;
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update face count
+       --------------------------------------------------------- */
+
+    function updateFaceCount(state) {
+
+        const element =
+            getElement("admin-face-count");
+
+
+        if (!element) {
+            return;
+        }
+
+
+        if (state.faceCount !== undefined) {
+
+            element.textContent =
+                state.faceCount;
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update recommendation
+       --------------------------------------------------------- */
+
+    function updateRecommendation(state) {
+
+        const element =
+            getElement("admin-recommendation");
+
+
+        if (!element) {
+            return;
+        }
+
+
+        if (state.recommendation) {
+
+            element.textContent =
+                state.recommendation;
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update fraud score
+       --------------------------------------------------------- */
+
+    function updateFraudScore(state) {
+
+        const scoreElement =
+            getElement("admin-fraud-score");
+
+
+        const riskElement =
+            getElement("admin-risk-level");
+
+
+        if (!scoreElement || !riskElement) {
+            return;
+        }
+
+
+        if (state.fraudScore === undefined) {
+            return;
+        }
+
+
+        const score =
+            Number(state.fraudScore);
+
+
+        scoreElement.textContent =
+            score;
+
+
+        if (score >= 51) {
+
+            riskElement.textContent =
+                "High Risk";
+
+            riskElement.style.color =
+                "#f87171";
+
+        }
+
+        else if (score >= 21) {
+
+            riskElement.textContent =
+                "Suspicious";
+
+            riskElement.style.color =
+                "#fbbf24";
+
+        }
+
+        else {
+
+            riskElement.textContent =
+                "Safe";
+
+            riskElement.style.color =
+                "#34d399";
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Update proctoring events
+       --------------------------------------------------------- */
+
+    function updateProctorEvents(state) {
+
+        const log =
+            getElement("admin-proctor-log");
+
+
+        if (!log) {
+            return;
+        }
+
+
+        if (!Array.isArray(state.proctorEvents)) {
+            return;
+        }
+
+
+        if (state.proctorEvents.length === 0) {
+
+            log.innerHTML =
+                '<p class="text-body-sm text-secondary">No events yet.</p>';
+
+            return;
+
+        }
+
+
+        const latestEvents =
+            state.proctorEvents
+                .slice(-5)
+                .reverse();
+
+
+        log.innerHTML = "";
+
+
+        latestEvents.forEach(function (event) {
+
+            const row =
+                document.createElement("div");
+
+
+            row.className =
+                "text-label-md px-xs py-xs rounded bg-surface-container-high";
+
+
+            const eventName =
+                event.event_type
+                    ? String(event.event_type)
+                        .replace(/_/g, " ")
+                    : "Event";
+
+
+            const details =
+                event.details
+                    ? String(event.details)
+                    : "";
+
+
+            const title =
+                document.createElement("span");
+
+
+            title.className =
+                "font-semibold";
+
+
+            title.textContent =
+                eventName;
+
+
+            row.appendChild(title);
+
+
+            const separator =
+                document.createTextNode(
+                    " — " + details
+                );
+
+
+            row.appendChild(separator);
+
+
+            if (event.severity === "high") {
+
+                row.style.color =
+                    "#f87171";
+
+            }
+
+            else {
+
+                row.style.color =
+                    "#e2e8f0";
+
+            }
+
+
+            log.appendChild(row);
+
+        });
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Main polling function
+       --------------------------------------------------------- */
+
+    function pollCandidateState() {
+
+        try {
+
+            const raw =
+                localStorage.getItem(storageKey);
+
+
+            if (!raw) {
+                return;
+            }
+
+
+            const state =
+                JSON.parse(raw);
+
+
+            if (!state || typeof state !== "object") {
+                return;
+            }
+
+
+            updateCurrentQuestion(state);
+
+            updateSection(state);
+
+            updateQuestionIndex(state);
+
+            updateEmotion(state);
+
+            updateEyeContact(state);
+
+            updateFaceCount(state);
+
+            updateRecommendation(state);
+
+            updateFraudScore(state);
+
+            updateProctorEvents(state);
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Unable to read interview state:",
+                error
+            );
+
+        }
+
+    }
+
+
+
+    /* ---------------------------------------------------------
+       Run immediately
+       --------------------------------------------------------- */
+
+    pollCandidateState();
+
+
+
+    /* ---------------------------------------------------------
+       Continue checking every 2 seconds
+       --------------------------------------------------------- */
+
+    setInterval(
+        pollCandidateState,
+        2000
+    );
+
+
+})();
+
+</script>
+
+{% endblock %}

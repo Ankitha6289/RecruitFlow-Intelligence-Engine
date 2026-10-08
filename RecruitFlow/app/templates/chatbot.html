@@ -1,0 +1,633 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg">
+
+        <!-- ================= HEADER ================= -->
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+
+            <div>
+                <h3 class="mb-0">
+                    🤖 AI Resume Chatbot
+                </h3>
+
+                <small>
+                    Candidate ID : {{ candidate_id }}
+                </small>
+            </div>
+
+            <div>
+
+                <a href="{{ url_for('chatbot.pdf', candidate_id=candidate_id) }}" class="btn btn-light btn-sm">
+                    📄 Download PDF
+                </a>
+
+                <a href="{{ url_for('chatbot.clear', candidate_id=candidate_id) }}" class="btn btn-danger btn-sm">
+                    🗑 Clear Chat
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= BODY ================= -->
+        <div class="card-body">
+
+
+            <!-- ================= SUGGESTED QUESTIONS ================= -->
+            <div class="mb-3">
+
+                <h5>Suggested Questions</h5>
+
+                <button type="button" class="btn btn-outline-primary btn-sm m-1 suggestion">
+                    Summarize this resume
+                </button>
+
+                <button type="button" class="btn btn-outline-success btn-sm m-1 suggestion">
+                    Candidate strengths
+                </button>
+
+                <button type="button" class="btn btn-outline-warning btn-sm m-1 suggestion">
+                    Suitable job roles
+                </button>
+
+                <button type="button" class="btn btn-outline-info btn-sm m-1 suggestion">
+                    Technical skills
+                </button>
+
+                <button type="button" class="btn btn-outline-secondary btn-sm m-1 suggestion">
+                    Experience summary
+                </button>
+
+            </div>
+
+
+            <hr>
+
+
+            <!-- ================= CHAT WINDOW ================= -->
+            <div id="chat-box">
+
+                {% for chat in chats %}
+
+                <div class="mb-4">
+
+                    <!-- USER MESSAGE -->
+                    <div class="text-end">
+
+                        <div class="d-inline-block bg-primary text-white p-3 rounded">
+
+                            <strong>You</strong>
+
+                            <hr class="m-1">
+
+                            {{ chat.user_question }}
+
+                        </div>
+
+                    </div>
+
+
+                    <br>
+
+
+                    <!-- AI MESSAGE -->
+                    <div class="text-start">
+
+                        <div class="d-inline-block ai-message p-3 rounded shadow-sm">
+
+                            <strong class="ai-title">
+                                RecruitFlow AI
+                            </strong>
+
+                            <hr class="m-1">
+
+
+                            <pre class="ai-answer">{{ chat.ai_answer }}</pre>
+
+
+                            <div class="text-end mt-2">
+
+                                <a href="{{ url_for(
+                                    'chatbot.delete',
+                                    chat_id=chat.chat_id
+                                ) }}" class="btn btn-sm btn-outline-danger">
+
+                                    Delete
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% else %}
+
+                <div class="text-center text-muted py-5">
+
+                    <i class="bi bi-chat-dots fs-1"></i>
+
+                    <p class="mt-2">
+                        No conversation yet.
+                    </p>
+
+                    <p>
+                        Ask something about this candidate's resume.
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- ================= LOADING ================= -->
+            <div id="loading" class="text-center mt-3" style="display:none;">
+
+                <div class="spinner-border text-primary"></div>
+
+                <p class="mt-2">
+                    AI is thinking...
+                </p>
+
+            </div>
+
+
+            <hr>
+
+
+            <!-- ================= ASK QUESTION ================= -->
+            <div class="row g-2">
+
+                <div class="col-md-10">
+
+                    <input type="text" id="question" class="form-control"
+                        placeholder="Ask something about this candidate..." autocomplete="off">
+
+                </div>
+
+
+                <div class="col-md-2">
+
+                    <button type="button" id="send-button" class="btn btn-success w-100">
+
+                        <i class="bi bi-send"></i>
+                        Send
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================================= -->
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        /*
+         * IMPORTANT:
+         * Use a different JavaScript variable name.
+         * This prevents the VS Code/Jinja redeclaration error.
+         */
+        const candidateId = {{ candidate_id | tojson
+    }};
+
+
+    const chatBox = document.getElementById("chat-box");
+
+    const questionInput = document.getElementById("question");
+
+    const sendButton = document.getElementById("send-button");
+
+    const loading = document.getElementById("loading");
+
+
+    /*
+     * Scroll chat to bottom when page loads
+     */
+    if (chatBox) {
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    }
+
+
+    /*
+     * Suggested questions
+     */
+    document.querySelectorAll(".suggestion").forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            questionInput.value = this.innerText.trim();
+
+            questionInput.focus();
+
+        });
+
+    });
+
+
+    /*
+     * Send question
+     */
+    async function sendQuestion() {
+
+        const question = questionInput.value.trim();
+
+
+        if (question === "") {
+
+            alert("Please enter a question.");
+
+            questionInput.focus();
+
+            return;
+
+        }
+
+
+        /*
+         * Disable button while AI is processing
+         */
+        sendButton.disabled = true;
+
+        questionInput.disabled = true;
+
+        loading.style.display = "block";
+
+
+        try {
+
+            const response = await fetch("/chatbot/send", {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type": "application/json",
+
+                    "Accept": "application/json"
+
+                },
+
+                body: JSON.stringify({
+
+                    candidate_id: candidateId,
+
+                    question: question
+
+                })
+
+            });
+
+
+            const data = await response.json();
+
+
+            /*
+             * Handle HTTP errors
+             */
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error || "Unable to process your question."
+                );
+
+            }
+
+
+            /*
+             * Handle Flask JSON error
+             */
+            if (data.error) {
+
+                alert(data.error);
+
+                return;
+
+            }
+
+
+            /*
+             * Remove "No conversation yet" message
+             */
+            const emptyMessage =
+                chatBox.querySelector(".empty-chat-message");
+
+            if (emptyMessage) {
+
+                emptyMessage.remove();
+
+            }
+
+
+            /*
+             * Add new conversation to chat window
+             */
+            chatBox.insertAdjacentHTML(
+
+                "beforeend",
+
+                `
+                <div class="mb-4">
+
+                    <!-- USER QUESTION -->
+                    <div class="text-end">
+
+                        <div class="d-inline-block bg-primary text-white p-3 rounded">
+
+                            <strong>You</strong>
+
+                            <hr class="m-1">
+
+                            ${escapeHtml(data.question)}
+
+                        </div>
+
+                    </div>
+
+
+                    <br>
+
+
+                    <!-- AI ANSWER -->
+                    <div class="text-start">
+
+                        <div class="d-inline-block ai-message p-3 rounded shadow-sm">
+
+                            <strong class="ai-title">
+                                RecruitFlow AI
+                            </strong>
+
+                            <hr class="m-1">
+
+                            <pre class="ai-answer">${escapeHtml(data.answer)}</pre>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                `
+
+            );
+
+
+            /*
+             * Clear input
+             */
+            questionInput.value = "";
+
+
+            /*
+             * Scroll to latest message
+             */
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+
+        } catch (error) {
+
+            console.error("Chatbot error:", error);
+
+            alert(
+                error.message ||
+                "Something went wrong while communicating with the AI."
+            );
+
+
+        } finally {
+
+            sendButton.disabled = false;
+
+            questionInput.disabled = false;
+
+            loading.style.display = "none";
+
+            questionInput.focus();
+
+        }
+
+    }
+
+
+    /*
+     * Send button
+     */
+    sendButton.addEventListener("click", function () {
+
+        sendQuestion();
+
+    });
+
+
+    /*
+     * Press Enter to send
+     */
+    questionInput.addEventListener("keydown", function (event) {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            sendQuestion();
+
+        }
+
+    });
+
+
+    /*
+     * Escape HTML
+     *
+     * This prevents AI/user text containing HTML
+     * from being inserted directly into the page.
+     */
+    function escapeHtml(value) {
+
+        const div = document.createElement("div");
+
+        div.textContent = value ?? "";
+
+        return div.innerHTML;
+
+    }
+
+});
+
+</script>
+
+
+<!-- ========================================================= -->
+<!-- CSS -->
+<!-- ========================================================= -->
+
+<style>
+    body {
+
+        background: #eef2f7;
+
+    }
+
+
+    /* Chat window */
+
+    #chat-box {
+
+        height: 500px;
+
+        overflow-y: auto;
+
+        background: var(--body-bg, #f8fafc);
+
+        padding: 20px;
+
+        border-radius: 10px;
+
+        border: 1px solid var(--border, #dee2e6);
+
+        scroll-behavior: smooth;
+
+    }
+
+
+    /* Scrollbar */
+
+    #chat-box::-webkit-scrollbar {
+
+        width: 8px;
+
+    }
+
+    #chat-box::-webkit-scrollbar-thumb {
+
+        background: #0d6efd;
+
+        border-radius: 10px;
+
+    }
+
+
+    /* AI message */
+
+    .ai-message {
+
+        background-color: var(--card-bg, #ffffff);
+
+        border: 1px solid var(--border, #dee2e6);
+
+        max-width: 85%;
+
+    }
+
+
+    .ai-title {
+
+        color: #6366f1;
+
+    }
+
+
+    .ai-answer {
+
+        white-space: pre-wrap;
+
+        font-family: inherit;
+
+        font-size: 15px;
+
+        border: none;
+
+        background: transparent;
+
+        color: #c7d4e3;
+
+        padding: 0;
+
+        margin: 0;
+
+    }
+
+
+    /* Card */
+
+    .card {
+
+        border-radius: 15px;
+
+        border: none;
+
+    }
+
+
+    .card-header {
+
+        border-radius: 15px 15px 0 0 !important;
+
+    }
+
+
+    /* Suggested questions */
+
+    .suggestion {
+
+        transition: all .2s ease;
+
+    }
+
+
+    .suggestion:hover {
+
+        transform: scale(1.05);
+
+    }
+
+
+    /* Input */
+
+    #question {
+
+        min-height: 42px;
+
+    }
+
+
+    #question:focus {
+
+        border-color: #6366f1;
+
+        box-shadow: 0 0 0 0.2rem rgba(18, 82, 172, 0.15);
+
+    }
+
+
+    /* Send button */
+
+    #send-button {
+
+        min-height: 42px;
+
+    }
+</style>
+
+{% endblock %}

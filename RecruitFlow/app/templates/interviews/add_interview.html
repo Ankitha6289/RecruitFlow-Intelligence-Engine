@@ -1,0 +1,168 @@
+{% extends "base_dark.html" %}
+{% block title %}Schedule Interview{% endblock %}
+
+{% block page_title %}Schedule Interview{% endblock %}
+{% block page_subtitle %}Auto-matches best job from candidate resume{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="bg-surface-container border border-outline-variant/30 rounded-xl shadow-sm overflow-hidden">
+
+    <div class="px-md py-sm border-b border-outline-variant/20 flex items-center gap-sm"
+         style="background-color:#1a73e8;">
+      <span class="material-symbols-outlined text-white" style="font-variation-settings:'FILL' 1;">event_available</span>
+      <h3 class="text-headline-sm font-bold text-white">Schedule Interview</h3>
+    </div>
+
+    <div class="p-lg">
+      <form method="POST" id="scheduleForm">
+
+        <!-- Candidate -->
+        <div class="mb-md">
+          <label class="block text-body-sm font-semibold text-secondary mb-xs">Candidate</label>
+          <select name="candidate_id" id="candidateSelect" required
+                  onchange="loadBestMatchingJob()"
+                  class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg px-sm py-sm text-on-surface text-body-sm focus:border-primary focus:outline-none transition-colors appearance-none">
+            <option value="">Select Candidate</option>
+            {% for candidate in candidates %}
+            <option value="{{ candidate.candidate_id }}">{{ candidate.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Job (auto-filled) -->
+        <div class="mb-md">
+          <label class="block text-body-sm font-semibold text-secondary mb-xs">
+            Job Position
+            <span class="text-label-md text-primary ml-1">(auto-matched from resume)</span>
+          </label>
+          <select name="job_id" id="jobSelect" required
+                  class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg px-sm py-sm text-on-surface text-body-sm focus:border-primary focus:outline-none transition-colors appearance-none">
+            <option value="">Select Candidate first…</option>
+            {% for job in jobs %}
+            <option value="{{ job.job_id }}">{{ job.title }} — {{ job.company }}</option>
+            {% endfor %}
+          </select>
+          <!-- Match info badge -->
+          <div id="matchInfo" class="mt-xs"></div>
+        </div>
+
+        <!-- Date & Time -->
+        <div class="grid grid-cols-2 gap-sm mb-md">
+          <div>
+            <label class="block text-body-sm font-semibold text-secondary mb-xs">Interview Date</label>
+            <input type="date" name="interview_date" required
+                   class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg px-sm py-sm text-on-surface text-body-sm focus:border-primary focus:outline-none transition-colors" />
+          </div>
+          <div>
+            <label class="block text-body-sm font-semibold text-secondary mb-xs">Interview Time</label>
+            <input type="time" name="interview_time" required
+                   class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg px-sm py-sm text-on-surface text-body-sm focus:border-primary focus:outline-none transition-colors" />
+          </div>
+        </div>
+
+        <!-- Mode & Interviewer -->
+        <div class="grid grid-cols-2 gap-sm mb-md">
+          <div>
+            <label class="block text-body-sm font-semibold text-secondary mb-xs">Interview Mode</label>
+            <select name="interview_mode" id="modeSelect" required
+                    onchange="updateMeetingLinkUI()"
+                    class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg px-sm py-sm text-on-surface text-body-sm focus:border-primary focus:outline-none transition-colors appearance-none">
+              <option value="Online">Online</option>
+              <option value="Offline">Offline</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-body-sm font-semibold text-secondary mb-xs">Interviewer Name</label>
+            <input type="text" name="interviewer" placeholder="e.g. HR Manager" required
+                   class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg px-sm py-sm text-on-surface text-body-sm focus:border-primary focus:outline-none transition-colors placeholder:text-secondary" />
+          </div>
+        </div>
+
+        <!-- Meeting Link / Location (auto-generated, shown read-only) -->
+        <div class="mb-lg" id="meetingLinkWrapper">
+          <label class="block text-body-sm font-semibold text-secondary mb-xs" id="meetingLinkLabel">
+            Meeting Link
+            <span class="text-label-md text-primary ml-1">(auto-generated)</span>
+          </label>
+          <!-- Hidden: submitted to backend as empty so service auto-generates -->
+          <input type="hidden" name="meeting_link" value="" />
+          <div id="meetingLinkPreview"
+               class="w-full bg-surface-container-high border border-outline-variant/20 rounded-lg px-sm py-sm text-secondary text-body-sm italic">
+            Will be generated automatically after scheduling
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-sm">
+          <button type="submit"
+                  class="flex-1 py-sm rounded-lg text-white font-semibold text-body-sm hover:brightness-110 transition-all"
+                  style="background-color:#1a73e8;">
+            <span class="material-symbols-outlined align-middle mr-1" style="font-size:18px;">event_available</span>
+            Schedule & Send Email
+          </button>
+          <a href="{{ url_for('interview_management.interviews') }}"
+             class="px-lg py-sm rounded-lg border border-outline-variant/30 text-secondary font-semibold text-body-sm hover:bg-surface-container-high transition-colors">
+            Cancel
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function loadBestMatchingJob() {
+  const candidateId = document.getElementById('candidateSelect').value;
+  const jobSelect   = document.getElementById('jobSelect');
+  const matchInfo   = document.getElementById('matchInfo');
+
+  if (!candidateId) {
+    jobSelect.value = '';
+    matchInfo.innerHTML = '';
+    return;
+  }
+
+  matchInfo.innerHTML = '<span class="text-label-md text-secondary">Matching resume to jobs…</span>';
+
+  fetch(`/admin/interviews/best-job/${candidateId}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        jobSelect.value = data.job_id;
+        matchInfo.innerHTML = `
+          <div class="mt-xs flex items-center gap-xs px-sm py-xs rounded-lg border"
+               style="background-color:rgba(26,115,232,0.12); border-color:rgba(26,115,232,0.3);">
+            <span class="material-symbols-outlined text-primary" style="font-size:16px;">auto_awesome</span>
+            <span class="text-label-md text-primary font-semibold">
+              Best match: ${data.job_title} — ${data.match_score}% skill fit
+            </span>
+          </div>`;
+      } else {
+        matchInfo.innerHTML = `
+          <div class="mt-xs text-label-md text-[#ca8a04]">
+            No strong match found — please select manually.
+          </div>`;
+      }
+    })
+    .catch(() => {
+      matchInfo.innerHTML = '<div class="mt-xs text-label-md text-error">Error loading match — select manually.</div>';
+    });
+}
+
+function updateMeetingLinkUI() {
+  const mode    = document.getElementById('modeSelect').value;
+  const label   = document.getElementById('meetingLinkLabel');
+  const preview = document.getElementById('meetingLinkPreview');
+
+  if (mode === 'Online') {
+    label.innerHTML = 'Meeting Link <span class="text-label-md text-primary ml-1">(auto-generated)</span>';
+    preview.textContent = 'A meeting room link will be generated automatically';
+  } else {
+    label.innerHTML = 'Venue / Location <span class="text-label-md text-primary ml-1">(from job location)</span>';
+    preview.textContent = 'Company location will be used from the selected job';
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-8">
+
+        <div class="card shadow">
+
+            <div class="card-header bg-warning text-dark">
+
+                <h3 class="mb-0">
+
+                    Edit Job
+
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                <form method="POST">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Job Title
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="job_title"
+                            value="{{ job.job_title }}"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Company
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="company"
+                            value="{{ job.company }}"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Location
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="location"
+                            value="{{ job.location }}"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Experience
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="experience"
+                            value="{{ job.experience }}"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Salary
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="salary"
+                            value="{{ job.salary }}"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Required Skills
+
+                        </label>
+
+                        <textarea
+                            name="skills"
+                            class="form-control"
+                            rows="3"
+                            required>{{ job.skills }}</textarea>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Eligibility
+
+                        </label>
+
+                        <textarea
+                            name="eligibility"
+                            class="form-control"
+                            rows="2"
+                            required>{{ job.eligibility }}</textarea>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Closing Date
+
+                        </label>
+
+                        <input
+                            type="date"
+                            name="closing_date"
+                            value="{{ job.closing_date }}"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+
+                            Job Description
+
+                        </label>
+
+                        <textarea
+                            name="description"
+                            class="form-control"
+                            rows="5"
+                            required>{{ job.description }}</textarea>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-warning">
+
+                        Update Job
+
+                    </button>
+
+                    <a
+                        href="{{ url_for('job_management.jobs') }}"
+                        class="btn btn-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

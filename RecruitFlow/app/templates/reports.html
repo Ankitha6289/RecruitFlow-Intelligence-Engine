@@ -1,0 +1,282 @@
+{% extends "base_dark.html" %}
+{% block title %}Candidate Reports{% endblock %}
+{% block page_title %}Candidate Reports{% endblock %}
+{% block page_subtitle %}Search, export, and download individual candidate profile PDFs{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --c-blue:   #4d8eff;
+  --c-green:  #34d399;
+  --c-amber:  #fbbf24;
+  --c-red:    #ff8a8a;
+  --c-cyan:   #38bdf8;
+  --c-bg:     #051424;
+  --c-s1:     #122131;
+  --c-s2:     #1c2b3c;
+  --c-border: rgba(140,144,159,.15);
+}
+
+/* search + export bar */
+.top-bar {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px;
+}
+.search-wrap { position:relative; flex:1; min-width:220px; }
+.search-wrap i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#2d4060; font-size:14px; pointer-events:none; }
+.search-input {
+  width:100%; padding:9px 12px 9px 38px;
+  background:var(--c-s1); border:1.5px solid var(--c-border);
+  border-radius:8px; color:#d4e4fa; font-size:13px;
+  font-family:'Hanken Grotesk',sans-serif; outline:none; transition:border-color .15s;
+}
+.search-input::placeholder { color:#2d4060; }
+.search-input:focus { border-color:var(--c-blue); }
+.btn-act {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 18px; border-radius:8px; font-size:13px; font-weight:600;
+  font-family:'Hanken Grotesk',sans-serif; border:none; cursor:pointer;
+  text-decoration:none; transition:all .18s ease; white-space:nowrap;
+}
+.btn-blue  { background:var(--c-blue); color:#fff; box-shadow:0 2px 10px rgba(77,142,255,.3); }
+.btn-blue:hover { opacity:.88; color:#fff; }
+.btn-green { background:rgba(52,211,153,.12); color:var(--c-green); border:1px solid rgba(52,211,153,.3); }
+.btn-green:hover { background:rgba(52,211,153,.2); color:var(--c-green); }
+.btn-print { background:rgba(140,144,159,.1); color:#94a3b8; border:1px solid var(--c-border); }
+.btn-print:hover { background:var(--c-s2); color:#d4e4fa; }
+
+/* stat tiles */
+.stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.stat-tile {
+  background:var(--c-s1); border:1px solid var(--c-border);
+  border-radius:12px; padding:16px 18px;
+}
+.stat-tile-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#4b6080; margin-bottom:6px; }
+.stat-tile-num   { font-size:26px; font-weight:800; line-height:1; }
+.num-white  { color:#d4e4fa; }
+.num-green  { color:var(--c-green); }
+.num-red    { color:var(--c-red); }
+.num-amber  { color:var(--c-amber); }
+
+/* table card */
+.table-card { background:var(--c-s1); border:1px solid var(--c-border); border-radius:14px; overflow:hidden; }
+.table-card-header {
+  padding:13px 18px; border-bottom:1px solid var(--c-border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.table-card-title { font-size:13.5px; font-weight:600; color:#d4e4fa; display:flex; align-items:center; gap:7px; }
+.table-count { font-size:11px; color:#4b6080; background:var(--c-s2); padding:3px 8px; border-radius:6px; }
+
+.rf-table { width:100%; border-collapse:collapse; font-size:13px; }
+.rf-table thead th {
+  background:rgba(5,20,36,.6); padding:10px 14px;
+  font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em;
+  color:#4b6080; border-bottom:1px solid var(--c-border); text-align:left;
+}
+.rf-table tbody td { padding:12px 14px; border-bottom:1px solid rgba(140,144,159,.07); color:#c2c6d6; vertical-align:middle; }
+.rf-table tbody tr:last-child td { border-bottom:none; }
+.rf-table tbody tr:hover td { background:rgba(77,142,255,.03); }
+
+/* candidate cell */
+.cand-cell { display:flex; align-items:center; gap:10px; }
+.cand-avatar {
+  width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700; flex-shrink:0; color:#fff;
+}
+.cand-name  { font-weight:600; color:#d4e4fa; font-size:13px; }
+.cand-email { font-size:11px; color:#4b6080; }
+.av0{background:#4d8eff;} .av1{background:#34d399;} .av2{background:#fbbf24;}
+.av3{background:#a78bfa;} .av4{background:#38bdf8;} .av5{background:#fb923c;}
+.av6{background:#f43f5e;} .av7{background:#10b981;}
+
+/* contact cell */
+.contact-line { display:flex; align-items:center; gap:5px; font-size:12px; color:#94a3b8; }
+.contact-line i { font-size:11px; color:#4b6080; }
+
+/* profile links */
+.profile-links { display:flex; gap:6px; }
+.profile-link {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:5px; font-size:11px; font-weight:600;
+  text-decoration:none; transition:all .15s;
+  border:1px solid var(--c-border); color:#6b7fa3;
+}
+.profile-link:hover { border-color:rgba(77,142,255,.3); color:var(--c-blue); }
+.profile-link.li { color:#38bdf8; border-color:rgba(56,189,248,.2); }
+.profile-link.gh { color:#94a3b8; border-color:rgba(148,163,184,.2); }
+
+/* status badge */
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:600; }
+.badge-applied   { background:rgba(251,191,36,.12); color:var(--c-amber); }
+.badge-selected  { background:rgba(52,211,153,.12); color:var(--c-green); }
+.badge-rejected  { background:rgba(255,138,138,.12); color:var(--c-red); }
+.badge-default   { background:rgba(140,144,159,.1);  color:#8c909f; }
+
+/* action buttons */
+.act-row { display:flex; gap:5px; align-items:center; }
+.act-btn {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:5px 10px; border-radius:6px; font-size:11.5px; font-weight:600;
+  font-family:'Hanken Grotesk',sans-serif; border:none; cursor:pointer;
+  text-decoration:none; white-space:nowrap; transition:all .15s ease;
+}
+.act-view { background:rgba(56,189,248,.12); color:var(--c-cyan); border:1px solid rgba(56,189,248,.2); }
+.act-view:hover { background:rgba(56,189,248,.22); color:var(--c-cyan); }
+.act-pdf  { background:rgba(255,138,138,.10); color:var(--c-red);  border:1px solid rgba(255,138,138,.2); }
+.act-pdf:hover  { background:rgba(255,138,138,.2);  color:var(--c-red); }
+
+/* empty */
+.empty-state { padding:48px; text-align:center; color:#4b6080; }
+.empty-state i { font-size:36px; margin-bottom:12px; display:block; color:#1c2b3c; }
+
+@media(max-width:900px){ .stat-row{grid-template-columns:1fr 1fr;} }
+@media print { .action-bar,.top-bar{display:none} }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Search + export bar -->
+<form method="GET">
+  <div class="top-bar">
+    <div class="search-wrap">
+      <i class="bi bi-search"></i>
+      <input type="text" name="search" class="search-input"
+             placeholder="Search by name or email…"
+             value="{{ search }}"/>
+    </div>
+    <button type="submit" class="btn-act btn-blue">
+      <i class="bi bi-search"></i> Search
+    </button>
+    <a href="/reports/excel" class="btn-act btn-green">
+      <i class="bi bi-file-earmark-excel-fill"></i> Export Excel
+    </a>
+    <button type="button" onclick="window.print()" class="btn-act btn-print">
+      <i class="bi bi-printer-fill"></i> Print
+    </button>
+  </div>
+</form>
+
+<!-- Stat tiles -->
+{% set total_c    = candidates | length %}
+{% set selected_c = candidates | selectattr("status","equalto","Selected") | list | length %}
+{% set rejected_c = candidates | selectattr("status","equalto","Rejected") | list | length %}
+{% set pending_c  = total_c - selected_c - rejected_c %}
+
+<div class="stat-row">
+  <div class="stat-tile">
+    <div class="stat-tile-label">Total Candidates</div>
+    <div class="stat-tile-num num-white">{{ total_c }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile-label">Selected</div>
+    <div class="stat-tile-num num-green">{{ selected_c }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile-label">Rejected</div>
+    <div class="stat-tile-num num-red">{{ rejected_c }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile-label">Applied / Pending</div>
+    <div class="stat-tile-num num-amber">{{ pending_c }}</div>
+  </div>
+</div>
+
+<!-- Candidate list table -->
+<div class="table-card">
+  <div class="table-card-header">
+    <div class="table-card-title">
+      <i class="bi bi-people-fill" style="color:var(--c-blue)"></i>
+      Candidate List
+    </div>
+    <span class="table-count">{{ total_c }} record{{ 's' if total_c != 1 }}</span>
+  </div>
+
+  <table class="rf-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Candidate</th>
+        <th>Contact</th>
+        <th>Profiles</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for candidate in candidates %}
+      {% set av = "av" ~ (loop.index0 % 8) %}
+      <tr>
+        <td style="color:#4b6080;font-size:12px;font-weight:600">{{ loop.index }}</td>
+
+        <td>
+          <div class="cand-cell">
+            <div class="cand-avatar {{ av }}">{{ candidate.full_name[0]|upper if candidate.full_name else '?' }}</div>
+            <div>
+              <div class="cand-name">{{ candidate.full_name }}</div>
+              <div class="cand-email">{{ candidate.email }}</div>
+            </div>
+          </div>
+        </td>
+
+        <td>
+          <div class="contact-line">
+            <i class="bi bi-telephone-fill"></i>
+            {{ candidate.phone or '—' }}
+          </div>
+        </td>
+
+        <td>
+          <div class="profile-links">
+            {% if candidate.linkedin %}
+            <a href="{{ candidate.linkedin }}" target="_blank" class="profile-link li">
+              <i class="bi bi-linkedin"></i> LinkedIn
+            </a>
+            {% endif %}
+            {% if candidate.github %}
+            <a href="{{ candidate.github }}" target="_blank" class="profile-link gh">
+              <i class="bi bi-github"></i> GitHub
+            </a>
+            {% endif %}
+            {% if not candidate.linkedin and not candidate.github %}
+            <span style="color:#2d4060;font-size:12px">—</span>
+            {% endif %}
+          </div>
+        </td>
+
+        <td>
+          {% if candidate.status == "Selected" %}
+            <span class="badge badge-selected"><i class="bi bi-circle-fill" style="font-size:6px"></i> Selected</span>
+          {% elif candidate.status == "Rejected" %}
+            <span class="badge badge-rejected"><i class="bi bi-circle-fill" style="font-size:6px"></i> Rejected</span>
+          {% elif candidate.status == "Applied" %}
+            <span class="badge badge-applied"><i class="bi bi-circle-fill" style="font-size:6px"></i> Applied</span>
+          {% else %}
+            <span class="badge badge-default">{{ candidate.status }}</span>
+          {% endif %}
+        </td>
+
+        <td>
+          <div class="act-row">
+            <a href="{{ url_for('candidate_management.candidate_details', candidate_id=candidate.candidate_id) }}"
+               class="act-btn act-view"><i class="bi bi-eye-fill"></i> View</a>
+            <a href="{{ url_for('report.export_pdf', candidate_id=candidate.candidate_id) }}"
+               class="act-btn act-pdf"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</a>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <i class="bi bi-people"></i>
+            No candidates found.
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h3 class="mb-0">
+                        <i class="fa fa-robot me-2"></i> Schedule AI Interview
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    <form method="POST">
+
+                        <!-- Candidate Selection -->
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">Candidate</label>
+
+                            <select name="candidate_id" class="form-select" required>
+
+                                <option value="">Select Candidate</option>
+
+                                {% for candidate in candidates %}
+
+                                <option value="{{ candidate.candidate_id }}">
+
+                                    {{ candidate.full_name }} ({{ candidate.email }})
+
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <!-- Job Selection -->
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">Job</label>
+
+                            <select name="job_id" class="form-select" required>
+
+                                <option value="">Select Job</option>
+
+                                {% for job in jobs %}
+
+                                <option value="{{ job.job_id }}">
+
+                                    {{ job.title }} - {{ job.company }}
+
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <!-- Scheduled Date -->
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">Scheduled Date</label>
+
+                            <input type="date" name="scheduled_date" class="form-control">
+
+                            <small class="text-muted">Optional: Leave blank if interview can be taken anytime</small>
+
+                        </div>
+
+                        <!-- Scheduled Time -->
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">Scheduled Time</label>
+
+                            <input type="time" name="scheduled_time" class="form-control">
+
+                            <small class="text-muted">Optional: Leave blank if interview can be taken anytime</small>
+
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="alert alert-info mb-3">
+
+                            <i class="fa fa-info-circle me-2"></i>
+
+                            <strong>AI Interview Information:</strong><br>
+
+                            The candidate will receive a unique link to access the AI interview.
+
+                            The interview will include HR, technical, coding, scenario, and behavioral questions.
+
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+
+                            <button type="submit" class="btn btn-primary">
+
+                                <i class="fa fa-calendar-check me-1"></i> Schedule AI Interview
+
+                            </button>
+
+                            <a href="{{ url_for('ai_interview.interviews') }}" class="btn btn-secondary">
+
+                                Cancel
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

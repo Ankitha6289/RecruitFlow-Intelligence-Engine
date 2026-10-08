@@ -1,0 +1,192 @@
+{% extends "recruiter_base.html" %}
+
+{% block title %}My Jobs{% endblock %}
+
+{% block page_title %}
+<div>My Jobs <span style="color:var(--text-sec);font-weight:400;font-size:12.5px;display:block;margin-top:2px;">Manage your job postings and track applications.</span></div>
+{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('recruiter_job.add_job') }}" class="rf-btn rf-btn-primary rf-btn-sm">
+    <i class="bi bi-plus-lg"></i> Add New Job
+</a>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Search Bar ── */
+.rf-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+}
+.rf-search-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,.04);
+    border: 1.5px solid var(--border2);
+    border-radius: 9px;
+    padding: 8px 14px;
+    transition: border-color .15s, box-shadow .15s;
+}
+.rf-search-input-wrap:focus-within {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(124,58,237,.18);
+}
+.rf-search-input-wrap i { color: var(--text-dim); font-size: 14px; }
+.rf-search-input-wrap input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+}
+.rf-search-input-wrap input::placeholder { color: var(--text-dim); }
+
+/* ── Job Row ── */
+.job-title-cell { font-weight: 700; color: var(--text); }
+.job-company-cell { color: var(--text-sec); font-size: 12.5px; }
+.job-id-chip {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(124,58,237,.12);
+    color: var(--accent2);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Search Bar -->
+<div class="rf-search-bar">
+    <form method="GET" style="flex:1;display:flex;align-items:center;gap:12px;">
+        <div class="rf-search-input-wrap" style="flex:1;">
+            <i class="bi bi-search"></i>
+            <input type="text" name="keyword" value="{{ keyword }}" placeholder="Search by job title, company, location…">
+        </div>
+        <button type="submit" class="rf-btn rf-btn-primary rf-btn-sm">
+            <i class="bi bi-search"></i> Search
+        </button>
+        {% if keyword %}
+        <a href="{{ url_for('recruiter_job.jobs') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+            <i class="bi bi-x-lg"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+    <a href="{{ url_for('recruiter_job.add_job') }}" class="rf-btn rf-btn-primary">
+        <i class="bi bi-plus-lg"></i> Add Job
+    </a>
+</div>
+
+<!-- Jobs Table Card -->
+<div class="rf-card">
+    <div class="rf-card-header">
+        <h3 class="rf-card-title">
+            <i class="bi bi-briefcase" style="color:var(--accent2);"></i>
+            Job Listings
+        </h3>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span class="rf-badge rf-badge-purple">{{ jobs|length }} Jobs</span>
+        </div>
+    </div>
+
+    <div class="rf-table-wrap" style="border:none;border-radius:0;">
+        <table class="rf-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Job Title</th>
+                    <th>Company</th>
+                    <th>Location</th>
+                    <th>Experience</th>
+                    <th>Salary</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr>
+                    <td><span class="job-id-chip">{{ job.job_id }}</span></td>
+                    <td>
+                        <div class="job-title-cell">{{ job.title }}</div>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:7px;">
+                            <div style="width:28px;height:28px;border-radius:7px;background:rgba(124,58,237,.14);display:grid;place-items:center;font-size:12px;color:var(--accent2);flex-shrink:0;">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <span style="font-size:13px;color:var(--text-sec);">{{ job.company }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--text-sec);">
+                            <i class="bi bi-geo-alt" style="color:var(--text-dim);"></i>
+                            {{ job.location or '—' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="font-size:12.5px;color:var(--text-sec);">{{ job.experience or '—' }}</span>
+                    </td>
+                    <td>
+                        <span style="font-size:12.5px;color:#34d399;font-weight:600;">{{ job.salary or '—' }}</span>
+                    </td>
+                    <td>
+                        {% if job.status == 'Active' %}
+                            <span class="rf-badge rf-badge-green"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Active</span>
+                        {% else %}
+                            <span class="rf-badge rf-badge-gray"><i class="bi bi-circle" style="font-size:7px;"></i> Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <a href="{{ url_for('recruiter_job.edit_job', job_id=job.job_id) }}" class="rf-btn rf-btn-amber rf-btn-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{{ url_for('recruiter_job.toggle_job', job_id=job.job_id) }}" class="rf-btn rf-btn-blue rf-btn-sm">
+                                <i class="bi bi-toggle-on"></i> Toggle
+                            </a>
+                            <a href="{{ url_for('recruiter_job.delete_job', job_id=job.job_id) }}"
+                               class="rf-btn rf-btn-danger rf-btn-sm"
+                               onclick="return confirm('Delete this job? This cannot be undone.')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8">
+                        <div class="rf-empty">
+                            <div class="rf-empty-icon"><i class="bi bi-briefcase"></i></div>
+                            <div class="rf-empty-title">No Jobs Found</div>
+                            <p class="rf-empty-desc">
+                                {% if keyword %}No jobs match "{{ keyword }}". Try a different search term.
+                                {% else %}You haven't posted any jobs yet. Click "Add New Job" to get started.{% endif %}
+                            </p>
+                            <a href="{{ url_for('recruiter_job.add_job') }}" class="rf-btn rf-btn-primary" style="margin-top:16px;">
+                                <i class="bi bi-plus-lg"></i> Post First Job
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

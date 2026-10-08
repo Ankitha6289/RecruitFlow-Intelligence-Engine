@@ -1,0 +1,176 @@
+{% extends "candidate_base.html" %}
+{% block title %}Notifications{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Notification Center</div>
+<div class="rf-topbar-sub">Stay updated on interview schedules, application stage changes &amp; offer updates</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .notif-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .notif-item {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--r-md);
+        padding: 18px 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        transition: all .18s ease;
+        position: relative;
+    }
+    .notif-item:hover {
+        border-color: rgba(14, 165, 233, .3);
+        background: rgba(13, 30, 53, .9);
+        transform: translateX(2px);
+    }
+    .notif-item.unread {
+        border-left: 3px solid var(--accent);
+        background: linear-gradient(90deg, rgba(14, 165, 233, .07), rgba(13, 30, 53, .7));
+    }
+    .notif-icon-box {
+        width: 42px; height: 42px;
+        border-radius: 12px;
+        display: grid; place-items: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    .notif-icon-box.general { background: rgba(14, 165, 233, .12); color: #38bdf8; }
+    .notif-icon-box.interview { background: rgba(245, 158, 11, .12); color: #fbbf24; }
+    .notif-icon-box.offer { background: rgba(16, 185, 129, .12); color: #34d399; }
+    .notif-icon-box.system { background: rgba(139, 92, 246, .12); color: #a78bfa; }
+
+    .notif-content {
+        flex: 1;
+        min-width: 0;
+    }
+    .notif-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 4px;
+    }
+    .notif-title {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #fff;
+    }
+    .notif-time {
+        font-size: 11.5px;
+        color: var(--text-sec);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    .notif-body {
+        font-size: 13px;
+        color: #cbd5e1;
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+    .notif-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="rf-card">
+    <div class="rf-card-header">
+        <div>
+            <h2 class="rf-card-title">
+                <i class="bi bi-bell-fill"></i>
+                Candidate Activity &amp; Alerts
+            </h2>
+            <div class="rf-card-subtitle">All notifications delivered to your candidate workspace</div>
+        </div>
+        <span class="rf-badge rf-badge-info">{{ notifications|length }} Alerts</span>
+    </div>
+
+    <div class="rf-card-body">
+        {% if notifications %}
+        <div class="notif-list">
+            {% for n in notifications %}
+            {% set title_lower = n.title|lower %}
+            {% set is_interview = 'interview' in title_lower %}
+            {% set is_offer = 'offer' in title_lower or 'selected' in title_lower %}
+            
+            <div class="notif-item {{ 'unread' if not n.is_read else '' }}">
+                <!-- Icon Box -->
+                <div class="notif-icon-box {{ 'interview' if is_interview else 'offer' if is_offer else 'general' }}">
+                    <i class="bi {{ 'bi-camera-video-fill' if is_interview else 'bi-gift-fill' if is_offer else 'bi-bell-fill' }}"></i>
+                </div>
+
+                <!-- Content -->
+                <div class="notif-content">
+                    <div class="notif-title-row">
+                        <span class="notif-title">{{ n.title }}</span>
+                        <span class="notif-time">
+                            <i class="bi bi-clock"></i>
+                            {% if n.created_at %}
+                            {{ n.created_at.strftime('%b %d, %H:%M') }}
+                            {% else %}
+                            Just now
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <p class="notif-body">{{ n.message }}</p>
+
+                    <!-- Contextual Shortcut Link -->
+                    <div class="notif-actions">
+                        {% if is_interview %}
+                        <a href="{{ url_for('candidate_interview.interviews') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+                            <i class="bi bi-calendar-event"></i> View Interview Schedule
+                        </a>
+                        {% elif is_offer %}
+                        <a href="{{ url_for('candidate_offer.offers') }}" class="rf-btn rf-btn-success rf-btn-sm">
+                            <i class="bi bi-award"></i> Review Job Offer
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('candidate_application.my_applications') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+                            <i class="bi bi-send-check"></i> Check Application
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="rf-empty-state">
+            <div class="rf-empty-icon">
+                <i class="bi bi-bell-slash"></i>
+            </div>
+            <div class="rf-empty-title">All caught up!</div>
+            <p class="rf-empty-desc">
+                You have no unread notifications or pending announcements. Check back after applying to new jobs or scheduling interviews.
+            </p>
+            <a href="{{ url_for('candidate_dashboard.dashboard') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+                <i class="bi bi-arrow-left"></i> Return to Dashboard
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="rf-card-footer">
+        <a href="{{ url_for('candidate_dashboard.dashboard') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        <span style="font-size: 12px; color: var(--text-sec);">
+            Notifications are sent instantly when recruiters update candidate statuses
+        </span>
+    </div>
+</div>
+
+{% endblock %}

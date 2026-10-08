@@ -1,0 +1,204 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Users{% endblock %}
+{% block breadcrumb %}Users{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-people-fill"></i> System{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block page_subtitle %}Manage all system users — candidates, recruiters, and administrators.{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-secondary"><i class="bi bi-download"></i> Export</button>
+<a href="{{ url_for('auth.register') }}" class="btn btn-primary"><i class="bi bi-person-plus-fill"></i> Add User</a>
+{% endblock %}
+
+{% block extra_styles %}
+.role-chip {
+display: inline-flex; align-items: center; gap: 5px;
+padding: 4px 10px; border-radius: 99px;
+font-size: 11px; font-weight: 700;
+}
+.role-admin { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+.role-recruiter{ background: rgba(59,130,246,.12); color: #60a5fa; border: 1px solid rgba(59,130,246,.25); }
+.role-candidate{ background: rgba(16,185,129,.12); color: #34d399; border: 1px solid rgba(16,185,129,.25); }
+
+.toolbar {
+display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+background: var(--bg-card); border: 1px solid var(--border-subtle);
+border-radius: var(--r-lg); padding: 12px 16px; margin-bottom: 20px;
+}
+{% endblock %}
+
+{% block content %}
+
+<!-- KPIs -->
+<div class="stat-grid section-gap" style="grid-template-columns:repeat(4,1fr);">
+  <div class="stat-card" style="--stat-accent:var(--accent-3);--stat-bg:rgba(59,130,246,.12);">
+    <div class="stat-header"><span class="stat-label">Total Users</span>
+      <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+    </div>
+    <div class="stat-value">{{ users|length if users else 0 }}</div>
+    <div class="stat-footer"><span>Registered accounts</span></div>
+  </div>
+  <div class="stat-card" style="--stat-accent:var(--red);--stat-bg:var(--red-bg);">
+    <div class="stat-header"><span class="stat-label">Admins</span>
+      <div class="stat-icon"><i class="bi bi-shield-fill-check"></i></div>
+    </div>
+    <div class="stat-value">{{ users|selectattr('role','equalto','admin')|list|length if users else 1 }}</div>
+    <div class="stat-footer"><span>System administrators</span></div>
+  </div>
+  <div class="stat-card" style="--stat-accent:var(--accent-3);--stat-bg:rgba(59,130,246,.12);">
+    <div class="stat-header"><span class="stat-label">Recruiters</span>
+      <div class="stat-icon"><i class="bi bi-person-badge-fill"></i></div>
+    </div>
+    <div class="stat-value">{{ users|selectattr('role','equalto','recruiter')|list|length if users else 0 }}</div>
+    <div class="stat-footer"><span>Hiring managers</span></div>
+  </div>
+  <div class="stat-card" style="--stat-accent:var(--green);--stat-bg:var(--green-bg);">
+    <div class="stat-header"><span class="stat-label">Candidates</span>
+      <div class="stat-icon"><i class="bi bi-person-fill"></i></div>
+    </div>
+    <div class="stat-value">{{ users|selectattr('role','equalto','candidate')|list|length if users else 0 }}</div>
+    <div class="stat-footer"><span>Job seekers</span></div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <i class="bi bi-funnel" style="color:var(--text-dim);"></i>
+  <input type="text" class="rf-input" id="userSearch" placeholder="Search by name, email or role..." />
+  <select class="rf-select" id="roleFilter" style="max-width:160px;">
+    <option value="">All Roles</option>
+    <option value="admin">Admin</option>
+    <option value="recruiter">Recruiter</option>
+    <option value="candidate">Candidate</option>
+  </select>
+  <div style="margin-left:auto;font-size:13px;color:var(--text-dim);">
+    <span id="userCount">{{ users|length if users else 0 }}</span> users
+  </div>
+</div>
+
+<!-- Users Table -->
+<div class="rf-card">
+  <div class="rf-table-wrap" style="border:none;border-radius:0;">
+    <table class="rf-table" id="usersTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Last Login</th>
+          <th style="text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if users %}
+        {% for u in users %}
+        <tr data-search="{{ u.username|lower }} {{ u.email|lower }} {{ u.role|lower }}">
+          <td style="color:var(--text-dim);font-weight:700;">{{ loop.index }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="av"
+                style="background:linear-gradient(135deg,{{ '#ef4444' if u.role=='admin' else '#2563eb' if u.role=='recruiter' else '#10b981' }},{{ '#fca5a5' if u.role=='admin' else '#60a5fa' if u.role=='recruiter' else '#34d399' }});">
+                {{ u.username[0]|upper if u.username else 'U' }}
+              </div>
+              <span class="text-primary-cell">{{ u.username }}</span>
+            </div>
+          </td>
+          <td style="color:var(--text-sec);">{{ u.email }}</td>
+          <td>
+            <span class="role-chip role-{{ u.role or 'candidate' }}">
+              <i
+                class="bi bi-{{ 'shield-fill-check' if u.role=='admin' else 'person-badge-fill' if u.role=='recruiter' else 'person-fill' }}"></i>
+              {{ u.role|title if u.role else 'Candidate' }}
+            </span>
+          </td>
+          <td style="color:var(--text-dim);font-size:12px;">{{ u.created_at or '—' }}</td>
+          <td style="color:var(--text-dim);font-size:12px;">{{ u.last_login or '—' }}</td>
+          <td>
+            <div style="display:flex;gap:6px;justify-content:flex-end;">
+              <a href="{{ url_for('user_management.edit_user', user_id=u.user_id) }}"
+                class="btn btn-secondary btn-sm btn-icon" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+              <form method="POST" action="{{ url_for('user_management.delete_user', user_id=u.user_id) }}"
+                onsubmit="return confirm('Delete this user?');">
+                <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete"><i
+                    class="bi bi-trash-fill"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <!-- Demo users -->
+        {% set demo_users = [
+        ('Admin User','admin@recruitflow.ai','admin','Sep 1, 2025','Today'),
+        ('Aarav Sharma','aarav@recruitflow.ai','recruiter','Sep 5, 2025','Yesterday'),
+        ('Priya Nair','priya@recruitflow.ai','recruiter','Sep 10, 2025','2 days ago'),
+        ('Raj Kumar','raj@email.com','candidate','Sep 12, 2025','3 days ago'),
+        ('Sneha Patel','sneha@email.com','candidate','Sep 15, 2025','1 week ago'),
+        ('Vikram Singh','vikram@email.com','candidate','Sep 18, 2025','2 weeks ago'),
+        ] %}
+        {% for name,email,role,joined,last in demo_users %}
+        <tr data-search="{{ name|lower }} {{ email|lower }} {{ role }}">
+          <td style="color:var(--text-dim);font-weight:700;">{{ loop.index }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="av"
+                style="background:linear-gradient(135deg,{{ '#ef4444' if role=='admin' else '#2563eb' if role=='recruiter' else '#10b981' }},{{ '#fca5a5' if role=='admin' else '#60a5fa' if role=='recruiter' else '#34d399' }});">
+                {{ name[0] }}</div>
+              <span class="text-primary-cell">{{ name }}</span>
+            </div>
+          </td>
+          <td style="color:var(--text-sec);">{{ email }}</td>
+          <td><span class="role-chip role-{{ role }}"><i
+                class="bi bi-{{ 'shield-fill-check' if role=='admin' else 'person-badge-fill' if role=='recruiter' else 'person-fill' }}"></i>
+              {{ role|title }}</span></td>
+          <td style="color:var(--text-dim);font-size:12px;">{{ joined }}</td>
+          <td style="color:var(--text-dim);font-size:12px;">{{ last }}</td>
+          <td>
+            <div style="display:flex;gap:6px;justify-content:flex-end;">
+              <button class="btn btn-secondary btn-sm btn-icon" title="Edit"><i class="bi bi-pencil-fill"></i></button>
+              <button class="btn btn-danger btn-sm btn-icon" title="Delete"><i class="bi bi-trash-fill"></i></button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rf-pagination">
+    <span class="rf-pagination-info">Showing 1–{{ [users|length,6]|min if users else 6 }} of {{ users|length if users
+      else 6 }} users</span>
+    <div class="rf-pagination-btns">
+      <span class="pg-btn"><i class="bi bi-chevron-left"></i></span>
+      <span class="pg-btn active">1</span>
+      <span class="pg-btn">2</span>
+      <span class="pg-btn"><i class="bi bi-chevron-right"></i></span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function filterUsers() {
+    const q = document.getElementById('userSearch').value.toLowerCase();
+    const r = document.getElementById('roleFilter').value.toLowerCase();
+    let count = 0;
+    document.querySelectorAll('#usersTable tbody tr').forEach(row => {
+      const text = (row.dataset.search || row.innerText).toLowerCase();
+      const match = text.includes(q) && (r === '' || text.includes(r));
+      row.style.display = match ? '' : 'none';
+      if (match) count++;
+    });
+    const cnt = document.getElementById('userCount');
+    if (cnt) cnt.textContent = count;
+  }
+  document.getElementById('userSearch').addEventListener('input', filterUsers);
+  document.getElementById('roleFilter').addEventListener('change', filterUsers);
+</script>
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends "recruiter_base.html" %}
+
+{% block title %}Offer Management{% endblock %}
+
+{% block page_title %}
+<div>Offer Management <span style="color:var(--text-sec);font-weight:400;font-size:12.5px;display:block;margin-top:2px;">Generate, track and manage offer letters for selected candidates.</span></div>
+{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('recruiter_offer.add_offer') }}" class="rf-btn rf-btn-primary rf-btn-sm">
+    <i class="bi bi-plus-lg"></i> Generate Offer
+</a>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Offer card top decoration ── */
+.offer-card-top {
+    background: linear-gradient(135deg, rgba(16,185,129,.14), rgba(6,182,212,.08));
+    border: 1px solid rgba(16,185,129,.2);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.offer-stat-mini {
+    text-align: center;
+    padding: 0 24px;
+    border-right: 1px solid rgba(255,255,255,.08);
+}
+.offer-stat-mini:last-child { border-right: none; }
+.offer-stat-mini-val { font-size: 28px; font-weight: 800; color: #34d399; }
+.offer-stat-mini-lbl { font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+
+/* ── Salary highlight ── */
+.salary-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    background: rgba(16,185,129,.12);
+    border: 1px solid rgba(16,185,129,.22);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #34d399;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Quick Stats Banner -->
+<div class="offer-card-top">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(16,185,129,.15);display:grid;place-items:center;font-size:22px;color:#34d399;">
+            <i class="bi bi-file-earmark-check-fill"></i>
+        </div>
+        <div>
+            <div style="font-size:15px;font-weight:700;color:var(--text);">Offer Letters</div>
+            <div style="font-size:12.5px;color:var(--text-sec);">Generate & track all candidate offer letters</div>
+        </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;">
+        {% set total     = offers|length %}
+        {% set accepted  = offers|selectattr('status','equalto','Accepted')|list|length %}
+        {% set pending   = offers|selectattr('status','equalto','Pending')|list|length %}
+        {% set rejected  = offers|selectattr('status','equalto','Rejected')|list|length %}
+
+        <div class="offer-stat-mini">
+            <div class="offer-stat-mini-val">{{ total }}</div>
+            <div class="offer-stat-mini-lbl">Total</div>
+        </div>
+        <div class="offer-stat-mini">
+            <div class="offer-stat-mini-val" style="color:#fbbf24;">{{ pending }}</div>
+            <div class="offer-stat-mini-lbl">Pending</div>
+        </div>
+        <div class="offer-stat-mini">
+            <div class="offer-stat-mini-val" style="color:#34d399;">{{ accepted }}</div>
+            <div class="offer-stat-mini-lbl">Accepted</div>
+        </div>
+        <div class="offer-stat-mini">
+            <div class="offer-stat-mini-val" style="color:#f87171;">{{ rejected }}</div>
+            <div class="offer-stat-mini-lbl">Declined</div>
+        </div>
+    </div>
+    <a href="{{ url_for('recruiter_offer.add_offer') }}" class="rf-btn rf-btn-success">
+        <i class="bi bi-plus-lg"></i> Generate Offer
+    </a>
+</div>
+
+<!-- Offers Table -->
+<div class="rf-card">
+    <div class="rf-card-header">
+        <h3 class="rf-card-title">
+            <i class="bi bi-file-earmark-check" style="color:#34d399;"></i>
+            Offer List
+        </h3>
+        <span class="rf-badge rf-badge-green">{{ offers|length }} Offers</span>
+    </div>
+
+    <div class="rf-table-wrap" style="border:none;border-radius:0;">
+        <table class="rf-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Candidate</th>
+                    <th>Job Position</th>
+                    <th>Offer Date</th>
+                    <th>Joining Date</th>
+                    <th>Offered Salary</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offer in offers %}
+                <tr>
+                    <td><span style="font-size:11px;font-weight:700;color:var(--text-dim);">#{{ offer.offer_id }}</span></td>
+
+                    <td>
+                        <div style="display:flex;align-items:center;gap:9px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">
+                                {{ offer.candidate.full_name[0]|upper }}
+                            </div>
+                            <span style="font-size:13px;font-weight:600;color:var(--text);">{{ offer.candidate.full_name }}</span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span style="font-size:13px;color:var(--text-sec);">{{ offer.job.title }}</span>
+                    </td>
+
+                    <td>
+                        <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text-sec);">
+                            <i class="bi bi-calendar3" style="color:var(--text-dim);"></i>
+                            {{ offer.offer_date }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text-sec);">
+                            <i class="bi bi-calendar-check" style="color:var(--text-dim);"></i>
+                            {{ offer.joining_date }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="salary-chip">
+                            <i class="bi bi-currency-rupee"></i>
+                            {{ offer.offered_salary }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if offer.status == 'Pending' %}
+                            <span class="rf-badge rf-badge-amber"><i class="bi bi-hourglass-split"></i> Pending</span>
+                        {% elif offer.status == 'Accepted' %}
+                            <span class="rf-badge rf-badge-green"><i class="bi bi-check-circle-fill"></i> Accepted</span>
+                        {% elif offer.status == 'Rejected' %}
+                            <span class="rf-badge rf-badge-red"><i class="bi bi-x-circle-fill"></i> Declined</span>
+                        {% else %}
+                            <span class="rf-badge rf-badge-gray">{{ offer.status }}</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <a href="/offers/pdf/{{ offer.offer_id }}"
+                               class="rf-btn rf-btn-blue rf-btn-sm">
+                                <i class="bi bi-filetype-pdf"></i> PDF
+                            </a>
+                            <a href="{{ url_for('recruiter_offer.delete_offer', offer_id=offer.offer_id) }}"
+                               class="rf-btn rf-btn-danger rf-btn-sm"
+                               onclick="return confirm('Delete this offer letter?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8">
+                        <div class="rf-empty">
+                            <div class="rf-empty-icon"><i class="bi bi-file-earmark-check"></i></div>
+                            <div class="rf-empty-title">No Offers Generated Yet</div>
+                            <p class="rf-empty-desc">Generate offer letters for selected candidates after their interview stage.</p>
+                            <a href="{{ url_for('recruiter_offer.add_offer') }}" class="rf-btn rf-btn-success" style="margin-top:16px;">
+                                <i class="bi bi-plus-lg"></i> Generate First Offer
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

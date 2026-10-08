@@ -1,0 +1,182 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Edit Offer{% endblock %}
+{% block breadcrumb %}Edit Offer{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-file-earmark-check-fill"></i> Recruitment{% endblock %}
+{% block page_title %}Edit Offer — {{ offer.candidate.full_name if offer.candidate else 'Offer' }}{% endblock %}
+{% block page_subtitle %}Update offer date, joining date, salary, and status.{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('offer_management.offers') }}" class="btn btn-secondary btn-sm">
+  <i class="bi bi-arrow-left"></i> Back to Offers
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+.of-card {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden; margin-bottom: 16px;
+}
+.of-card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 20px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+.of-card-icon {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+}
+.of-card-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.of-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.of-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:700px){ .of-row{ grid-template-columns: 1fr; } }
+.of-label {
+  display: block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-sec); margin-bottom: 7px;
+}
+.of-input, .of-select {
+  width: 100%;
+  background: rgba(5,12,30,.65) !important;
+  border: 1.5px solid var(--border-base);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: 13.5px; font-family: 'Inter', sans-serif;
+  color: var(--text-primary) !important;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.of-input:focus, .of-select:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.13);
+  background: rgba(5,12,35,.85) !important;
+}
+.of-input::placeholder { color: var(--text-dim); }
+.of-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.6); }
+.of-select {
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%238ba4c8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 13px center !important;
+  background-size: 11px !important;
+  padding-right: 36px;
+}
+.of-select option { background: #0f1f35; color: var(--text-primary); }
+.of-hint { font-size: 11px; color: var(--text-dim); margin-top: 5px; }
+.of-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 16px 20px; border-top: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+/* Offer info strip */
+.offer-info-strip {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); padding: 16px 20px; margin-bottom: 18px;
+}
+.offer-info-item { display: flex; flex-direction: column; gap: 3px; }
+.offer-info-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-dim); }
+.offer-info-value { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}{% for cat, msg in messages %}
+<div class="flash {{ 'success' if cat=='success' else 'error' if cat in ['danger','error'] else 'info' }}" style="margin-bottom:14px;">
+  <i class="bi bi-{% if cat=='success' %}check-circle-fill{% elif cat in ['danger','error'] %}x-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+  {{ msg }}
+  <button class="flash-close" onclick="this.parentElement.remove()"><i class="bi bi-x-lg"></i></button>
+</div>
+{% endfor %}{% endif %}
+{% endwith %}
+
+<!-- Offer context strip -->
+<div class="offer-info-strip">
+  <div class="offer-info-item">
+    <span class="offer-info-label">Candidate</span>
+    <span class="offer-info-value">{{ offer.candidate.full_name if offer.candidate else '—' }}</span>
+  </div>
+  <div style="width:1px;height:36px;background:var(--border-subtle);flex-shrink:0;"></div>
+  <div class="offer-info-item">
+    <span class="offer-info-label">Position</span>
+    <span class="offer-info-value">{{ offer.job.title if offer.job else '—' }}</span>
+  </div>
+  <div style="width:1px;height:36px;background:var(--border-subtle);flex-shrink:0;"></div>
+  <div class="offer-info-item">
+    <span class="offer-info-label">Company</span>
+    <span class="offer-info-value">{{ offer.job.company if offer.job else '—' }}</span>
+  </div>
+  <div style="margin-left:auto;">
+    <span class="badge {{ 'badge-green' if offer.status=='Accepted' else 'badge-red' if offer.status=='Declined' else 'badge-amber' }}">
+      {{ offer.status or 'Pending' }}
+    </span>
+  </div>
+</div>
+
+<form method="POST" action="{{ url_for('offer_management.edit_offer', offer_id=offer.offer_id) }}">
+
+  <!-- Offer Details -->
+  <div class="of-card">
+    <div class="of-card-header">
+      <div class="of-card-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+        <i class="bi bi-file-earmark-check-fill"></i>
+      </div>
+      <span class="of-card-title">Offer Details</span>
+    </div>
+    <div class="of-body">
+      <div class="of-row">
+        <div>
+          <label class="of-label" for="offer_date">Offer Date <span style="color:var(--red);">*</span></label>
+          <input type="date" id="offer_date" name="offer_date" class="of-input"
+                 value="{{ offer.offer_date }}" required />
+        </div>
+        <div>
+          <label class="of-label" for="joining_date">Joining Date <span style="color:var(--red);">*</span></label>
+          <input type="date" id="joining_date" name="joining_date" class="of-input"
+                 value="{{ offer.joining_date }}" required />
+        </div>
+      </div>
+      <div>
+        <label class="of-label" for="offered_salary">Offered Salary <span style="color:var(--red);">*</span></label>
+        <input type="text" id="offered_salary" name="offered_salary" class="of-input"
+               value="{{ offer.salary or offer.offered_salary or '' }}" required
+               placeholder="e.g. ₹8,00,000 per annum" />
+        <p class="of-hint">Enter the gross annual salary or CTC.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="of-card">
+    <div class="of-card-header">
+      <div class="of-card-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+        <i class="bi bi-activity"></i>
+      </div>
+      <span class="of-card-title">Offer Status</span>
+    </div>
+    <div class="of-body">
+      <div>
+        <label class="of-label" for="status">Status</label>
+        <select id="status" name="status" class="of-select">
+          <option value="Pending"  {% if offer.status == 'Pending'  %}selected{% endif %}>Pending</option>
+          <option value="Accepted" {% if offer.status == 'Accepted' %}selected{% endif %}>Accepted</option>
+          <option value="Declined" {% if offer.status == 'Declined' %}selected{% endif %}>Declined</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="of-card">
+    <div class="of-footer">
+      <a href="{{ url_for('offer_management.offers') }}" class="btn btn-secondary btn-sm">
+        <i class="bi bi-x-lg"></i> Cancel
+      </a>
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="bi bi-save-fill"></i> Save Changes
+      </button>
+    </div>
+  </div>
+
+</form>
+{% endblock %}

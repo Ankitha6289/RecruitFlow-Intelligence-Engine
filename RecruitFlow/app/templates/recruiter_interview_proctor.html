@@ -1,0 +1,544 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Proctor Report — Interview #{{ interview.interview_id }}{% endblock %}
+{% block breadcrumb %}Proctor Report{% endblock %}
+{% block hide_page_header %}page-header-blank{% endblock %}
+{% block page_eyebrow %}{% endblock %}
+{% block page_title %}{% endblock %}
+{% block page_subtitle %}{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('recruiter_interview_list.interviews') }}" class="btn btn-secondary btn-sm">
+  <i class="bi bi-arrow-left"></i> Back to Interviews
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+
+/* ═══════════════════════════════════════════
+   PROCTOR REPORT — PAGE STYLES
+═══════════════════════════════════════════ */
+
+/* ── Page banner ── */
+.pr-banner {
+  background: linear-gradient(130deg,
+    rgba(15, 31, 53, 0.98) 0%,
+    rgba(10, 22, 40, 0.98) 100%);
+  border: 1px solid rgba(99,143,220,.16);
+  border-radius: var(--r-xl);
+  padding: 24px 28px;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 24px;
+  margin-bottom: 22px; position: relative; overflow: hidden;
+}
+.pr-banner::before {
+  content:''; position:absolute; top:-60px; right:-60px;
+  width:260px; height:260px;
+  background:radial-gradient(circle,rgba(37,99,235,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.pr-banner-left { position:relative; z-index:1; }
+.pr-banner-eyebrow {
+  font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--blue-3,#60a5fa); margin-bottom:8px;
+  display:flex; align-items:center; gap:7px;
+}
+.pr-banner-title { font-size:22px; font-weight:900; color:#fff; letter-spacing:-.4px; margin-bottom:6px; }
+.pr-banner-meta  { font-size:13px; color:var(--text-sec,#8ba4c8); display:flex; flex-wrap:wrap; gap:14px; }
+.pr-banner-meta span { display:flex; align-items:center; gap:5px; }
+
+/* risk badge in banner */
+.risk-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 20px; border-radius:99px;
+  font-size:14px; font-weight:800; letter-spacing:.04em;
+  flex-shrink:0; position:relative; z-index:1;
+}
+.risk-safe     { background:rgba(16,185,129,.14); border:1px solid rgba(16,185,129,.35); color:#10b981; }
+.risk-sus      { background:rgba(245,158,11,.14); border:1px solid rgba(245,158,11,.35); color:#f59e0b; }
+.risk-high     { background:rgba(239,68,68,.14);  border:1px solid rgba(239,68,68,.35);  color:#ef4444; }
+
+/* ── Top-row grid ── */
+.pr-top-grid {
+  display:grid; grid-template-columns:auto 1fr 1fr; gap:18px;
+  margin-bottom:20px; align-items:start;
+}
+@media(max-width:1000px){ .pr-top-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:680px) { .pr-top-grid{ grid-template-columns:1fr; } }
+
+/* ── Fraud score ring card ── */
+.score-ring-card {
+  background:var(--bg-card,#0f1f35);
+  border:1px solid rgba(99,143,220,.12);
+  border-radius:var(--r-xl);
+  padding:28px 24px;
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  min-width:200px;
+}
+.score-ring-wrap { position:relative; width:140px; height:140px; }
+.score-ring-wrap svg { transform:rotate(-90deg); }
+.score-ring-center {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  text-align:center;
+}
+.score-ring-val { font-size:32px; font-weight:900; line-height:1; }
+.score-ring-lbl { font-size:10px; color:var(--text-sec,#8ba4c8); font-weight:600;
+                  text-transform:uppercase; letter-spacing:.07em; margin-top:3px; }
+.score-ring-risk { font-size:13px; font-weight:800; }
+.score-ring-sub  { font-size:11.5px; color:var(--text-sec,#8ba4c8); text-align:center; }
+
+/* ── Detail card ── */
+.pr-detail-card {
+  background:var(--bg-card,#0f1f35);
+  border:1px solid rgba(99,143,220,.12);
+  border-radius:var(--r-xl); overflow:hidden;
+}
+.pr-detail-header {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px 18px; border-bottom:1px solid rgba(99,143,220,.08);
+}
+.pr-detail-title {
+  font-size:13px; font-weight:700; color:var(--text-primary,#e8f0ff);
+  display:flex; align-items:center; gap:8px;
+}
+.pr-detail-body { padding:18px; }
+.pr-field { margin-bottom:13px; display:flex; flex-direction:column; gap:3px; }
+.pr-field:last-child { margin-bottom:0; }
+.pr-field-label { font-size:10px; font-weight:700; text-transform:uppercase;
+                  letter-spacing:.07em; color:var(--text-dim,#4d6080); }
+.pr-field-value { font-size:13.5px; color:var(--text-primary,#e8f0ff); font-weight:600; }
+.pr-field-value a { color:var(--blue-3,#60a5fa); text-decoration:none; }
+.pr-field-value a:hover { text-decoration:underline; }
+
+/* ── Event weight grid ── */
+.weight-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+  gap:10px;
+}
+.weight-tile {
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(99,143,220,.09);
+  border-radius:var(--r-md); padding:12px 14px;
+  transition:border-color var(--t-fast,.15s);
+}
+.weight-tile:hover { border-color:rgba(99,143,220,.2); }
+.weight-tile-count {
+  font-size:22px; font-weight:900; line-height:1; margin-bottom:3px;
+}
+.weight-tile-label { font-size:11px; color:var(--text-sec,#8ba4c8); }
+.weight-tile-pts   { font-size:10px; color:var(--text-dim,#4d6080); margin-top:4px; }
+.wt-zero    { opacity:.5; }
+.wt-low     { --wc:#f59e0b; }
+.wt-medium  { --wc:#ef4444; }
+.wt-high    { --wc:#dc2626; }
+.weight-tile-count { color:var(--wc,var(--text-primary,#e8f0ff)); }
+
+/* ── Event log ── */
+.pr-event-table {
+  width:100%; border-collapse:collapse; font-size:13px;
+}
+.pr-event-table thead th {
+  background:rgba(255,255,255,.025); color:var(--text-dim,#4d6080);
+  font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em;
+  padding:10px 14px; text-align:left; border-bottom:1px solid rgba(99,143,220,.08);
+  white-space:nowrap;
+}
+.pr-event-table tbody tr {
+  border-bottom:1px solid rgba(99,143,220,.06);
+  transition:background var(--t-fast,.15s);
+}
+.pr-event-table tbody tr:last-child { border-bottom:none; }
+.pr-event-table tbody tr:hover { background:rgba(255,255,255,.02); }
+.pr-event-table td { padding:11px 14px; color:var(--text-sec,#8ba4c8); vertical-align:middle; }
+.pr-event-table td.ev-name { color:var(--text-primary,#e8f0ff); font-weight:600; }
+.pr-event-table td.ev-detail{ color:var(--text-sec,#8ba4c8); font-size:12px; max-width:340px;
+                               white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.sev-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:99px;
+  font-size:10.5px; font-weight:700;
+}
+.sev-low    { background:rgba(245,158,11,.12); color:#fbbf24; border:1px solid rgba(245,158,11,.25); }
+.sev-medium { background:rgba(239,68,68,.12);  color:#fca5a5; border:1px solid rgba(239,68,68,.25); }
+.sev-high   { background:rgba(220,38,38,.16);  color:#ef4444; border:1px solid rgba(220,38,38,.40); }
+
+/* ── AI review card ── */
+.pr-video-wrap {
+  width:100%; border-radius:var(--r-lg); overflow:hidden;
+  background:#040a18; border:1px solid rgba(99,143,220,.10);
+  margin-bottom:14px;
+}
+.pr-video-wrap video { display:block; width:100%; max-height:380px; }
+
+.pr-transcript-pre {
+  background:rgba(4,10,26,.7); border:1px solid rgba(99,143,220,.10);
+  border-radius:var(--r-lg); padding:16px;
+  font-size:12.5px; line-height:1.7; color:var(--text-sec,#8ba4c8);
+  white-space:pre-wrap; max-height:280px; overflow-y:auto;
+}
+
+/* ── Score chips row ── */
+.ai-score-row {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px;
+}
+@media(max-width:640px){ .ai-score-row{ grid-template-columns:1fr 1fr; } }
+.ai-score-chip {
+  background:rgba(255,255,255,.025); border:1px solid rgba(99,143,220,.10);
+  border-radius:var(--r-lg); padding:14px 16px;
+}
+.ai-score-chip .asc-label { font-size:10px; font-weight:700; text-transform:uppercase;
+                             letter-spacing:.07em; color:var(--text-dim,#4d6080); margin-bottom:5px; }
+.ai-score-chip .asc-val   { font-size:20px; font-weight:900; color:var(--text-primary,#e8f0ff); }
+
+{% endblock %}
+
+{% block content %}
+
+{# ── helper macros ── #}
+{% set WEIGHTS = {
+  'tab_switch':15,'copy_attempt':5,'paste_attempt':5,'cut_attempt':5,
+  'right_click':5,'focus_loss':10,'window_resize':10,'camera_away':20,
+  'multiple_faces':25,'phone_detected':30,'devtools_open':35,
+  'fullscreen_exit':18,'audio_anomaly':12,'screenshot_attempt':8,
+  'eye_contact_loss':5
+} %}
+
+{% set risk_class = 'risk-high' if risk == 'High Risk' else ('risk-sus' if risk == 'Suspicious' else 'risk-safe') %}
+{% set score_color = '#ef4444' if risk == 'High Risk' else ('#f59e0b' if risk == 'Suspicious' else '#10b981') %}
+
+{# ── SVG ring math ── circumference = 2π×52 ≈ 326.7 ── #}
+{% set max_score = 300 %}
+{% set ring_pct  = [severity_score / max_score, 1.0] | min %}
+{% set ring_dash = (ring_pct * 326.7) | round(1) %}
+
+<!-- ══════════════════════════════════════════
+     BANNER
+══════════════════════════════════════════ -->
+<div class="pr-banner">
+  <div class="pr-banner-left">
+    <div class="pr-banner-eyebrow">
+      <i class="bi bi-shield-exclamation"></i>
+      Interview Integrity Report &nbsp;·&nbsp; #{{ interview.interview_id }}
+    </div>
+    <div class="pr-banner-title">
+      Proctoring Summary —
+      {{ interview.candidate.full_name if interview.candidate else 'Unknown Candidate' }}
+    </div>
+    <div class="pr-banner-meta">
+      <span><i class="bi bi-briefcase"></i>
+        {{ interview.job.title if interview.job else '—' }}
+      </span>
+      <span><i class="bi bi-calendar3"></i>
+        {{ interview.interview_date or '—' }}
+      </span>
+      <span><i class="bi bi-activity"></i>
+        {{ events | length }} event{{ 's' if events | length != 1 else '' }} recorded
+      </span>
+    </div>
+  </div>
+  <span class="risk-pill {{ risk_class }}">
+    <i class="bi bi-{% if risk == 'High Risk' %}shield-x{% elif risk == 'Suspicious' %}exclamation-triangle{% else %}shield-check{% endif %}-fill"></i>
+    {{ risk }}
+  </span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TOP ROW — Ring + Interview Details + Offer/Status
+══════════════════════════════════════════ -->
+<div class="pr-top-grid">
+
+  <!-- Fraud Score Ring -->
+  <div class="score-ring-card">
+    <div class="score-ring-wrap">
+      <svg viewBox="0 0 120 120" width="140" height="140">
+        <!-- track -->
+        <circle cx="60" cy="60" r="52" fill="none"
+                stroke="rgba(99,143,220,.1)" stroke-width="12"/>
+        <!-- fill -->
+        <circle cx="60" cy="60" r="52" fill="none"
+                stroke="{{ score_color }}" stroke-width="12"
+                stroke-dasharray="{{ ring_dash }} 326.7"
+                stroke-linecap="round"
+                style="filter:drop-shadow(0 0 8px {{ score_color }}66);"/>
+      </svg>
+      <div class="score-ring-center">
+        <div class="score-ring-val" style="color:{{ score_color }};">{{ severity_score }}</div>
+        <div class="score-ring-lbl">Fraud Score</div>
+      </div>
+    </div>
+    <div class="score-ring-risk" style="color:{{ score_color }};">{{ risk }}</div>
+    <div class="score-ring-sub">
+      {% if risk == 'High Risk' %}Requires immediate review
+      {% elif risk == 'Suspicious' %}Manual review recommended
+      {% else %}Session appears clean{% endif %}
+    </div>
+  </div>
+
+  <!-- Interview Details -->
+  <div class="pr-detail-card">
+    <div class="pr-detail-header">
+      <div class="pr-detail-title">
+        <i class="bi bi-person-video3" style="color:var(--blue-3,#60a5fa);"></i>
+        Interview Details
+      </div>
+      <span class="badge badge-{{ 'green' if interview.status in ['Selected'] else 'red' if interview.status == 'Rejected' else 'amber' }}">
+        {{ interview.status or 'Pending' }}
+      </span>
+    </div>
+    <div class="pr-detail-body">
+      <div class="grid-2" style="gap:10px;">
+        <div class="pr-field">
+          <span class="pr-field-label">Candidate</span>
+          <span class="pr-field-value">{{ interview.candidate.full_name if interview.candidate else '—' }}</span>
+        </div>
+        <div class="pr-field">
+          <span class="pr-field-label">Email</span>
+          <span class="pr-field-value">{{ interview.candidate.email if interview.candidate else '—' }}</span>
+        </div>
+        <div class="pr-field">
+          <span class="pr-field-label">Job Role</span>
+          <span class="pr-field-value">{{ interview.job.title if interview.job else '—' }}</span>
+        </div>
+        <div class="pr-field">
+          <span class="pr-field-label">Interview Mode</span>
+          <span class="pr-field-value">{{ interview.mode or 'AI Interview' }}</span>
+        </div>
+        <div class="pr-field">
+          <span class="pr-field-label">Date / Time</span>
+          <span class="pr-field-value">
+            {{ interview.interview_date or '—' }}
+            {% if interview.interview_time %}&nbsp;at&nbsp;{{ interview.interview_time }}{% endif %}
+          </span>
+        </div>
+        <div class="pr-field">
+          <span class="pr-field-label">Duration</span>
+          <span class="pr-field-value">
+            {% if interview.ai_duration_seconds %}
+              {{ (interview.ai_duration_seconds // 60) }}m {{ (interview.ai_duration_seconds % 60) }}s
+            {% else %}—{% endif %}
+          </span>
+        </div>
+        {% if interview.meeting_link %}
+        <div class="pr-field" style="grid-column:1/-1;">
+          <span class="pr-field-label">Meeting Link</span>
+          <span class="pr-field-value">
+            <a href="{{ interview.meeting_link }}" target="_blank">
+              <i class="bi bi-box-arrow-up-right"></i> Join / View
+            </a>
+          </span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recruiter Actions -->
+  <div class="pr-detail-card">
+    <div class="pr-detail-header">
+      <div class="pr-detail-title">
+        <i class="bi bi-check2-all" style="color:#10b981;"></i>
+        Recruiter Actions
+      </div>
+    </div>
+    <div class="pr-detail-body" style="display:flex;flex-direction:column;gap:10px;">
+      <a href="{{ url_for('recruiter_interview_list.select', interview_id=interview.interview_id) }}"
+         class="btn btn-sm"
+         style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981;justify-content:center;"
+         onclick="return confirm('Mark this candidate as Selected?')">
+        <i class="bi bi-person-check-fill"></i> Mark Selected
+      </a>
+      <a href="{{ url_for('recruiter_interview_list.reject', interview_id=interview.interview_id) }}"
+         class="btn btn-sm"
+         style="background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.28);color:#ef4444;justify-content:center;"
+         onclick="return confirm('Mark this candidate as Rejected?')">
+        <i class="bi bi-person-x-fill"></i> Mark Rejected
+      </a>
+      <a href="{{ url_for('recruiter_interview_list.complete', interview_id=interview.interview_id) }}"
+         class="btn btn-secondary btn-sm" style="justify-content:center;">
+        <i class="bi bi-check-circle"></i> Mark Completed
+      </a>
+      {% if interview.ai_recording_path %}
+      <a href="{{ url_for('candidate_interview.staff_ai_recording', interview_id=interview.interview_id) }}"
+         class="btn btn-secondary btn-sm" target="_blank" style="justify-content:center;">
+        <i class="bi bi-camera-video-fill"></i> View Recording
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     EVENT BREAKDOWN TILES
+══════════════════════════════════════════ -->
+<div class="rf-card section-gap">
+  <div class="rf-card-header">
+    <div class="rf-card-title">
+      <i class="bi bi-grid-3x3-gap-fill" style="color:var(--amber,#f59e0b);"></i>
+      Violation Breakdown
+    </div>
+    <span class="badge badge-amber">{{ events | length }} total events</span>
+  </div>
+  <div class="rf-card-body">
+    {% set event_meta = [
+      ('tab_switch',       'Tab Switches',        'bi-display',             15),
+      ('copy_attempt',     'Copy Attempts',        'bi-clipboard',            5),
+      ('paste_attempt',    'Paste Attempts',       'bi-clipboard-check',      5),
+      ('cut_attempt',      'Cut Attempts',         'bi-scissors',             5),
+      ('right_click',      'Right Clicks',         'bi-mouse2',               5),
+      ('focus_loss',       'Focus Loss',           'bi-eye-slash',           10),
+      ('window_resize',    'Window Resize',        'bi-arrows-angle-contract',10),
+      ('camera_away',      'Camera Away',          'bi-camera-video-off',    20),
+      ('multiple_faces',   'Multiple Faces',       'bi-people-fill',         25),
+      ('phone_detected',   'Phone Detected',       'bi-phone-fill',          30),
+      ('devtools_open',    'DevTools Opened',      'bi-code-slash',          35),
+      ('fullscreen_exit',  'Fullscreen Exits',     'bi-fullscreen-exit',     18),
+      ('audio_anomaly',    'Audio Anomalies',      'bi-mic-mute-fill',       12),
+      ('screenshot_attempt','Screenshots',         'bi-camera-fill',          8),
+      ('eye_contact_loss', 'Eye Contact Loss',     'bi-eye',                  5),
+    ] %}
+    <div class="weight-grid">
+      {% for evt_key, evt_label, evt_icon, evt_pts in event_meta %}
+        {% set cnt = counts.get(evt_key, 0) %}
+        {% set severity_cls = 'wt-zero' if cnt == 0 else ('wt-high' if evt_pts >= 25 else ('wt-medium' if evt_pts >= 12 else 'wt-low')) %}
+      <div class="weight-tile {{ severity_cls }}">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <i class="bi {{ evt_icon }}"
+             style="font-size:14px;color:{% if cnt == 0 %}var(--text-dim){% elif evt_pts >= 25 %}#ef4444{% elif evt_pts >= 12 %}#f59e0b{% else %}#60a5fa{% endif %};"></i>
+          <span class="weight-tile-label">{{ evt_label }}</span>
+        </div>
+        <div class="weight-tile-count">{{ cnt }}</div>
+        <div class="weight-tile-pts">× {{ evt_pts }} pts = <strong>{{ cnt * evt_pts }}</strong></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     AI SCORE SUMMARY (if available)
+══════════════════════════════════════════ -->
+{% if interview.ai_final_score is not none or interview.ai_duration_seconds %}
+<div class="rf-card section-gap">
+  <div class="rf-card-header">
+    <div class="rf-card-title">
+      <i class="bi bi-stars" style="color:#60a5fa;"></i>
+      AI Interview Score
+    </div>
+    <span class="badge badge-{{ 'green' if (interview.ai_final_score or 0) >= 70 else 'red' }}">
+      {{ 'Passed' if (interview.ai_final_score or 0) >= 70 else 'Did not pass' }}
+    </span>
+  </div>
+  <div class="rf-card-body">
+    <div class="ai-score-row">
+      <div class="ai-score-chip">
+        <div class="asc-label">AI Score</div>
+        <div class="asc-val"
+             style="color:{% if (interview.ai_final_score or 0) >= 70 %}#10b981{% else %}#ef4444{% endif %};">
+          {{ interview.ai_final_score if interview.ai_final_score is not none else '—' }}
+          {% if interview.ai_final_score is not none %}<span style="font-size:13px;color:var(--text-dim);">/100</span>{% endif %}
+        </div>
+      </div>
+      <div class="ai-score-chip">
+        <div class="asc-label">AI Decision</div>
+        <div class="asc-val"
+             style="color:{% if interview.status == 'Selected' %}#10b981{% elif interview.status == 'Rejected' %}#ef4444{% else %}#f59e0b{% endif %};">
+          {{ interview.status or '—' }}
+        </div>
+      </div>
+      <div class="ai-score-chip">
+        <div class="asc-label">Duration</div>
+        <div class="asc-val">
+          {% if interview.ai_duration_seconds %}
+            {{ (interview.ai_duration_seconds // 60) }}m {{ (interview.ai_duration_seconds % 60) }}s
+          {% else %}—{% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% if interview.ai_recording_path %}
+    <div class="pr-video-wrap">
+      <video controls preload="metadata">
+        <source src="{{ url_for('candidate_interview.staff_ai_recording', interview_id=interview.interview_id) }}"
+                type="video/webm">
+        Your browser does not support the video element.
+      </video>
+    </div>
+    {% endif %}
+
+    {% if interview.ai_transcript %}
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+                color:var(--text-dim);margin-bottom:8px;">
+      Full Transcript
+    </div>
+    <pre class="pr-transcript-pre">{{ interview.ai_transcript }}</pre>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════
+     FULL EVENT LOG TABLE
+══════════════════════════════════════════ -->
+<div class="rf-card section-gap">
+  <div class="rf-card-header">
+    <div class="rf-card-title">
+      <i class="bi bi-list-columns-reverse" style="color:var(--cyan,#06b6d4);"></i>
+      Full Event Log
+    </div>
+    <span class="badge badge-cyan">Chronological</span>
+  </div>
+  {% if events %}
+  <div class="rf-table-wrap" style="border:none;border-radius:0;">
+    <table class="pr-event-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Timestamp</th>
+          <th>Event Type</th>
+          <th>Details</th>
+          <th>Severity</th>
+          <th>Weight</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+        {% set w = WEIGHTS.get(event.event_type, 10) %}
+        <tr>
+          <td style="color:var(--text-dim);font-weight:700;">{{ loop.index }}</td>
+          <td style="font-size:11.5px;white-space:nowrap;">
+            {{ event.created_at.strftime('%Y-%m-%d %H:%M:%S') if event.created_at else '—' }}
+          </td>
+          <td class="ev-name">
+            <i class="bi bi-{% if event.severity == 'high' %}exclamation-octagon-fill{% elif event.severity == 'medium' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"
+               style="font-size:12px;margin-right:5px;color:{% if event.severity == 'high' %}#ef4444{% elif event.severity == 'medium' %}#f59e0b{% else %}#60a5fa{% endif %};"></i>
+            {{ event.event_type.replace('_',' ') | title }}
+          </td>
+          <td class="ev-detail" title="{{ event.details or '' }}">
+            {{ event.details or '—' }}
+          </td>
+          <td>
+            <span class="sev-badge sev-{{ event.severity or 'low' }}">
+              {{ (event.severity or 'low') | title }}
+            </span>
+          </td>
+          <td style="font-weight:700;color:{% if w >= 25 %}#ef4444{% elif w >= 12 %}#f59e0b{% else %}#60a5fa{% endif %};">
+            +{{ w }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="rf-card-body">
+    <div style="text-align:center;padding:28px;color:var(--text-dim);">
+      <i class="bi bi-shield-check" style="font-size:32px;color:#10b981;display:block;margin-bottom:10px;"></i>
+      No proctoring events were recorded for this interview session.
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

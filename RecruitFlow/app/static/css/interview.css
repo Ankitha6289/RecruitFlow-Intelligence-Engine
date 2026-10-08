@@ -1,0 +1,306 @@
+body{
+    background:#f3f5f9;
+    font-family:"Segoe UI",sans-serif;
+}
+
+/* ===========================
+HEADER
+=========================== */
+
+.interview-header{
+
+    background:white;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:15px 25px;
+
+    border-radius:15px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+
+    margin:20px;
+
+}
+
+.left-header{
+
+    display:flex;
+
+    align-items:center;
+
+}
+
+.company-logo{
+
+    width:60px;
+
+    margin-right:15px;
+
+}
+
+.left-header h3{
+
+    margin:0;
+
+    color:#0d6efd;
+
+}
+
+.center-header{
+
+    font-size:28px;
+
+    font-weight:bold;
+
+    color:#dc3545;
+
+}
+
+.right-header{
+
+    display:flex;
+
+    align-items:center;
+
+    font-weight:bold;
+
+}
+
+/* ===========================
+RECORDING
+=========================== */
+
+.recording-dot{
+
+    width:14px;
+
+    height:14px;
+
+    border-radius:50%;
+
+    background:red;
+
+    margin-right:8px;
+
+    animation:blink 1s infinite;
+
+}
+
+@keyframes blink{
+
+50%{
+
+opacity:.2;
+
+}
+
+}
+
+/* ===========================
+MAIN
+=========================== */
+
+.interview-container{
+
+    display:flex;
+
+    gap:20px;
+
+    padding:20px;
+
+}
+
+/* ===========================
+VIDEO
+=========================== */
+
+.video-panel{
+
+    width:65%;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:15px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+
+}
+
+#video{
+
+    width:100%;
+
+    height:550px;
+
+    border-radius:12px;
+
+    background:black;
+
+    object-fit:cover;
+
+}
+
+/* ===========================
+AI PANEL
+=========================== */
+
+.ai-panel{
+
+    width:35%;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:15px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+
+}
+
+.ai-avatar{
+
+    width:140px;
+
+    height:140px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    background:#0d6efd;
+
+    color:white;
+
+    font-size:70px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    animation:pulse 2s infinite;
+
+}
+
+@keyframes pulse{
+
+0%{
+
+transform:scale(1);
+
+}
+
+50%{
+
+transform:scale(1.08);
+
+}
+
+100%{
+
+transform:scale(1);
+
+}
+
+}
+
+/* ===========================
+QUESTION
+=========================== */
+
+.question-box{
+
+    background:#eef5ff;
+
+    padding:20px;
+
+    border-radius:10px;
+
+    font-size:20px;
+
+    font-weight:600;
+
+    margin-top:15px;
+
+    min-height:100px;
+
+}
+
+/* ===========================
+TEXTAREA
+=========================== */
+
+textarea{
+
+    margin-top:15px;
+
+}
+
+/* ===========================
+FEEDBACK
+=========================== */
+
+.feedback-box{
+
+    background:#fff7d6;
+
+    padding:20px;
+
+    border-radius:10px;
+
+    min-height:120px;
+
+    margin-top:15px;
+
+    font-size:17px;
+
+}
+
+/* ===========================
+BUTTON
+=========================== */
+
+.btn-danger{
+
+    font-size:20px;
+
+    padding:12px;
+
+}
+
+/* ===========================
+RESPONSIVE
+=========================== */
+
+@media(max-width:1000px){
+
+.interview-container{
+
+flex-direction:column;
+
+}
+
+.video-panel,
+
+.ai-panel{
+
+width:100%;
+
+}
+
+#video{
+
+height:350px;
+
+}
+
+}

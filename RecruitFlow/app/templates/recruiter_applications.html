@@ -1,0 +1,212 @@
+{% extends "recruiter_base.html" %}
+
+{% block title %}Applications{% endblock %}
+
+{% block page_title %}
+<div>Candidate Applications <span style="color:var(--text-sec);font-weight:400;font-size:12.5px;display:block;margin-top:2px;">Review, shortlist and schedule interviews for applicants.</span></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Candidate Avatar ── */
+.cand-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #5b21b6);
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+.cand-name { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.cand-email { font-size: 11.5px; color: var(--text-dim); }
+
+/* ── Score Bar ── */
+.score-mini-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.score-mini-bar {
+    flex: 1;
+    height: 5px;
+    background: rgba(255,255,255,.07);
+    border-radius: 99px;
+    overflow: hidden;
+    min-width: 50px;
+}
+.score-mini-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.score-mini-num {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    white-space: nowrap;
+}
+
+/* ── Filter Tabs ── */
+.filter-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+.filter-tab {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-sec);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .15s;
+}
+.filter-tab:hover, .filter-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Status filter tabs -->
+<div class="filter-tabs">
+    <a href="{{ url_for('recruiter_application.applications') }}" class="filter-tab active">
+        <i class="bi bi-grid-3x3-gap"></i> All
+    </a>
+    <a href="{{ url_for('recruiter_application.applications') }}?status=Applied" class="filter-tab">
+        <i class="bi bi-send"></i> Applied
+    </a>
+    <a href="{{ url_for('recruiter_application.applications') }}?status=Shortlisted" class="filter-tab">
+        <i class="bi bi-star"></i> Shortlisted
+    </a>
+    <a href="{{ url_for('recruiter_application.applications') }}?status=Rejected" class="filter-tab">
+        <i class="bi bi-x-circle"></i> Rejected
+    </a>
+</div>
+
+<!-- Applications Table -->
+<div class="rf-card">
+    <div class="rf-card-header">
+        <h3 class="rf-card-title">
+            <i class="bi bi-file-earmark-person" style="color:var(--accent2);"></i>
+            All Applications
+        </h3>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span class="rf-badge rf-badge-purple">{{ applications|length }} Total</span>
+        </div>
+    </div>
+
+    <div class="rf-table-wrap" style="border:none;border-radius:0;">
+        <table class="rf-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Candidate</th>
+                    <th>Applied For</th>
+                    <th>AI Score</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td>
+                        <span style="font-size:11px;font-weight:700;color:var(--text-dim);">#{{ application.application_id }}</span>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:11px;">
+                            <div class="cand-avatar">{{ application.candidate.full_name[0]|upper }}</div>
+                            <div>
+                                <div class="cand-name">{{ application.candidate.full_name }}</div>
+                                <div class="cand-email">{{ application.candidate.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size:13px;font-weight:600;color:var(--text);">{{ application.job.title }}</div>
+                        <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px;">
+                            <i class="bi bi-building"></i> {{ application.job.company if application.job.company else '—' }}
+                        </div>
+                    </td>
+                    <td>
+                        {% if application.candidate.ai_analysis %}
+                            {% set score = application.candidate.ai_analysis.suitability_scores | float %}
+                            <div class="score-mini-wrap">
+                                <div class="score-mini-bar">
+                                    <div class="score-mini-fill" data-w="{{ score | int }}"></div>
+                                </div>
+                                <span class="score-mini-num">{{ score | int }}%</span>
+                            </div>
+                        {% else %}
+                            <span class="rf-badge rf-badge-gray">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if application.status == 'Applied' %}
+                            <span class="rf-badge rf-badge-blue"><i class="bi bi-send"></i> Applied</span>
+                        {% elif application.status == 'Shortlisted' %}
+                            <span class="rf-badge rf-badge-green"><i class="bi bi-star-fill"></i> Shortlisted</span>
+                        {% elif application.status == 'Rejected' %}
+                            <span class="rf-badge rf-badge-red"><i class="bi bi-x-circle"></i> Rejected</span>
+                        {% else %}
+                            <span class="rf-badge rf-badge-gray">{{ application.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <a href="{{ url_for('candidate_management.candidate_details', candidate_id=application.candidate.candidate_id) }}"
+                               class="rf-btn rf-btn-blue rf-btn-sm">
+                                <i class="bi bi-person"></i> Profile
+                            </a>
+                            <a href="{{ url_for('recruiter_application.shortlist', application_id=application.application_id) }}"
+                               class="rf-btn rf-btn-success rf-btn-sm">
+                                <i class="bi bi-star"></i> Shortlist
+                            </a>
+                            <a href="{{ url_for('recruiter_application.reject', application_id=application.application_id) }}"
+                               class="rf-btn rf-btn-amber rf-btn-sm">
+                                <i class="bi bi-x"></i> Reject
+                            </a>
+                            <a href="/interviews/add/{{ application.application_id }}"
+                               class="rf-btn rf-btn-outline rf-btn-sm">
+                                <i class="bi bi-calendar-plus"></i> Interview
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">
+                        <div class="rf-empty">
+                            <div class="rf-empty-icon"><i class="bi bi-file-earmark-person"></i></div>
+                            <div class="rf-empty-title">No Applications Yet</div>
+                            <p class="rf-empty-desc">Once candidates apply to your jobs, they will appear here for review.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Apply data-w (width percentage) to score bar fills
+document.querySelectorAll('.score-mini-fill[data-w]').forEach(function(el) {
+    el.style.width = el.getAttribute('data-w') + '%';
+});
+</script>
+{% endblock %}

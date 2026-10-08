@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RecruitFlow — Complete UI/UX Design System</title>
+<style>
+:root{
+  --bg:#051424;--surface:#0d1c2d;--surface-hi:#1c2b3c;--surface-hst:#273647;
+  --border:rgba(140,144,159,0.2);--primary:#adc6ff;--primary-c:#4d8eff;
+  --green:#34d399;--amber:#fbbf24;--pink:#fb7185;--orange:#fb923c;
+  --cyan:#38bdf8;--purple:#a78bfa;--red:#ff8a8a;
+  --text:#d4e4fa;--text-sec:#8c909f;--text-dim:#424754;
+  --r:12px;--r-sm:8px;--r-lg:16px;
+  font-size:13px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5}
+
+/* ── layout ── */
+.toc{width:260px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;overflow-y:auto;padding:16px 0}
+.content{margin-left:260px;padding:40px 48px;max-width:1400px}
+
+/* ── toc ── */
+.toc-logo{display:flex;align-items:center;gap:8px;padding:16px 20px 20px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.toc-logo span{font-size:18px;font-weight:700;color:var(--primary)}
+.bolt{width:28px;height:28px;background:var(--primary-c);border-radius:6px;display:grid;place-items:center;font-size:16px;color:#000}
+.toc-section{padding:4px 20px 2px;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;margin-top:12px}
+.toc a{display:block;padding:7px 20px;color:var(--text-sec);text-decoration:none;border-radius:0;font-size:12px;transition:all .15s}
+.toc a:hover,.toc a.active{background:rgba(77,142,255,.12);color:var(--primary);padding-left:24px}
+
+/* ── sections ── */
+.section-hero{background:linear-gradient(135deg,rgba(77,142,255,.08),rgba(5,20,36,1) 70%);border:1px solid rgba(77,142,255,.2);border-radius:var(--r-lg);padding:32px 36px;margin-bottom:40px}
+.section-hero h1{font-size:28px;font-weight:700;color:var(--primary);margin-bottom:6px}
+.section-hero p{color:var(--text-sec);max-width:720px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-blue{background:rgba(77,142,255,.15);color:var(--primary)}
+.badge-green{background:rgba(52,211,153,.15);color:var(--green)}
+.badge-amber{background:rgba(251,191,36,.15);color:var(--amber)}
+.badge-purple{background:rgba(167,139,250,.15);color:var(--purple)}
+.badge-pink{background:rgba(251,113,133,.15);color:var(--pink)}
+.badge-orange{background:rgba(251,146,60,.15);color:var(--orange)}
+
+h2{font-size:22px;font-weight:700;color:var(--text);margin:40px 0 6px;display:flex;align-items:center;gap:10px}
+h2 .icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+h2 .icon.blue{background:rgba(77,142,255,.15);color:var(--primary-c)}
+h2 .icon.green{background:rgba(52,211,153,.15);color:var(--green)}
+h2 .icon.amber{background:rgba(251,191,36,.15);color:var(--amber)}
+h2 .icon.purple{background:rgba(167,139,250,.15);color:var(--purple)}
+h2 .icon.cyan{background:rgba(56,189,248,.15);color:var(--cyan)}
+h3{font-size:15px;font-weight:600;color:var(--text);margin:24px 0 10px}
+.sub{color:var(--text-sec);font-size:12px;margin-bottom:20px}
+hr{border:none;border-top:1px solid var(--border);margin:36px 0}
+
+/* ── colour palette ── */
+.palette{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}
+.swatch{width:80px}
+.swatch-color{height:52px;border-radius:8px;margin-bottom:6px}
+.swatch p{font-size:10px;color:var(--text-sec);line-height:1.4}
+.swatch strong{display:block;color:var(--text);font-size:11px}
+
+/* ── type scale ── */
+.type-row{display:flex;align-items:baseline;gap:20px;padding:10px 0;border-bottom:1px solid var(--border)}
+.type-row:last-child{border:none}
+.type-label{width:140px;font-size:11px;color:var(--text-sec);flex-shrink:0}
+.type-sample{color:var(--text)}
+
+/* ── component showcase ── */
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:16px 0}
+.comp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.comp-card h4{font-size:12px;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
+
+/* ── buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s}
+.btn-primary{background:var(--primary-c);color:#fff}
+.btn-secondary{background:var(--surface-hi);color:var(--text);border:1px solid var(--border)}
+.btn-danger{background:rgba(255,138,138,.15);color:var(--red);border:1px solid rgba(255,138,138,.3)}
+.btn-success{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+.btn-ghost{background:transparent;color:var(--text-sec);border:1px solid var(--border)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+
+/* ── form inputs ── */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:11px;font-weight:600;color:var(--text-sec);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+.form-input{width:100%;background:var(--surface-hi);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none}
+.form-input:focus{border-color:var(--primary-c)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238c909f' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+
+/* ── stat card ── */
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;padding:16px}
+.stat-card .top-bar{height:3px;border-radius:3px 3px 0 0;margin:-16px -16px 14px}
+.stat-meta{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
+.stat-num{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.stat-sub{font-size:11px;color:var(--text-sec)}
+
+/* ── table ── */
+.rf-table{width:100%;border-collapse:collapse;margin:10px 0}
+.rf-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.rf-table td{padding:10px 12px;font-size:12px;color:var(--text);border-bottom:1px solid rgba(140,144,159,.08)}
+.rf-table tr:last-child td{border:none}
+.rf-table tr:hover td{background:rgba(77,142,255,.04)}
+
+/* ── page mockup wrapper ── */
+.page-mock{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin:20px 0}
+.page-mock-header{background:var(--bg);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.page-mock-header h3{font-size:16px;font-weight:700;color:var(--text);margin:0}
+.page-mock-header p{font-size:11px;color:var(--text-sec)}
+.page-mock-body{padding:24px}
+
+/* ── sidebar mock ── */
+.sidebar-mock{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;display:flex;flex-direction:column;gap:2px}
+.sidebar-logo{display:flex;align-items:center;gap:8px;padding:8px 16px 14px;margin-bottom:4px;border-bottom:1px solid var(--border)}
+.sidebar-logo-text{font-size:15px;font-weight:700;color:var(--primary)}
+.sidebar-section{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--text-dim);text-transform:uppercase;padding:10px 16px 4px}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:0;color:var(--text-sec);font-size:12px;cursor:pointer;margin:0 6px;border-radius:99px}
+.sidebar-item.active{background:rgba(77,142,255,.18);color:var(--primary)}
+.sidebar-item:hover:not(.active){background:var(--surface-hi)}
+.sidebar-item .si{font-size:15px}
+
+/* ── portal layouts ── */
+.portal-layout{display:flex;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;height:520px}
+.portal-main{flex:1;overflow:auto;background:var(--bg)}
+
+/* ── card grid ── */
+.card-g{display:grid;gap:12px}
+.card-g-2{grid-template-columns:1fr 1fr}
+.card-g-3{grid-template-columns:1fr 1fr 1fr}
+.card-g-4{grid-template-columns:repeat(4,1fr)}
+.mini-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.mini-card.blue{border-color:rgba(77,142,255,.25);background:linear-gradient(135deg,rgba(77,142,255,.08),var(--surface) 60%)}
+.mini-card.green{border-color:rgba(52,211,153,.25);background:linear-gradient(135deg,rgba(52,211,153,.08),var(--surface) 60%)}
+.mini-card.amber{border-color:rgba(251,191,36,.25);background:linear-gradient(135deg,rgba(251,191,36,.08),var(--surface) 60%)}
+.mini-card.pink{border-color:rgba(251,113,133,.25);background:linear-gradient(135deg,rgba(251,113,133,.08),var(--surface) 60%)}
+.mini-card .mc-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.mini-card .mc-label.blue{color:var(--primary-c)}
+.mini-card .mc-label.green{color:var(--green)}
+.mini-card .mc-label.amber{color:var(--amber)}
+.mini-card .mc-label.pink{color:var(--pink)}
+.mini-card .mc-num{font-size:26px;font-weight:700;line-height:1;color:var(--text)}
+.mini-card .mc-sub{font-size:10px;color:var(--text-sec);margin-top:3px}
+
+/* ── ai card ── */
+.ai-card{background:var(--surface);border:1px solid rgba(167,139,250,.2);border-radius:var(--r);padding:14px}
+.ai-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-avatar{width:32px;height:32px;border-radius:50%;background:rgba(77,142,255,.2);color:var(--primary);display:grid;place-items:center;font-weight:700;font-size:14px;flex-shrink:0}
+.ai-name{font-size:13px;font-weight:600;color:var(--text)}
+.ai-email{font-size:11px;color:var(--text-sec)}
+.role-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.role-chip{padding:2px 8px;background:var(--surface-hi);border:1px solid var(--border);border-radius:5px;font-size:10px;color:var(--text-sec)}
+
+/* ── interview proctor ── */
+.risk-badge{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700}
+.risk-high{background:rgba(255,138,138,.15);color:var(--red)}
+.risk-med{background:rgba(251,191,36,.15);color:var(--amber)}
+.risk-low{background:rgba(52,211,153,.15);color:var(--green)}
+
+/* ── progress bar ── */
+.prog-wrap{background:rgba(77,142,255,.1);border-radius:99px;height:6px;margin:6px 0}
+.prog-fill{height:6px;border-radius:99px;background:linear-gradient(90deg,var(--primary-c),var(--primary))}
+
+/* ── timeline ── */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:12px;padding-bottom:18px;position:relative}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:13px;top:28px;width:2px;height:calc(100% - 10px);background:var(--border)}
+.tl-dot{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:12px;z-index:1}
+.tl-dot.blue{background:rgba(77,142,255,.2);color:var(--primary-c)}
+.tl-dot.green{background:rgba(52,211,153,.2);color:var(--green)}
+.tl-dot.amber{background:rgba(251,191,36,.2);color:var(--amber)}
+.tl-dot.pink{background:rgba(251,113,133,.2);color:var(--pink)}
+.tl-content p{font-size:12px;color:var(--text)}
+.tl-content small{font-size:10px;color:var(--text-sec)}
+
+/* ── notification ── */
+.notif-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.notif-item:last-child{border:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.notif-title{font-size:12px;font-weight:600;color:var(--text)}
+.notif-msg{font-size:11px;color:var(--text-sec)}
+.notif-time{font-size:10px;color:var(--text-dim);margin-top:2px}
+
+/* ── chatbot ── */
+.chat-bubble{padding:8px 12px;border-radius:10px;font-size:12px;max-width:85%;margin-bottom:8px}
+.chat-user{background:rgba(77,142,255,.18);color:var(--primary);margin-left:auto;border-bottom-right-radius:3px}
+.chat-ai{background:var(--surface-hi);color:var(--text);border-bottom-left-radius:3px}
+
+/* ── skill bar ── */
+.skill-row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.skill-name{width:80px;font-size:11px;color:var(--text-sec);flex-shrink:0}
+.skill-bar-bg{flex:1;height:6px;background:rgba(77,142,255,.1);border-radius:3px}
+.skill-bar-fill{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--primary-c),var(--primary))}
+.skill-count{width:30px;font-size:10px;color:var(--primary-c);text-align:right;flex-shrink:0}
+
+/* ── section label ── */
+.section-label{display:flex;align-items:center;gap:10px;margin:36px 0 16px}
+.section-label .line{flex:1;height:1px;background:var(--border)}
+.section-label span{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);white-space:nowrap}
+
+/* ── page nav pill ── */
+.page-nav{display:flex;gap:6px;margin:16px 0;flex-wrap:wrap}
+.page-pill{padding:5px 14px;border-radius:99px;font-size:11px;font-weight:600;cursor:default;border:1px solid var(--border);color:var(--text-sec)}
+.page-pill.active{background:rgba(77,142,255,.15);border-color:rgba(77,142,255,.4);color:var(--primary)}
+
+/* ── modal mock ── */
+.modal-bg{background:rgba(5,20,36,.85);border-radius:var(--r-lg);padding:20px;backdrop-filter:blur(4px)}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;max-width:440px}
+.modal-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.modal-sub{font-size:11px;color:var(--text-sec);margin-bottom:18px}
+</style>
+</head>
+<body>
+
+<!-- TOC -->
+<nav class="toc">
+  <div class="toc-logo"><div class="bolt">⚡</div><span>RecruitFlow</span></div>
+  <div class="toc-section">Foundation</div>
+  <a href="#colors">Color System</a>
+  <a href="#type">Typography</a>
+  <a href="#components">Components</a>
+  <a href="#layout">Layout Anatomy</a>
+  <div class="toc-section">Admin Portal</div>
+  <a href="#admin-dashboard">Dashboard</a>
+  <a href="#admin-candidates">Candidates</a>
+  <a href="#admin-candidate-detail">Candidate Detail</a>
+  <a href="#admin-scoring">Scoring Dashboard</a>
+  <a href="#admin-jobs">Jobs</a>
+  <a href="#admin-interviews">Interviews</a>
+  <a href="#admin-offers">Offers</a>
+  <a href="#admin-applications">Applications</a>
+  <a href="#admin-ai-tools">AI Tools</a>
+  <a href="#admin-reports">Reports & Analytics</a>
+  <a href="#admin-system">System Pages</a>
+  <div class="toc-section">Recruiter Portal</div>
+  <a href="#rec-dashboard">Dashboard</a>
+  <a href="#rec-jobs">Jobs</a>
+  <a href="#rec-applications">Applications</a>
+  <a href="#rec-interviews">Interviews</a>
+  <a href="#rec-proctor">Proctor View</a>
+  <a href="#rec-offers">Offers</a>
+  <div class="toc-section">Candidate Portal</div>
+  <a href="#cand-auth">Auth (Login/Register)</a>
+  <a href="#cand-dashboard">Dashboard</a>
+  <a href="#cand-jobs">Browse Jobs</a>
+  <a href="#cand-interviews">Interviews + AI</a>
+  <a href="#cand-offers">Offers</a>
+  <a href="#cand-profile">Profile & Settings</a>
+  <div class="toc-section">Shared</div>
+  <a href="#shared-chatbot">AI Chatbot</a>
+  <a href="#shared-meeting">Meeting Room</a>
+  <a href="#shared-notif">Notifications</a>
+  <a href="#shared-forms">Forms Pattern</a>
+</nav>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════ HERO -->
+<div class="section-hero">
+  <h1>⚡ RecruitFlow — Complete UI/UX Design System</h1>
+  <p>Full design specification for all 3 portals (Admin, Recruiter, Candidate), covering 60+ pages. Every page layout, component, color, and interaction pattern is defined here.</p>
+  <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+    <span class="badge badge-blue">Admin Portal</span>
+    <span class="badge badge-green">Recruiter Portal</span>
+    <span class="badge badge-amber">Candidate Portal</span>
+    <span class="badge badge-purple">AI Tools</span>
+    <span class="badge badge-pink">60+ Pages</span>
+    <span class="badge" style="background:rgba(56,189,248,.15);color:#38bdf8">Dark Theme</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ COLORS -->
+<h2 id="colors"><span class="icon blue">🎨</span>Color System</h2>
+<p class="sub">All colors use CSS custom properties. The palette is Material Design 3 adapted for dark mode.</p>
+
+<div class="palette">
+  <div class="swatch"><div class="swatch-color" style="background:#4d8eff"></div><strong>#4D8EFF</strong><p>Primary / Interactive</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#adc6ff"></div><strong>#ADC6FF</strong><p>Primary Light / Text</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#34d399"></div><strong>#34D399</strong><p>Success / Active</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#fbbf24"></div><strong>#FBBF24</strong><p>Warning / Amber</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#fb7185"></div><strong>#FB7185</strong><p>Danger / Rejected</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#fb923c"></div><strong>#FB923C</strong><p>Orange / Scheduled</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#38bdf8"></div><strong>#38BDF8</strong><p>Cyan / Completed</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#a78bfa"></div><strong>#A78BFA</strong><p>Purple / AI</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#ff8a8a"></div><strong>#FF8A8A</strong><p>Red / Error</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#051424"></div><strong>#051424</strong><p>Background</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#0d1c2d"></div><strong>#0D1C2D</strong><p>Surface</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#1c2b3c"></div><strong>#1C2B3C</strong><p>Surface High</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#273647"></div><strong>#273647</strong><p>Surface Highest</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#424754"></div><strong>#424754</strong><p>Outline Variant</p></div>
+  <div class="swatch"><div class="swatch-color" style="background:#8c909f"></div><strong>#8C909F</strong><p>Secondary Text</p></div>
+</div>
+
+<h3>Status Color Mapping</h3>
+<table class="rf-table">
+  <thead><tr><th>Status</th><th>Color</th><th>Usage</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-green">Active / Selected / Accepted</span></td><td>#34D399</td><td>Jobs active, candidates selected, offers accepted</td></tr>
+    <tr><td><span class="badge badge-blue">Applied / Scheduled</span></td><td>#ADC6FF</td><td>New applications, scheduled interviews</td></tr>
+    <tr><td><span class="badge badge-orange">Scheduled / Pending</span></td><td>#FB923C</td><td>Interviews scheduled, offers pending</td></tr>
+    <tr><td><span class="badge badge-pink">Rejected / Closed / Declined</span></td><td>#FB7185</td><td>Rejected candidates, closed jobs, declined offers</td></tr>
+    <tr><td><span class="badge" style="background:rgba(56,189,248,.15);color:#38bdf8">Completed</span></td><td>#38BDF8</td><td>Completed interviews</td></tr>
+    <tr><td><span class="badge badge-purple">AI / Matched</span></td><td>#A78BFA</td><td>AI-generated content, job matches</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════ TYPOGRAPHY -->
+<h2 id="type"><span class="icon blue">Aa</span>Typography</h2>
+<p class="sub">Font: <strong>Hanken Grotesk</strong> for all body/heading text. <strong>JetBrains Mono</strong> for code/scores.</p>
+<div class="comp-card" style="margin:0">
+  <div class="type-row"><span class="type-label">headline-xl / 40px 700</span><span class="type-sample" style="font-size:32px;font-weight:700">Executive Command Center</span></div>
+  <div class="type-row"><span class="type-label">headline-lg / 32px 600</span><span class="type-sample" style="font-size:24px;font-weight:600">Candidate Pipeline</span></div>
+  <div class="type-row"><span class="type-label">headline-md / 24px 600</span><span class="type-sample" style="font-size:20px;font-weight:600">Job Postings</span></div>
+  <div class="type-row"><span class="type-label">headline-sm / 20px 600</span><span class="type-sample" style="font-size:16px;font-weight:600">Quick Actions</span></div>
+  <div class="type-row"><span class="type-label">body-lg / 18px 400</span><span class="type-sample" style="font-size:15px">RecruitFlow tracks pipelines and automates AI interviews</span></div>
+  <div class="type-row"><span class="type-label">body-md / 16px 400</span><span class="type-sample" style="font-size:13px">Candidate status updated to Selected</span></div>
+  <div class="type-row"><span class="type-label">body-sm / 14px 400</span><span class="type-sample" style="font-size:12px">Applied: 15 &nbsp;·&nbsp; Selected: 0</span></div>
+  <div class="type-row"><span class="type-label">label-md / 12px 600 CAPS</span><span class="type-sample" style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Talent Pool</span></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ COMPONENTS -->
+<h2 id="components"><span class="icon blue">⬡</span>Components</h2>
+
+<h3>Buttons</h3>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Variants</h4>
+    <div class="btns">
+      <button class="btn btn-primary">Upload Resumes</button>
+      <button class="btn btn-secondary">Post Job</button>
+      <button class="btn btn-success">Accept Offer</button>
+      <button class="btn btn-danger">Reject</button>
+      <button class="btn btn-ghost">Cancel</button>
+    </div>
+    <div class="btns">
+      <button class="btn btn-primary btn-sm">Small Primary</button>
+      <button class="btn btn-ghost btn-sm">Small Ghost</button>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>Icon Buttons</h4>
+    <div class="btns">
+      <button class="btn btn-primary">⬆ Upload</button>
+      <button class="btn btn-secondary">✏️ Edit</button>
+      <button class="btn btn-danger">🗑 Delete</button>
+      <button class="btn btn-success">✓ Select</button>
+    </div>
+    <p style="font-size:11px;color:var(--text-sec);margin-top:8px">Use icon + label for clarity. Icon-only allowed for icon buttons in table rows only.</p>
+  </div>
+</div>
+
+<h3>Status Badges</h3>
+<div class="comp-card">
+  <div style="display:flex;flex-wrap:wrap;gap:8px">
+    <span class="badge badge-green">Active</span>
+    <span class="badge badge-green">Selected</span>
+    <span class="badge badge-green">Accepted</span>
+    <span class="badge badge-green">Matched</span>
+    <span class="badge badge-blue">Applied</span>
+    <span class="badge badge-orange">Scheduled</span>
+    <span class="badge badge-orange">Pending</span>
+    <span class="badge" style="background:rgba(56,189,248,.15);color:#38bdf8">Completed</span>
+    <span class="badge badge-pink">Rejected</span>
+    <span class="badge badge-pink">Closed</span>
+    <span class="badge badge-pink">Declined</span>
+    <span class="badge badge-purple">AI Matched</span>
+    <span class="badge badge-amber">High Risk</span>
+    <span class="badge" style="background:rgba(251,191,36,.15);color:#fbbf24">Suspicious</span>
+    <span class="badge badge-green">Safe</span>
+  </div>
+</div>
+
+<h3>Stat Cards (Primary — 4-up grid)</h3>
+<div class="card-g card-g-4">
+  <div class="mini-card blue"><div class="mc-label blue">Talent Pool</div><div class="mc-num">16</div><div class="mc-sub">Applied: 15 &nbsp;·&nbsp; Selected: 0</div></div>
+  <div class="mini-card green"><div class="mc-label green">Hiring Team</div><div class="mc-num">1</div><div class="mc-sub">System Users: 3</div></div>
+  <div class="mini-card amber"><div class="mc-label amber">Openings</div><div class="mc-num">41</div><div class="mc-sub">Active: 38 &nbsp;·&nbsp; Closed: 3</div></div>
+  <div class="mini-card pink"><div class="mc-label pink">AI Sessions</div><div class="mc-num">2</div><div class="mc-sub">Scheduled: 0 &nbsp;·&nbsp; Completed: 0</div></div>
+</div>
+
+<h3>Form Inputs</h3>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Text & Select</h4>
+    <div class="form-group"><label class="form-label">Candidate Name</label><input class="form-input" placeholder="Search candidates…" /></div>
+    <div class="form-group"><label class="form-label">Status Filter</label><select class="form-input form-select"><option>All Statuses</option><option>Applied</option><option>Selected</option></select></div>
+    <div class="form-group"><label class="form-label">Min Score</label><input class="form-input" type="number" placeholder="0" /></div>
+  </div>
+  <div class="comp-card">
+    <h4>Textarea & Upload</h4>
+    <div class="form-group"><label class="form-label">Job Description</label><textarea class="form-input" rows="3" placeholder="Describe the role…" style="resize:vertical"></textarea></div>
+    <div style="border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;color:var(--text-sec);font-size:12px;cursor:pointer">
+      ☁ Drag & drop resume PDF/DOCX<br><span style="font-size:10px">or click to browse</span>
+    </div>
+  </div>
+</div>
+
+<h3>Data Table</h3>
+<div class="comp-card" style="padding:0;overflow:hidden">
+  <table class="rf-table">
+    <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Status</th><th>Score</th><th>Actions</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td style="font-weight:600">Abhishek Mishra</td><td style="color:var(--text-sec)">abhishek@email.com</td><td><span class="badge badge-blue">Applied</span></td><td style="font-family:monospace;color:var(--primary)">78.5</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-secondary btn-sm">Edit</button><button class="btn btn-danger btn-sm">Del</button></div></td></tr>
+      <tr><td>2</td><td style="font-weight:600">Aditi Chauhan</td><td style="color:var(--text-sec)">aditi@email.com</td><td><span class="badge badge-green">Selected</span></td><td style="font-family:monospace;color:var(--green)">91.2</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-secondary btn-sm">Edit</button><button class="btn btn-danger btn-sm">Del</button></div></td></tr>
+      <tr><td>3</td><td style="font-weight:600">Aditya Reddy</td><td style="color:var(--text-sec)">aditya@email.com</td><td><span class="badge badge-pink">Rejected</span></td><td style="font-family:monospace;color:var(--red)">42.0</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-secondary btn-sm">Edit</button><button class="btn btn-danger btn-sm">Del</button></div></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════ LAYOUT ANATOMY -->
+<h2 id="layout"><span class="icon blue">⬜</span>Layout Anatomy</h2>
+<p class="sub">Every admin/recruiter page follows this 3-zone layout. Candidate portal uses a top-nav variant.</p>
+<div class="portal-layout">
+  <div class="sidebar-mock">
+    <div class="sidebar-logo"><div class="bolt" style="width:24px;height:24px;font-size:12px">⚡</div><span class="sidebar-logo-text">RecruitFlow</span></div>
+    <div class="sidebar-section">Core</div>
+    <div class="sidebar-item active"><span class="si">▦</span> Dashboard</div>
+    <div class="sidebar-item"><span class="si">☁</span> Upload Resumes</div>
+    <div class="sidebar-section">People</div>
+    <div class="sidebar-item"><span class="si">👤</span> Recruiters</div>
+    <div class="sidebar-item"><span class="si">👥</span> Candidates</div>
+    <div class="sidebar-item"><span class="si">📊</span> Scoring</div>
+    <div class="sidebar-section">Recruitment</div>
+    <div class="sidebar-item"><span class="si">💼</span> Jobs</div>
+    <div class="sidebar-item"><span class="si">📅</span> Interviews</div>
+    <div class="sidebar-item"><span class="si">📋</span> Offers</div>
+    <div class="sidebar-section">AI Tools</div>
+    <div class="sidebar-item"><span class="si">🧠</span> Job Matching</div>
+    <div class="sidebar-item"><span class="si">🧩</span> Skill Gap</div>
+    <div class="sidebar-item"><span class="si">🤖</span> AI Interview</div>
+    <div class="sidebar-section">Insights</div>
+    <div class="sidebar-item"><span class="si">📈</span> Reports</div>
+    <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px">
+      <div class="ai-avatar">A</div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--text)">Admin</div><div style="font-size:10px;color:var(--text-sec)">admin@gmail.com</div></div>
+    </div>
+  </div>
+  <div class="portal-main">
+    <div style="border-bottom:1px solid var(--border);padding:14px 20px;background:rgba(5,20,36,.6);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:17px;font-weight:700;color:var(--text)">Executive Command Center</div>
+        <div style="font-size:11px;color:var(--text-sec)">Real-time intelligence, candidate pipeline, and AI analytics overview</div>
+      </div>
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--surface-hi);display:grid;place-items:center;color:var(--text-sec);cursor:pointer;border:1px solid var(--border)">🔔</div>
+    </div>
+    <div style="padding:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <span style="background:rgba(52,211,153,.1);color:var(--green);padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;border:1px solid rgba(52,211,153,.2)">● Live System Active</span>
+        <span style="background:rgba(77,142,255,.1);color:var(--primary);padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;border:1px solid rgba(77,142,255,.2)">🤖 AI Engine v2.4</span>
+      </div>
+      <div class="card-g card-g-4">
+        <div class="mini-card blue"><div class="mc-label blue">Talent Pool</div><div class="mc-num">16</div><div class="mc-sub">Applied: 15</div></div>
+        <div class="mini-card green"><div class="mc-label green">Hiring Team</div><div class="mc-num">1</div><div class="mc-sub">3 System Users</div></div>
+        <div class="mini-card amber"><div class="mc-label amber">Openings</div><div class="mc-num">41</div><div class="mc-sub">38 Active</div></div>
+        <div class="mini-card pink"><div class="mc-label pink">AI Sessions</div><div class="mc-num">2</div><div class="mc-sub">Conducted</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p style="font-size:11px;color:var(--text-sec);margin-top:8px">Sidebar = 288px fixed · Topbar = 64px sticky · Content = fluid max-w-7xl · Mobile: sidebar collapses, bottom nav appears</p>
+
+<!-- ═══════════════════════════════════════════ ADMIN DASHBOARD -->
+<div class="section-label"><span>Admin Portal</span><div class="line"></div></div>
+<h2 id="admin-dashboard"><span class="icon blue">▦</span>Admin Dashboard</h2>
+<p class="sub">The Executive Command Center — the first page after admin login. URL: <code>/admin/dashboard</code></p>
+
+<h3>Layout (top-to-bottom sections)</h3>
+<table class="rf-table">
+  <thead><tr><th>Zone</th><th>Content</th><th>Data Source</th></tr></thead>
+  <tbody>
+    <tr><td>Welcome Banner</td><td>Live status pill · AI Engine pill · "Welcome back, {name}" · Upload/Post Job CTA buttons</td><td>session.username</td></tr>
+    <tr><td>Primary Stats (4-up)</td><td>Total Candidates, Active Recruiters, Job Postings, Total Interviews — each with colored accent, sub-stats</td><td>DB counts</td></tr>
+    <tr><td>Secondary Metrics (4-up)</td><td>AI Analyses, Selection Rate %, Avg Suitability Score, Offer Acceptance Rate</td><td>DB aggregates</td></tr>
+    <tr><td>Quick Operational Actions</td><td>6 icon-tiles: Candidates, Post Job, Interviews, Offers, AI Match, Analytics</td><td>Static links</td></tr>
+    <tr><td>Interview Status Breakdown</td><td>Doughnut chart + 4-item legend (Scheduled/Completed/Selected/Rejected)</td><td>Interview counts</td></tr>
+    <tr><td>Top Skills Chart</td><td>Bar chart (Chart.js) + ranked list with candidate counts</td><td>Skills table</td></tr>
+    <tr><td>AI Recommended Roles</td><td>Cards per candidate: avatar, name, email, role chips, Matched badge</td><td>AIAnalysis + Candidate join</td></tr>
+    <tr><td>Bottom 3-column</td><td>Recent Candidates · Recent Job Openings · Recent Interviews — with status badges</td><td>Last 5 records each</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════ ADMIN CANDIDATES -->
+<h2 id="admin-candidates"><span class="icon blue">👥</span>Candidate Management List</h2>
+<p class="sub">URL: <code>/admin/candidates</code> · Template: <code>candidates/candidates.html</code></p>
+<div class="page-mock">
+  <div class="page-mock-header">
+    <div><h3>Candidates</h3><p>Talent pool overview with filters</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm">📄 Export PDF</button>
+      <button class="btn btn-secondary btn-sm">📊 Export Excel</button>
+    </div>
+  </div>
+  <div class="page-mock-body">
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <input class="form-input" style="width:200px" placeholder="🔍 Search by name, email…"/>
+      <select class="form-input form-select" style="width:140px"><option>All Statuses</option><option>Applied</option><option>Selected</option><option>Rejected</option></select>
+      <input class="form-input" style="width:140px" placeholder="Skill filter"/>
+      <input class="form-input" style="width:120px" type="number" placeholder="Min Score"/>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:16px">
+      <div class="mini-card" style="flex:1;padding:10px 14px"><div style="font-size:10px;color:var(--text-sec)">Total</div><div style="font-size:20px;font-weight:700;color:var(--text)">16</div></div>
+      <div class="mini-card" style="flex:1;padding:10px 14px"><div style="font-size:10px;color:var(--primary)">Applied</div><div style="font-size:20px;font-weight:700;color:var(--primary)">10</div></div>
+      <div class="mini-card" style="flex:1;padding:10px 14px"><div style="font-size:10px;color:var(--green)">Selected</div><div style="font-size:20px;font-weight:700;color:var(--green)">4</div></div>
+      <div class="mini-card" style="flex:1;padding:10px 14px"><div style="font-size:10px;color:var(--red)">Rejected</div><div style="font-size:20px;font-weight:700;color:var(--red)">2</div></div>
+    </div>
+    <table class="rf-table">
+      <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Skills</th><th>Score</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td style="font-weight:600">Abhishek Mishra</td><td style="color:var(--text-sec)">abhishek@email.com</td><td style="color:var(--text-sec)">Java, HTML, SQL</td><td style="font-family:monospace;color:var(--primary)">78.5</td><td><span class="badge badge-blue">Applied</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-secondary btn-sm">✏</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+        <tr><td>2</td><td style="font-weight:600">Aditi Chauhan</td><td style="color:var(--text-sec)">aditi@email.com</td><td style="color:var(--text-sec)">Python, React, CSS</td><td style="font-family:monospace;color:var(--green)">91.2</td><td><span class="badge badge-green">Selected</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-secondary btn-sm">✏</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ CANDIDATE DETAIL -->
+<h2 id="admin-candidate-detail"><span class="icon blue">📋</span>Candidate Detail View</h2>
+<p class="sub">URL: <code>/admin/candidates/&lt;id&gt;</code> · Template: <code>candidates/candidate_details.html</code></p>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Profile Header Card</h4>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div class="ai-avatar" style="width:48px;height:48px;font-size:20px">A</div>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)">Abhishek Mishra</div>
+        <div style="font-size:12px;color:var(--text-sec)">abhishek@email.com · +91 98765 43210</div>
+        <span class="badge badge-blue" style="margin-top:4px">Applied</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm">📄 Resume</button>
+      <button class="btn btn-secondary btn-sm">💬 Chatbot</button>
+      <button class="btn btn-secondary btn-sm">🎯 ATS Score</button>
+      <button class="btn btn-secondary btn-sm">✏ Edit</button>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>AI Analysis Card</h4>
+    <div style="font-size:11px;color:var(--text-sec);margin-bottom:6px">Suitability Score</div>
+    <div style="font-size:28px;font-weight:700;color:var(--primary-c);font-family:monospace">78.5<span style="font-size:14px;color:var(--text-sec)">/100</span></div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:78.5%"></div></div>
+    <div style="font-size:11px;color:var(--text-sec);margin:8px 0 4px">Recommended Roles</div>
+    <div class="role-chips"><span class="role-chip">Junior Java Developer</span><span class="role-chip">Entry-level SE</span><span class="role-chip">Trainee Programmer</span></div>
+  </div>
+  <div class="comp-card">
+    <h4>Skills</h4>
+    <div class="skill-row"><span class="skill-name">Java</span><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:85%"></div></div><span class="skill-count">85%</span></div>
+    <div class="skill-row"><span class="skill-name">HTML</span><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:70%"></div></div><span class="skill-count">70%</span></div>
+    <div class="skill-row"><span class="skill-name">SQL</span><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:60%"></div></div><span class="skill-count">60%</span></div>
+    <div class="skill-row"><span class="skill-name">Python</span><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:40%"></div></div><span class="skill-count">40%</span></div>
+  </div>
+  <div class="comp-card">
+    <h4>Education & Experience Timeline</h4>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-dot blue">🎓</div><div class="tl-content"><p style="font-weight:600">B.Tech CS — VIT University</p><small>2020–2024 · CGPA 8.4</small></div></div>
+      <div class="tl-item"><div class="tl-dot amber">💼</div><div class="tl-content"><p style="font-weight:600">Intern — TCS</p><small>Jun 2023 – Dec 2023 · Java Developer</small></div></div>
+      <div class="tl-item"><div class="tl-dot green">✓</div><div class="tl-content"><p style="font-weight:600">Applied at RecruitFlow</p><small>Sep 2026</small></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SCORING DASHBOARD -->
+<h2 id="admin-scoring"><span class="icon blue">📊</span>Scoring Dashboard</h2>
+<p class="sub">URL: <code>/admin/candidates/scoring-dashboard</code> · Ranked leaderboard of all candidates by AI suitability score.</p>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Leaderboard Table</h4>
+    <table class="rf-table">
+      <thead><tr><th>Rank</th><th>Candidate</th><th>Score</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--amber);font-weight:700">🥇 1</td><td style="font-weight:600">Aditi Chauhan</td><td style="font-family:monospace;color:var(--green)">91.2</td><td><span class="badge badge-green">Selected</span></td></tr>
+        <tr><td style="color:var(--text-sec);font-weight:700">🥈 2</td><td style="font-weight:600">Abhishek Mishra</td><td style="font-family:monospace;color:var(--primary)">78.5</td><td><span class="badge badge-blue">Applied</span></td></tr>
+        <tr><td style="color:var(--text-sec);font-weight:700">🥉 3</td><td style="font-weight:600">Aditya Reddy</td><td style="font-family:monospace;color:var(--orange)">65.0</td><td><span class="badge badge-blue">Applied</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="comp-card">
+    <h4>Score Distribution</h4>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-sec)"><span>80–100 (Excellent)</span><span style="color:var(--green)">3 candidates</span></div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:30%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-sec)"><span>60–79 (Good)</span><span style="color:var(--primary)">8 candidates</span></div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:80%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-sec)"><span>0–59 (Needs Review)</span><span style="color:var(--orange)">5 candidates</span></div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:50%;background:linear-gradient(90deg,var(--orange),var(--amber))"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ JOBS -->
+<h2 id="admin-jobs"><span class="icon amber">💼</span>Job Management</h2>
+<p class="sub">URL: <code>/admin/jobs</code> · Template: <code>jobs/jobs.html</code></p>
+<div class="page-mock">
+  <div class="page-mock-header">
+    <div><h3>Job Postings</h3><p>41 total — 38 active, 3 closed</p></div>
+    <button class="btn btn-primary btn-sm">+ Post New Job</button>
+  </div>
+  <div class="page-mock-body">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input class="form-input" style="width:200px" placeholder="🔍 Search jobs…"/>
+      <select class="form-input form-select" style="width:130px"><option>All Statuses</option><option>Active</option><option>Closed</option></select>
+    </div>
+    <table class="rf-table">
+      <thead><tr><th>Title</th><th>Company</th><th>Location</th><th>Salary</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Graduate Software Eng…</td><td>Siemens</td><td>Mumbai</td><td>₹8–12 LPA</td><td><span class="badge badge-green">Active</span></td><td style="color:var(--text-sec)">Sep 20</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-secondary btn-sm">✏</button><button class="btn btn-secondary btn-sm">Toggle</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+        <tr><td style="font-weight:600">Cloud Support Engineer</td><td>Zoho</td><td>Chennai</td><td>₹6–9 LPA</td><td><span class="badge badge-green">Active</span></td><td style="color:var(--text-sec)">Sep 18</td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">View</button><button class="btn btn-secondary btn-sm">✏</button><button class="btn btn-secondary btn-sm">Toggle</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3>Add / Edit Job Form</h3>
+<div class="comp-card">
+  <div class="card-g card-g-2">
+    <div class="form-group"><label class="form-label">Job Title *</label><input class="form-input" placeholder="e.g. Software Engineer"/></div>
+    <div class="form-group"><label class="form-label">Company *</label><input class="form-input" placeholder="e.g. Siemens"/></div>
+    <div class="form-group"><label class="form-label">Location</label><input class="form-input" placeholder="e.g. Mumbai, Remote"/></div>
+    <div class="form-group"><label class="form-label">Salary</label><input class="form-input" placeholder="e.g. ₹8–12 LPA"/></div>
+    <div class="form-group"><label class="form-label">Experience Required</label><input class="form-input" placeholder="e.g. 0–2 years"/></div>
+    <div class="form-group"><label class="form-label">Status</label><select class="form-input form-select"><option>Active</option><option>Closed</option></select></div>
+  </div>
+  <div class="form-group"><label class="form-label">Required Skills</label><input class="form-input" placeholder="Java, Python, SQL (comma-separated)"/></div>
+  <div class="form-group"><label class="form-label">Job Description</label><textarea class="form-input" rows="4" placeholder="Full job description…" style="resize:vertical"></textarea></div>
+  <div class="btns"><button class="btn btn-primary">Save Job</button><button class="btn btn-ghost">Cancel</button></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ INTERVIEWS -->
+<h2 id="admin-interviews"><span class="icon orange">📅</span>Interview Management</h2>
+<p class="sub">URLs: <code>/interviews</code> (list) · <code>/interviews/add/&lt;id&gt;</code> (schedule) · <code>/meeting/&lt;id&gt;</code> (room)</p>
+<div class="page-mock">
+  <div class="page-mock-header"><div><h3>Interviews</h3><p>All scheduled and completed interviews</p></div></div>
+  <div class="page-mock-body">
+    <table class="rf-table">
+      <thead><tr><th>Candidate</th><th>Job Role</th><th>Interviewer</th><th>Date</th><th>Mode</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Ankitha An</td><td style="color:var(--text-sec)">Data Analyst</td><td>Ravi Kumar</td><td>Oct 5, 2026</td><td><span class="badge" style="background:rgba(56,189,248,.12);color:var(--cyan)">Online</span></td><td><span class="badge badge-orange">Scheduled</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-secondary btn-sm">✏ Edit</button><button class="btn btn-success btn-sm">🎥 Join</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+        <tr><td style="font-weight:600">Sneha S A</td><td style="color:var(--text-sec)">Python Developer</td><td>Priya Sharma</td><td>Sep 28, 2026</td><td><span class="badge" style="background:rgba(56,189,248,.12);color:var(--cyan)">Online</span></td><td><span class="badge badge-green">Selected</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-secondary btn-sm">✏ Edit</button><button class="btn btn-success btn-sm">🎥 Join</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3>Meeting Room Page</h3>
+<div class="comp-card">
+  <div style="display:flex;gap:12px;align-items:flex-start">
+    <div style="flex:1;background:var(--bg);border-radius:var(--r);height:120px;display:grid;place-items:center;color:var(--text-sec);font-size:12px;border:1px solid var(--border)">🎥 Video embed (iframe / Jitsi link)</div>
+    <div style="width:200px">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">Meeting Details</div>
+      <div class="form-group"><label class="form-label">Candidate</label><div style="font-size:12px;color:var(--text)">Ankitha An</div></div>
+      <div class="form-group"><label class="form-label">Job</label><div style="font-size:12px;color:var(--text)">Data Analyst</div></div>
+      <div class="form-group"><label class="form-label">Mode</label><span class="badge" style="background:rgba(56,189,248,.12);color:var(--cyan)">Online</span></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:6px">Join Meeting</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ OFFERS -->
+<h2 id="admin-offers"><span class="icon green">📋</span>Offer Management</h2>
+<p class="sub">URL: <code>/offers</code> · Template: <code>offers/offers.html</code></p>
+<div class="page-mock">
+  <div class="page-mock-header"><div><h3>Offer Letters</h3><p>Pending: 2 · Accepted: 4 · Declined: 1</p></div><button class="btn btn-primary btn-sm">+ Generate Offer</button></div>
+  <div class="page-mock-body">
+    <div class="card-g card-g-3" style="margin-bottom:14px">
+      <div class="mini-card" style="padding:12px;text-align:center"><div style="color:var(--orange);font-size:10px;font-weight:700">PENDING</div><div style="font-size:22px;font-weight:700;color:var(--orange)">2</div></div>
+      <div class="mini-card" style="padding:12px;text-align:center"><div style="color:var(--green);font-size:10px;font-weight:700">ACCEPTED</div><div style="font-size:22px;font-weight:700;color:var(--green)">4</div></div>
+      <div class="mini-card" style="padding:12px;text-align:center"><div style="color:var(--red);font-size:10px;font-weight:700">DECLINED</div><div style="font-size:22px;font-weight:700;color:var(--red)">1</div></div>
+    </div>
+    <table class="rf-table">
+      <thead><tr><th>Candidate</th><th>Job Role</th><th>Salary</th><th>Offer Date</th><th>Joining Date</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Aditi Chauhan</td><td style="color:var(--text-sec)">Full Stack Developer</td><td style="color:var(--green)">₹12 LPA</td><td>Sep 25, 2026</td><td>Oct 15, 2026</td><td><span class="badge badge-green">Accepted</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-secondary btn-sm">✏</button><button class="btn btn-ghost btn-sm">📄 PDF</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ APPLICATIONS -->
+<h2 id="admin-applications"><span class="icon blue">📝</span>Applications</h2>
+<p class="sub">URL: <code>/admin/applications</code> · Full pipeline view — every job application with status controls.</p>
+<div class="page-mock">
+  <div class="page-mock-header"><div><h3>All Applications</h3><p>Update status → triggers automated email to candidate</p></div></div>
+  <div class="page-mock-body">
+    <table class="rf-table">
+      <thead><tr><th>Candidate</th><th>Job</th><th>Applied On</th><th>Status</th><th>Remarks</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Abhishek Mishra</td><td style="color:var(--text-sec)">Junior Java Dev</td><td style="color:var(--text-sec)">Sep 20</td><td><span class="badge badge-blue">Applied</span></td><td style="color:var(--text-sec)">—</td><td><div style="display:flex;gap:4px"><button class="btn btn-success btn-sm">✓ Shortlist</button><button class="btn btn-danger btn-sm">✗ Reject</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;padding:10px;background:var(--surface-hi);border-radius:var(--r-sm);border:1px solid rgba(251,191,36,.2);font-size:11px;color:var(--amber)">
+      ⚡ Status change automatically sends email notification to the candidate (interview invite / rejection / selection).
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ AI TOOLS -->
+<h2 id="admin-ai-tools"><span class="icon purple">🤖</span>AI Tools</h2>
+
+<h3>Job Matching — <code>/job-matching</code></h3>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Match Result Card</h4>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:14px;font-weight:600;color:var(--text)">Aditi Chauhan</div>
+      <div style="font-size:24px;font-weight:700;color:var(--green);font-family:monospace">87%</div>
+    </div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:87%;background:linear-gradient(90deg,var(--green),#6ee7b7)"></div></div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text-sec)">Matched to: <strong style="color:var(--text)">Junior Full Stack Developer @ Zoho</strong></div>
+    <div class="role-chips" style="margin-top:8px">
+      <span class="role-chip" style="background:rgba(52,211,153,.1);color:var(--green)">✓ Python</span>
+      <span class="role-chip" style="background:rgba(52,211,153,.1);color:var(--green)">✓ React</span>
+      <span class="role-chip" style="background:rgba(255,138,138,.1);color:var(--red)">✗ Docker</span>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>Match Controls</h4>
+    <div class="form-group"><label class="form-label">Select Candidate</label><select class="form-input form-select"><option>Aditi Chauhan</option><option>Abhishek Mishra</option></select></div>
+    <div class="form-group"><label class="form-label">Select Job</label><select class="form-input form-select"><option>Full Stack Dev @ Zoho</option><option>Java Dev @ TCS</option></select></div>
+    <button class="btn btn-primary" style="width:100%">🧠 Run AI Match</button>
+  </div>
+</div>
+
+<h3>Skill Gap Analysis — <code>/skill-gap</code></h3>
+<div class="comp-card">
+  <div class="card-g card-g-2">
+    <div>
+      <div class="form-group"><label class="form-label">Candidate</label><select class="form-input form-select"><option>Abhishek Mishra</option></select></div>
+      <div class="form-group"><label class="form-label">Target Job</label><select class="form-input form-select"><option>Data Engineer @ Infosys</option></select></div>
+      <button class="btn btn-primary">🧩 Analyze Skill Gap</button>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Gap Analysis Result</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--green)">✓ Present</span><span class="role-chip" style="background:rgba(52,211,153,.1);color:var(--green)">Java, SQL</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0"><span style="color:var(--red)">✗ Missing</span><span class="role-chip" style="background:rgba(255,138,138,.1);color:var(--red)">Spark, Kafka, Airflow</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>AI Interview Management — <code>/admin/ai-interviews</code></h3>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>AI Interview List</h4>
+    <table class="rf-table">
+      <thead><tr><th>Candidate</th><th>Job</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Abhishek Mishra</td><td style="color:var(--text-sec)">Java Dev</td><td style="color:var(--text-sec)">Oct 3</td><td><span class="badge badge-orange">Scheduled</span></td><td><button class="btn btn-ghost btn-sm">Preview</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="comp-card">
+    <h4>AI Interview Preview</h4>
+    <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;color:var(--purple);margin-bottom:8px">🤖 AI-Generated Questions</div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:4px">1. Explain the difference between interface and abstract class in Java.</div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:4px">2. What is the time complexity of HashMap lookup?</div>
+      <div style="font-size:12px;color:var(--text)">3. Describe a project where you used SQL optimization.</div>
+    </div>
+  </div>
+</div>
+
+<h3>ATS Report — <code>/ats/&lt;candidate_id&gt;</code></h3>
+<div class="comp-card">
+  <div class="card-g card-g-2">
+    <div>
+      <div style="font-size:11px;color:var(--text-sec);margin-bottom:4px">ATS Score</div>
+      <div style="font-size:36px;font-weight:700;color:var(--primary-c);font-family:monospace">82<span style="font-size:14px;color:var(--text-sec)">/100</span></div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:82%"></div></div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:6px">Matched Keywords</div>
+      <div class="role-chips"><span class="role-chip" style="background:rgba(52,211,153,.1);color:var(--green)">Java</span><span class="role-chip" style="background:rgba(52,211,153,.1);color:var(--green)">REST API</span><span class="role-chip" style="background:rgba(52,211,153,.1);color:var(--green)">Agile</span></div>
+      <div style="font-size:11px;font-weight:600;color:var(--red);margin:8px 0 4px">Missing Keywords</div>
+      <div class="role-chips"><span class="role-chip" style="background:rgba(255,138,138,.1);color:var(--red)">Docker</span><span class="role-chip" style="background:rgba(255,138,138,.1);color:var(--red)">Kubernetes</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ REPORTS & ANALYTICS -->
+<h2 id="admin-reports"><span class="icon cyan">📈</span>Reports & Analytics</h2>
+<p class="sub">URLs: <code>/reports</code> · <code>/admin/analytics</code> · <code>/analytics</code> · <code>/ranking/&lt;job_id&gt;</code></p>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Reports Dashboard</h4>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border)">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text)">Aditi Chauhan</div><div style="font-size:10px;color:var(--text-sec)">Candidate Report</div></div>
+        <button class="btn btn-secondary btn-sm">📄 PDF</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border)">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text)">All Candidates</div><div style="font-size:10px;color:var(--text-sec)">Full Export</div></div>
+        <button class="btn btn-secondary btn-sm">📊 Excel</button>
+      </div>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>Analytics Charts</h4>
+    <div style="display:flex;gap:8px;flex-direction:column">
+      <div style="font-size:11px;color:var(--text-sec)">Applications by Month</div>
+      <div style="height:60px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border);display:flex;align-items:flex-end;padding:8px;gap:4px">
+        <div style="flex:1;background:var(--primary-c);border-radius:2px;height:30%"></div>
+        <div style="flex:1;background:var(--primary-c);border-radius:2px;height:60%"></div>
+        <div style="flex:1;background:var(--primary-c);border-radius:2px;height:45%"></div>
+        <div style="flex:1;background:var(--primary-c);border-radius:2px;height:80%"></div>
+        <div style="flex:1;background:var(--primary-c);border-radius:2px;height:100%"></div>
+        <div style="flex:1;background:rgba(77,142,255,.3);border-radius:2px;height:70%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>Candidate Ranking — by Job</h4>
+    <div class="form-group"><label class="form-label">Select Job</label><select class="form-input form-select"><option>Junior Java Dev @ TCS</option></select></div>
+    <table class="rf-table">
+      <thead><tr><th>#</th><th>Candidate</th><th>Match %</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--amber);font-weight:700">1</td><td>Aditi Chauhan</td><td style="color:var(--green);font-family:monospace">87%</td></tr>
+        <tr><td style="color:var(--text-sec)">2</td><td>Abhishek Mishra</td><td style="color:var(--primary);font-family:monospace">74%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SYSTEM PAGES -->
+<h2 id="admin-system"><span class="icon blue">⚙</span>System Pages</h2>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Recruiter Management · /recruiters</h4>
+    <table class="rf-table">
+      <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Ravi Kumar</td><td style="color:var(--text-sec)">ravi@rf.ai</td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-secondary btn-sm">✏</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="comp-card">
+    <h4>User Management · /admin/users</h4>
+    <table class="rf-table">
+      <thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">admin</td><td><span class="badge badge-blue">Admin</span></td><td><span class="badge badge-green">Active</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-secondary btn-sm">✏</button><button class="btn btn-ghost btn-sm">Toggle</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="comp-card">
+    <h4>Activity Logs · /activity-logs</h4>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;gap:8px;font-size:11px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-sec);width:80px;flex-shrink:0">Sep 28 14:32</span><span><strong style="color:var(--text)">admin</strong> <span style="color:var(--text-sec)">updated candidate status →</span> <span class="badge badge-green" style="font-size:9px">Selected</span></span></div>
+      <div style="display:flex;gap:8px;font-size:11px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-sec);width:80px;flex-shrink:0">Sep 28 13:10</span><span><strong style="color:var(--text)">admin</strong> <span style="color:var(--text-sec)">posted new job</span> <span style="color:var(--primary)">Cloud Engineer @ Zoho</span></span></div>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>Settings · /admin/settings</h4>
+    <div class="form-group"><label class="form-label">Company Name</label><input class="form-input" value="RecruitFlow Inc."/></div>
+    <div class="form-group"><label class="form-label">SMTP Email</label><input class="form-input" value="noreply@recruitflow.ai"/></div>
+    <div class="form-group"><label class="form-label">AI Model</label><select class="form-input form-select"><option>Groq — Llama 3.1</option></select></div>
+    <button class="btn btn-primary btn-sm">Save Settings</button>
+  </div>
+  <div class="comp-card">
+    <h4>Backup · /admin/backup</h4>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" style="width:100%">💾 Create Backup</button>
+      <button class="btn btn-secondary" style="width:100%">⬇ Download Backup</button>
+      <div style="border-top:1px solid var(--border);padding-top:8px">
+        <div class="form-group"><label class="form-label">Restore from File</label><input class="form-input" type="file" accept=".sql,.zip"/></div>
+        <button class="btn btn-danger" style="width:100%">♻ Restore Database</button>
+      </div>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>Admin Profile · /admin/profile</h4>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div class="ai-avatar" style="width:44px;height:44px;font-size:18px">A</div>
+      <div><div style="font-size:14px;font-weight:700;color:var(--text)">Admin User</div><div style="font-size:11px;color:var(--text-sec)">admin@gmail.com</div></div>
+    </div>
+    <div class="form-group"><label class="form-label">Username</label><input class="form-input" value="admin"/></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="admin@gmail.com"/></div>
+    <button class="btn btn-primary btn-sm">Update Profile</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ RECRUITER PORTAL -->
+<div class="section-label"><span>Recruiter Portal</span><div class="line"></div></div>
+<h2 id="rec-dashboard"><span class="icon green">▦</span>Recruiter Dashboard</h2>
+<p class="sub">URL: <code>/recruiter/dashboard</code> · Uses <code>recruiter_base.html</code> with its own sidebar.</p>
+<div class="page-mock">
+  <div class="page-mock-header"><div><h3>Recruiter Dashboard</h3><p>Your pipeline at a glance</p></div></div>
+  <div class="page-mock-body">
+    <div class="card-g card-g-3" style="margin-bottom:14px">
+      <div class="mini-card blue"><div class="mc-label blue">My Jobs</div><div class="mc-num">8</div><div class="mc-sub">6 Active · 2 Closed</div></div>
+      <div class="mini-card green"><div class="mc-label green">Applications</div><div class="mc-num">24</div><div class="mc-sub">8 Shortlisted</div></div>
+      <div class="mini-card amber"><div class="mc-label amber">Interviews</div><div class="mc-num">5</div><div class="mc-sub">3 Upcoming</div></div>
+    </div>
+    <div class="card-g card-g-2">
+      <div class="comp-card">
+        <h4>Recent Applications</h4>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600">Abhishek Mishra</span><div style="display:flex;gap:4px"><button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm">✗</button></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0"><span style="font-weight:600">Aditi Chauhan</span><span class="badge badge-green">Shortlisted</span></div>
+        </div>
+      </div>
+      <div class="comp-card">
+        <h4>Upcoming Interviews</h4>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="padding:6px 0;border-bottom:1px solid var(--border)"><div style="font-size:12px;font-weight:600;color:var(--text)">Ankitha An</div><div style="font-size:10px;color:var(--text-sec)">Oct 5 · 10:00 AM · Data Analyst</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 id="rec-jobs"><span class="icon green">💼</span>Recruiter Jobs</h2>
+<p class="sub">URL: <code>/recruiter/jobs</code> · Recruiters see only their own jobs. Can add, edit, toggle, delete.</p>
+<div class="page-mock">
+  <div class="page-mock-header"><div><h3>My Jobs</h3></div><button class="btn btn-primary btn-sm">+ Post Job</button></div>
+  <div class="page-mock-body">
+    <table class="rf-table">
+      <thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Applications</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Cloud Support Engineer</td><td>Zoho</td><td><span class="badge badge-green">Active</span></td><td style="color:var(--primary)">12</td><td><div style="display:flex;gap:4px"><button class="btn btn-secondary btn-sm">✏</button><button class="btn btn-ghost btn-sm">Toggle</button><button class="btn btn-danger btn-sm">🗑</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2 id="rec-applications"><span class="icon green">📝</span>Recruiter Applications</h2>
+<p class="sub">URL: <code>/recruiter/applications</code> · Shortlist or reject candidates for recruiter-owned jobs.</p>
+<div class="page-mock">
+  <div class="page-mock-header"><div><h3>Applications</h3><p>Manage shortlisting for your job postings</p></div></div>
+  <div class="page-mock-body">
+    <table class="rf-table">
+      <thead><tr><th>Candidate</th><th>Job</th><th>Applied On</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Abhishek Mishra</td><td style="color:var(--text-sec)">Cloud Support Eng</td><td style="color:var(--text-sec)">Sep 22</td><td><span class="badge badge-blue">Applied</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-success btn-sm">✓ Shortlist</button><button class="btn btn-danger btn-sm">✗ Reject</button><button class="btn btn-ghost btn-sm">Schedule Interview →</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2 id="rec-interviews"><span class="icon orange">📅</span>Recruiter Interviews</h2>
+<p class="sub">URL: <code>/recruiter/interviews</code> · Lists all interviews, shows proctor risk level.</p>
+<div class="page-mock">
+  <div class="page-mock-header">
+    <div><h3>Interviews</h3></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm">All</button>
+      <button class="btn btn-secondary btn-sm" style="border-color:rgba(251,191,36,.4);color:var(--amber)">Suspicious</button>
+      <button class="btn btn-secondary btn-sm" style="border-color:rgba(255,138,138,.4);color:var(--red)">High Risk</button>
+    </div>
+  </div>
+  <div class="page-mock-body">
+    <table class="rf-table">
+      <thead><tr><th>Candidate</th><th>Job</th><th>Date</th><th>Status</th><th>Proctor Risk</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Abhishek Mishra</td><td style="color:var(--text-sec)">Java Dev</td><td style="color:var(--text-sec)">Oct 3</td><td><span class="badge badge-orange">Scheduled</span></td><td><span class="risk-badge risk-low">Safe</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">🔍 Proctor</button><button class="btn btn-success btn-sm">✓ Complete</button><button class="btn btn-success btn-sm">Select</button><button class="btn btn-danger btn-sm">Reject</button></div></td></tr>
+        <tr><td style="font-weight:600">Riya Singh</td><td style="color:var(--text-sec)">Python Dev</td><td style="color:var(--text-sec)">Oct 2</td><td><span class="badge" style="background:rgba(56,189,248,.15);color:var(--cyan)">Completed</span></td><td><span class="risk-badge risk-high">High Risk</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-ghost btn-sm">🔍 Proctor</button><button class="btn btn-success btn-sm">Select</button><button class="btn btn-danger btn-sm">Reject</button></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2 id="rec-proctor"><span class="icon amber">🔍</span>Interview Proctoring View</h2>
+<p class="sub">URL: <code>/recruiter/interview/proctor/&lt;id&gt;</code> · AI integrity score, event log, risk classification.</p>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Integrity Score</h4>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div>
+        <div style="font-size:36px;font-weight:700;color:var(--red);font-family:monospace">67</div>
+        <span class="risk-badge risk-high">High Risk</span>
+      </div>
+      <div style="flex:1">
+        <div class="prog-wrap"><div class="prog-fill" style="width:67%;background:linear-gradient(90deg,var(--red),var(--orange))"></div></div>
+        <div style="font-size:10px;color:var(--text-sec);margin-top:4px">Score ≥51 = High Risk · 21–50 = Suspicious · &lt;21 = Safe</div>
+      </div>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>Event Breakdown</h4>
+    <table class="rf-table">
+      <thead><tr><th>Event Type</th><th>Count</th><th>Weight</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--red)">tab_switch</td><td>2</td><td style="color:var(--text-sec)">15 pts</td></tr>
+        <tr><td style="color:var(--orange)">focus_loss</td><td>3</td><td style="color:var(--text-sec)">10 pts</td></tr>
+        <tr><td style="color:var(--amber)">copy_attempt</td><td>1</td><td style="color:var(--text-sec)">5 pts</td></tr>
+        <tr><td style="color:var(--red)">camera_away</td><td>1</td><td style="color:var(--text-sec)">20 pts</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2 id="rec-offers"><span class="icon green">📋</span>Recruiter Offers</h2>
+<p class="sub">URL: <code>/recruiter/offers</code> · Recruiters can view, generate, and delete offers for their candidates.</p>
+<div class="page-mock">
+  <div class="page-mock-header"><div><h3>Offers</h3></div><button class="btn btn-primary btn-sm">+ Generate Offer</button></div>
+  <div class="page-mock-body">
+    <table class="rf-table">
+      <thead><tr><th>Candidate</th><th>Job</th><th>Salary</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Aditi Chauhan</td><td style="color:var(--text-sec)">Full Stack Dev</td><td style="color:var(--green)">₹12 LPA</td><td><span class="badge badge-green">Accepted</span></td><td><button class="btn btn-danger btn-sm">🗑</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ CANDIDATE PORTAL -->
+<div class="section-label"><span>Candidate Portal</span><div class="line"></div></div>
+
+<h2 id="cand-auth"><span class="icon amber">🔑</span>Auth — Login & Register</h2>
+<p class="sub">URLs: <code>/candidate/login</code> · <code>/candidate/register</code> · Separate from admin/recruiter auth.</p>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Candidate Login</h4>
+    <div style="text-align:center;margin-bottom:16px">
+      <div class="bolt" style="width:40px;height:40px;font-size:20px;margin:0 auto 8px">⚡</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text)">RecruitFlow</div>
+      <div style="font-size:12px;color:var(--text-sec)">Candidate Portal</div>
+    </div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" placeholder="your@email.com"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="••••••••"/></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:4px">Sign In</button>
+    <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text-sec)">Don't have an account? <a href="#" style="color:var(--primary)">Register</a></div>
+  </div>
+  <div class="comp-card">
+    <h4>Candidate Register</h4>
+    <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" placeholder="Your full name"/></div>
+    <div class="form-group"><label class="form-label">Email *</label><input class="form-input" placeholder="your@email.com"/></div>
+    <div class="form-group"><label class="form-label">Phone</label><input class="form-input" placeholder="+91 98765 43210"/></div>
+    <div class="form-group"><label class="form-label">Password *</label><input class="form-input" type="password" placeholder="Min 8 characters"/></div>
+    <button class="btn btn-primary" style="width:100%">Create Account</button>
+  </div>
+</div>
+
+<h2 id="cand-dashboard"><span class="icon amber">▦</span>Candidate Dashboard</h2>
+<p class="sub">URL: <code>/candidate/dashboard</code> · Uses <code>candidate_base.html</code> with a top navigation bar.</p>
+<div class="page-mock">
+  <div class="page-mock-header">
+    <div><h3>Welcome, Abhishek 👋</h3><p>Your recruitment journey at a glance</p></div>
+    <button class="btn btn-primary btn-sm">Upload Resume</button>
+  </div>
+  <div class="page-mock-body">
+    <div class="card-g card-g-4" style="margin-bottom:16px">
+      <div class="mini-card blue"><div class="mc-label blue">Applications</div><div class="mc-num">5</div><div class="mc-sub">3 In Review</div></div>
+      <div class="mini-card amber"><div class="mc-label amber">Interviews</div><div class="mc-num">2</div><div class="mc-sub">1 Upcoming</div></div>
+      <div class="mini-card green"><div class="mc-label green">Offers</div><div class="mc-num">1</div><div class="mc-sub">Pending Action</div></div>
+      <div class="mini-card" style="border-color:rgba(167,139,250,.25);background:linear-gradient(135deg,rgba(167,139,250,.08),var(--surface) 60%)"><div class="mc-label" style="color:var(--purple)">AI Score</div><div class="mc-num">78.5</div><div class="mc-sub">Suitability</div></div>
+    </div>
+    <div class="card-g card-g-2">
+      <div class="comp-card">
+        <h4>My AI Analysis</h4>
+        <div style="font-size:11px;color:var(--text-sec);margin-bottom:6px">Recommended for</div>
+        <div class="role-chips"><span class="role-chip">Junior Java Developer</span><span class="role-chip">Entry-level SE</span></div>
+        <div style="margin-top:10px;font-size:11px;color:var(--green)">Strengths</div>
+        <div style="font-size:11px;color:var(--text-sec)">Strong Java fundamentals, SQL proficiency</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--orange)">Areas to Improve</div>
+        <div style="font-size:11px;color:var(--text-sec)">Docker, cloud deployment, CI/CD</div>
+      </div>
+      <div class="comp-card">
+        <h4>Upcoming Interview</h4>
+        <div style="padding:10px;background:var(--bg);border-radius:var(--r-sm);border:1px solid rgba(251,146,60,.2)">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Data Analyst Role</div>
+          <div style="font-size:11px;color:var(--text-sec);margin:4px 0">Oct 5, 2026 · 10:00 AM</div>
+          <div style="font-size:11px;color:var(--text-sec)">Interviewer: Ravi Kumar</div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-primary btn-sm">🎥 Join Meeting</button>
+            <button class="btn btn-ghost btn-sm">🤖 AI Practice</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 id="cand-jobs"><span class="icon amber">💼</span>Browse & Apply for Jobs</h2>
+<p class="sub">URL: <code>/candidate/jobs</code> · Browse all active jobs, see match %, apply directly.</p>
+<div class="page-mock">
+  <div class="page-mock-header"><div><h3>Browse Jobs</h3><p>Find your next opportunity</p></div></div>
+  <div class="page-mock-body">
+    <input class="form-input" style="width:300px;margin-bottom:14px" placeholder="🔍 Search by title, company, location…"/>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">Cloud Support Engineer</div>
+            <div style="font-size:12px;color:var(--text-sec)">Zoho · Chennai · 0–2 yrs · ₹6–9 LPA</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:18px;font-weight:700;color:var(--green);font-family:monospace">82%</span>
+            <span class="badge badge-green">Match</span>
+          </div>
+        </div>
+        <div class="role-chips" style="margin-bottom:10px"><span class="role-chip">AWS</span><span class="role-chip">Python</span><span class="role-chip">Linux</span></div>
+        <button class="btn btn-primary btn-sm">Apply Now</button>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">Graduate Software Engineer</div>
+            <div style="font-size:12px;color:var(--text-sec)">Siemens · Mumbai · Fresher · ₹8–12 LPA</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:18px;font-weight:700;color:var(--primary);font-family:monospace">74%</span>
+            <span class="badge badge-blue">Match</span>
+          </div>
+        </div>
+        <div class="role-chips" style="margin-bottom:10px"><span class="role-chip">Java</span><span class="role-chip">Agile</span><span class="role-chip">REST API</span></div>
+        <span class="badge badge-green" style="font-size:11px">✓ Applied</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 id="cand-interviews"><span class="icon amber">🤖</span>Interviews & AI Interview Session</h2>
+<p class="sub">URLs: <code>/candidate/interviews</code> (list) · <code>/candidate/questions</code> (live AI session)</p>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Interview List</h4>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:var(--bg);border:1px solid rgba(251,146,60,.2);border-radius:var(--r-sm);padding:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Data Analyst Interview</div>
+          <span class="badge badge-orange">Upcoming</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-sec)">Oct 5, 2026 · 10:00 AM · Interviewer: Ravi</div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button class="btn btn-primary btn-sm">🎥 Join</button>
+          <button class="btn btn-ghost btn-sm">🤖 AI Practice</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>AI Interview Session (Live)</h4>
+    <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px;border:1px solid rgba(167,139,250,.2);margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">🤖 Question 2 of 5</div>
+      <div style="font-size:13px;color:var(--text)">Explain the difference between a stack and a queue. When would you use each?</div>
+    </div>
+    <div class="form-group"><label class="form-label">Your Answer</label><textarea class="form-input" rows="4" placeholder="Type your answer here…" style="resize:vertical"></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary">Submit Answer →</button>
+      <button class="btn btn-ghost btn-sm">⏭ Skip</button>
+    </div>
+    <div style="margin-top:10px;padding:8px;background:rgba(255,138,138,.08);border-radius:var(--r-sm);border:1px solid rgba(255,138,138,.15);font-size:11px;color:var(--red)">
+      ⚠ Proctoring Active — Tab switching, copy/paste, and focus loss are being monitored.
+    </div>
+  </div>
+</div>
+
+<h2 id="cand-offers"><span class="icon green">🎉</span>Candidate Offers</h2>
+<p class="sub">URL: <code>/candidate/offers</code> · View offers, download PDF, accept or reject.</p>
+<div class="comp-card">
+  <div style="background:var(--bg);border:1px solid rgba(52,211,153,.25);border-radius:var(--r);padding:20px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)">Offer Letter — Full Stack Developer</div>
+        <div style="font-size:12px;color:var(--text-sec)">Zoho · Joining: Oct 15, 2026 · ₹12 LPA</div>
+      </div>
+      <span class="badge badge-orange">Pending</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-success">✓ Accept Offer</button>
+      <button class="btn btn-danger">✗ Decline</button>
+      <button class="btn btn-ghost">📄 Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<h2 id="cand-profile"><span class="icon amber">👤</span>Candidate Profile & Settings</h2>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>Edit Profile · /candidate/profile</h4>
+    <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" value="Abhishek Mishra"/></div>
+    <div class="form-group"><label class="form-label">Phone</label><input class="form-input" value="+91 98765 43210"/></div>
+    <div class="form-group"><label class="form-label">LinkedIn URL</label><input class="form-input" placeholder="https://linkedin.com/in/…"/></div>
+    <div class="form-group"><label class="form-label">GitHub URL</label><input class="form-input" placeholder="https://github.com/…"/></div>
+    <div class="form-group"><label class="form-label">Address</label><textarea class="form-input" rows="2"></textarea></div>
+    <button class="btn btn-primary btn-sm">Save Profile</button>
+  </div>
+  <div class="comp-card">
+    <h4>Upload Resume · /candidate/upload</h4>
+    <div style="border:2px dashed var(--primary-c);border-radius:var(--r);padding:30px;text-align:center;margin-bottom:12px;cursor:pointer">
+      <div style="font-size:24px;margin-bottom:8px">☁</div>
+      <div style="font-size:13px;font-weight:600;color:var(--primary)">Drop your resume here</div>
+      <div style="font-size:11px;color:var(--text-sec)">PDF or DOCX · Max 10MB</div>
+    </div>
+    <button class="btn btn-primary" style="width:100%">Upload & Analyze</button>
+    <div style="margin-top:10px;padding:8px;background:rgba(77,142,255,.06);border-radius:var(--r-sm);border:1px solid rgba(77,142,255,.2);font-size:11px;color:var(--primary)">🤖 AI will automatically parse and analyze your resume on upload.</div>
+  </div>
+  <div class="comp-card">
+    <h4>Settings · /candidate/settings</h4>
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">Change Password</div>
+    <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password"/></div>
+    <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password"/></div>
+    <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" type="password"/></div>
+    <button class="btn btn-primary btn-sm">Update Password</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SHARED -->
+<div class="section-label"><span>Shared Pages</span><div class="line"></div></div>
+
+<h2 id="shared-chatbot"><span class="icon purple">💬</span>AI Resume Chatbot</h2>
+<p class="sub">URL: <code>/chatbot/&lt;candidate_id&gt;</code> · Ask questions about any candidate's resume.</p>
+<div class="comp-card">
+  <div style="border:1px solid rgba(167,139,250,.2);border-radius:var(--r);overflow:hidden">
+    <div style="background:var(--surface-hi);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px"><div class="ai-avatar" style="width:28px;height:28px;background:rgba(167,139,250,.2);color:var(--purple);font-size:12px">A</div><div style="font-size:13px;font-weight:600;color:var(--text)">Abhishek Mishra</div></div>
+      <div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm">📄 PDF</button><button class="btn btn-danger btn-sm">🗑 Clear</button></div>
+    </div>
+    <div style="padding:14px;min-height:160px;display:flex;flex-direction:column;gap:4px">
+      <div class="chat-ai">What would you like to know about Abhishek's resume?</div>
+      <div class="chat-user">What are his strongest technical skills?</div>
+      <div class="chat-ai">Abhishek's strongest technical skills are Java (OOP, Collections, Streams), SQL (joins, indexing, stored procedures), and HTML/CSS. He also has foundational Python knowledge from his internship at TCS.</div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:10px;display:flex;gap:8px">
+      <input class="form-input" style="flex:1" placeholder="Ask about this candidate…"/>
+      <button class="btn btn-primary btn-sm">Send →</button>
+    </div>
+  </div>
+</div>
+
+<h2 id="shared-notif"><span class="icon cyan">🔔</span>Notifications</h2>
+<p class="sub">URL: <code>/notifications</code> · For admin/recruiter. <code>/candidate/notifications</code> for candidates.</p>
+<div class="comp-card">
+  <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+    <div style="font-size:14px;font-weight:700;color:var(--text)">Notifications</div>
+    <div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm">Mark All Read</button><button class="btn btn-danger btn-sm">Clear All</button></div>
+  </div>
+  <div class="notif-item"><div class="notif-dot" style="background:var(--primary-c)"></div><div><div class="notif-title">New Application Received</div><div class="notif-msg">Abhishek Mishra applied for Junior Java Developer</div><div class="notif-time">2 hours ago</div></div></div>
+  <div class="notif-item"><div class="notif-dot" style="background:var(--green)"></div><div><div class="notif-title">Interview Completed</div><div class="notif-msg">Sneha S A completed her AI interview session</div><div class="notif-time">5 hours ago</div></div></div>
+  <div class="notif-item" style="opacity:.5"><div class="notif-dot" style="background:var(--text-dim)"></div><div><div class="notif-title">Offer Accepted</div><div class="notif-msg">Aditi Chauhan accepted the offer for Full Stack Developer</div><div class="notif-time">Yesterday</div></div></div>
+</div>
+
+<h2 id="shared-forms"><span class="icon blue">📐</span>Forms Design Pattern</h2>
+<p class="sub">All forms across the system follow this dark-card pattern.</p>
+<div class="modal-bg">
+  <div class="modal-box">
+    <div class="modal-title">Schedule Interview</div>
+    <div class="modal-sub">Set up an interview for the selected candidate</div>
+    <div class="card-g card-g-2">
+      <div class="form-group"><label class="form-label">Candidate *</label><select class="form-input form-select"><option>Abhishek Mishra</option></select></div>
+      <div class="form-group"><label class="form-label">Job Role *</label><select class="form-input form-select"><option>Junior Java Dev</option></select></div>
+      <div class="form-group"><label class="form-label">Date *</label><input class="form-input" type="date"/></div>
+      <div class="form-group"><label class="form-label">Time *</label><input class="form-input" type="time"/></div>
+      <div class="form-group"><label class="form-label">Interviewer *</label><input class="form-input" placeholder="Interviewer name"/></div>
+      <div class="form-group"><label class="form-label">Mode *</label><select class="form-input form-select"><option>Online</option><option>In-person</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Meeting Link</label><input class="form-input" placeholder="https://meet.google.com/…"/></div>
+    <div class="btns" style="margin-top:6px">
+      <button class="btn btn-primary">Schedule Interview</button>
+      <button class="btn btn-ghost">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ PAGE MAP -->
+<div class="section-label"><span>Complete Page Map</span><div class="line"></div></div>
+<h2><span class="icon blue">🗺</span>All 60+ Pages — Master Reference</h2>
+<div class="comp-grid">
+  <div class="comp-card">
+    <h4>🔵 Admin Portal (28 pages)</h4>
+    <div style="font-size:11px;color:var(--text-sec);line-height:2">
+      /admin/dashboard · /upload · /admin/candidates · /admin/candidates/&lt;id&gt; · /admin/candidates/scoring-dashboard · /recruiters · /recruiters/add · /recruiters/edit/&lt;id&gt; · /admin/users · /admin/users/edit/&lt;id&gt; · /jobs · /jobs/add · /jobs/edit/&lt;id&gt; · /jobs/&lt;id&gt; · /interviews · /interviews/add/&lt;id&gt; · /interviews/edit/&lt;id&gt; · /meeting/&lt;id&gt; · /offers · /offers/add · /offers/edit/&lt;id&gt; · /admin/applications · /admin/ai-interviews · /admin/ai-interviews/preview/&lt;id&gt; · /job-matching · /skill-gap · /ats/&lt;id&gt; · /ranking/&lt;id&gt; · /reports · /admin/analytics · /notifications · /activity-logs · /admin/settings · /admin/backup · /admin/profile · /search · /chatbot/&lt;id&gt;
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>🟢 Recruiter Portal (12 pages)</h4>
+    <div style="font-size:11px;color:var(--text-sec);line-height:2">
+      /recruiter/dashboard · /recruiter/jobs · /recruiter/jobs/add · /recruiter/jobs/edit/&lt;id&gt; · /recruiter/applications · /interviews/add/&lt;app_id&gt; · /recruiter/interviews · /recruiter/interview/proctor/&lt;id&gt; · /recruiter/offers · /recruiter/offers/add · /recruiter/profile · /notifications
+    </div>
+  </div>
+  <div class="comp-card">
+    <h4>🟡 Candidate Portal (14 pages)</h4>
+    <div style="font-size:11px;color:var(--text-sec);line-height:2">
+      /candidate/login · /candidate/register · /candidate/dashboard · /candidate/jobs · /candidate/applications · /candidate/interviews · /candidate/questions (AI interview) · /candidate/offers · /candidate/notifications · /candidate/profile · /candidate/upload · /candidate/settings · /chatbot/&lt;id&gt; · /meeting/&lt;id&gt;
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:48px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:space-between">
+  <div>
+    <div style="font-size:14px;font-weight:700;color:var(--text)">⚡ RecruitFlow Design System</div>
+    <div style="font-size:11px;color:var(--text-sec);margin-top:2px">Dark theme · Material Design 3 adapted · Tailwind CSS · Hanken Grotesk</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <span class="badge badge-blue">3 Portals</span>
+    <span class="badge badge-green">60+ Pages</span>
+    <span class="badge badge-purple">AI Features</span>
+  </div>
+</div>
+</div><!-- end .content -->
+</body>
+</html>

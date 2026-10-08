@@ -1,0 +1,448 @@
+{% extends "candidate_base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Candidate Profile</div>
+<div class="rf-topbar-sub">View and update your personal details, credentials &amp; experience</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Profile Header Banner */
+    .profile-hero {
+        background: linear-gradient(135deg, rgba(14, 165, 233, .14) 0%, rgba(99, 102, 241, .1) 50%, rgba(13, 30, 53, .6) 100%);
+        border: 1px solid rgba(14, 165, 233, .25);
+        border-radius: var(--r-lg);
+        padding: 26px 30px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 240px; height: 240px;
+        background: radial-gradient(circle, rgba(14, 165, 233, .18) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .profile-hero-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .profile-avatar-lg {
+        width: 80px; height: 80px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #0ea5e9, #6366f1);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 32px; font-weight: 800; color: #fff;
+        box-shadow: 0 8px 24px rgba(14, 165, 233, .35);
+        flex-shrink: 0;
+        border: 2px solid rgba(255, 255, 255, .2);
+    }
+    .profile-hero-meta h1 {
+        font-size: 22px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 6px;
+        letter-spacing: -0.3px;
+    }
+    .profile-pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+    .profile-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--text-sec);
+        background: rgba(255, 255, 255, .05);
+        padding: 4px 10px;
+        border-radius: 99px;
+        border: 1px solid var(--border);
+    }
+    .profile-chip i { color: var(--accent2); font-size: 13px; }
+
+    /* Timeline Cards */
+    .rf-timeline-item {
+        position: relative;
+        padding-left: 28px;
+        padding-bottom: 20px;
+        border-left: 2px solid rgba(255, 255, 255, .08);
+    }
+    .rf-timeline-item:last-child {
+        border-left-color: transparent;
+        padding-bottom: 0;
+    }
+    .rf-timeline-dot {
+        position: absolute;
+        left: -7px;
+        top: 2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 10px var(--accent);
+        border: 2px solid var(--card-bg);
+    }
+    .rf-timeline-content {
+        background: rgba(255, 255, 255, .02);
+        border: 1px solid var(--border);
+        border-radius: var(--r-sm);
+        padding: 12px 16px;
+        transition: border-color .15s ease;
+    }
+    .rf-timeline-content:hover {
+        border-color: rgba(14, 165, 233, .3);
+    }
+    .rf-timeline-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 3px;
+    }
+    .rf-timeline-sub {
+        font-size: 12.5px;
+        color: var(--text-sec);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    /* Skills Cloud */
+    .skills-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .skill-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(14, 165, 233, .12);
+        color: #38bdf8;
+        border: 1px solid rgba(14, 165, 233, .25);
+        transition: all .15s ease;
+    }
+    .skill-chip:hover {
+        background: rgba(14, 165, 233, .22);
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Candidate Hero Banner -->
+<div class="profile-hero">
+    <div class="profile-hero-left">
+        <div class="profile-avatar-lg">
+            {{ candidate.full_name[0]|upper if candidate.full_name else 'C' }}
+        </div>
+        <div class="profile-hero-meta">
+            <h1>{{ candidate.full_name }}</h1>
+            <div class="profile-pill-row">
+                <span class="profile-chip">
+                    <i class="bi bi-envelope"></i> {{ candidate.email }}
+                </span>
+                {% if candidate.phone %}
+                <span class="profile-chip">
+                    <i class="bi bi-telephone"></i> {{ candidate.phone }}
+                </span>
+                {% endif %}
+                {% if candidate.address %}
+                <span class="profile-chip">
+                    <i class="bi bi-geo-alt"></i> {{ candidate.address }}
+                </span>
+                {% endif %}
+                <span class="rf-badge rf-badge-info">
+                    <i class="bi bi-shield-check"></i> {{ candidate.status or 'Active Candidate' }}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div>
+        <a href="{{ url_for('candidate_resume.upload_resume') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+            <i class="bi bi-file-earmark-arrow-up"></i>
+            <span>{{ 'Update Resume' if candidate.resume_path else 'Upload Resume' }}</span>
+        </a>
+    </div>
+</div>
+
+<div class="rf-grid-2-1">
+
+    <!-- Left Column: Edit Personal Details -->
+    <div>
+        <div class="rf-card">
+            <div class="rf-card-header">
+                <div>
+                    <h2 class="rf-card-title">
+                        <i class="bi bi-person-lines-fill"></i>
+                        Personal &amp; Contact Information
+                    </h2>
+                    <div class="rf-card-subtitle">Keep your information up to date so recruiters can reach you easily</div>
+                </div>
+            </div>
+            <div class="rf-card-body">
+                <form method="POST">
+                    
+                    <div class="rf-grid-2">
+                        <!-- Full Name -->
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="full_name">Full Name *</label>
+                            <input type="text" id="full_name" name="full_name" class="rf-input" value="{{ candidate.full_name }}" required>
+                        </div>
+
+                        <!-- Email (Readonly) -->
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="email">
+                                <span>Email Address</span>
+                                <span style="font-size: 10px; color: var(--green);"><i class="bi bi-check-circle-fill"></i> Verified</span>
+                            </label>
+                            <input type="email" id="email" class="rf-input" value="{{ candidate.email }}" readonly title="Email cannot be changed directly">
+                        </div>
+                    </div>
+
+                    <div class="rf-grid-2">
+                        <!-- Phone -->
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="phone">Phone Number</label>
+                            <input type="text" id="phone" name="phone" class="rf-input" placeholder="+1 (555) 000-0000" value="{{ candidate.phone or '' }}">
+                        </div>
+
+                        <!-- Address -->
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="address">Location / Address</label>
+                            <input type="text" id="address" name="address" class="rf-input" placeholder="City, Country" value="{{ candidate.address or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="linkedin">
+                            <span><i class="bi bi-linkedin" style="color: #0ea5e9;"></i> LinkedIn Profile URL</span>
+                        </label>
+                        <input type="url" id="linkedin" name="linkedin" class="rf-input" placeholder="https://linkedin.com/in/username" value="{{ candidate.linkedin or '' }}">
+                    </div>
+
+                    <div class="rf-grid-2">
+                        <!-- GitHub -->
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="github">
+                                <span><i class="bi bi-github" style="color: #cbd5e1;"></i> GitHub Profile URL</span>
+                            </label>
+                            <input type="url" id="github" name="github" class="rf-input" placeholder="https://github.com/username" value="{{ candidate.github or '' }}">
+                        </div>
+
+                        <!-- Portfolio -->
+                        <div class="rf-form-group">
+                            <label class="rf-label" for="portfolio">
+                                <span><i class="bi bi-globe" style="color: #10b981;"></i> Portfolio / Website</span>
+                            </label>
+                            <input type="url" id="portfolio" name="portfolio" class="rf-input" placeholder="https://myportfolio.dev" value="{{ candidate.portfolio or '' }}">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 14px; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                        <button type="submit" class="rf-btn rf-btn-primary">
+                            <i class="bi bi-check2-circle"></i>
+                            <span>Save Profile Changes</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Experience Section -->
+        <div class="rf-card" style="margin-top: 20px;">
+            <div class="rf-card-header">
+                <div>
+                    <h2 class="rf-card-title">
+                        <i class="bi bi-briefcase"></i>
+                        Work Experience
+                    </h2>
+                    <div class="rf-card-subtitle">Parsed from your uploaded resume or recruiter records</div>
+                </div>
+                <span class="rf-badge rf-badge-gray">{{ experience|length }} Records</span>
+            </div>
+            <div class="rf-card-body">
+                {% if experience %}
+                    {% for exp in experience %}
+                    <div class="rf-timeline-item">
+                        <div class="rf-timeline-dot"></div>
+                        <div class="rf-timeline-content">
+                            <div class="rf-timeline-title">{{ exp.role }}</div>
+                            <div class="rf-timeline-sub">
+                                <span><i class="bi bi-building"></i> {{ exp.company_name }}</span>
+                                <span class="rf-badge rf-badge-info">{{ exp.duration or 'Full Time' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="rf-empty-state" style="padding: 24px 12px;">
+                        <div class="rf-empty-icon" style="width: 48px; height: 48px; font-size: 20px;">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <div class="rf-empty-title" style="font-size: 14px;">No experience records parsed yet</div>
+                        <div class="rf-empty-desc" style="font-size: 12px;">Upload your latest resume to automatically extract your career history.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Education Section -->
+        <div class="rf-card" style="margin-top: 20px;">
+            <div class="rf-card-header">
+                <div>
+                    <h2 class="rf-card-title">
+                        <i class="bi bi-mortarboard"></i>
+                        Education &amp; Credentials
+                    </h2>
+                    <div class="rf-card-subtitle">Academic qualifications and certifications</div>
+                </div>
+                <span class="rf-badge rf-badge-gray">{{ education|length }} Records</span>
+            </div>
+            <div class="rf-card-body">
+                {% if education %}
+                    {% for edu in education %}
+                    <div class="rf-timeline-item">
+                        <div class="rf-timeline-dot" style="background: var(--purple); box-shadow: 0 0 10px var(--purple);"></div>
+                        <div class="rf-timeline-content">
+                            <div class="rf-timeline-title">{{ edu.degree }}</div>
+                            <div class="rf-timeline-sub">
+                                <span><i class="bi bi-bank"></i> {{ edu.institution }}</span>
+                                {% if edu.cgpa %}
+                                <span class="rf-badge rf-badge-success">GPA: {{ edu.cgpa }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="rf-empty-state" style="padding: 24px 12px;">
+                        <div class="rf-empty-icon" style="width: 48px; height: 48px; font-size: 20px;">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <div class="rf-empty-title" style="font-size: 14px;">No education records parsed yet</div>
+                        <div class="rf-empty-desc" style="font-size: 12px;">Upload your resume to automatically extract your degrees and credentials.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Skills & Quick Actions -->
+    <div>
+        
+        <!-- Skills Card -->
+        <div class="rf-card">
+            <div class="rf-card-header">
+                <div>
+                    <h2 class="rf-card-title">
+                        <i class="bi bi-cpu"></i>
+                        Skills &amp; Competencies
+                    </h2>
+                    <div class="rf-card-subtitle">Keywords matched for job recommendations</div>
+                </div>
+                <span class="rf-badge rf-badge-purple">{{ skills|length }}</span>
+            </div>
+            <div class="rf-card-body">
+                {% if skills %}
+                    <div class="skills-cloud">
+                        {% for skill in skills %}
+                        <span class="skill-chip">
+                            <i class="bi bi-check2"></i>
+                            {{ skill.skill_name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="rf-empty-state" style="padding: 24px 12px;">
+                        <div class="rf-empty-icon" style="width: 44px; height: 44px; font-size: 18px;">
+                            <i class="bi bi-cpu"></i>
+                        </div>
+                        <div class="rf-empty-title" style="font-size: 13.5px;">No skills added yet</div>
+                        <div class="rf-empty-desc" style="font-size: 12px;">Resume analysis will automatically tag your technical and soft skills.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Resume Attachment Card -->
+        <div class="rf-card" style="margin-top: 20px;">
+            <div class="rf-card-header">
+                <h2 class="rf-card-title">
+                    <i class="bi bi-file-earmark-text"></i>
+                    Resume File
+                </h2>
+            </div>
+            <div class="rf-card-body">
+                {% if candidate.resume_path %}
+                <div style="background: rgba(16, 185, 129, .08); border: 1px solid rgba(16, 185, 129, .25); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <i class="bi bi-file-earmark-pdf-fill" style="color: #ef4444; font-size: 24px;"></i>
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; color: #fff;">
+                            {{ candidate.resume_path }}
+                        </div>
+                    </div>
+                    <span class="rf-badge rf-badge-success" style="font-size: 10px;">
+                        <i class="bi bi-check-circle-fill"></i> Uploaded &amp; Parsed
+                    </span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="/uploads/resumes/{{ candidate.resume_path }}" target="_blank" class="rf-btn rf-btn-outline rf-btn-sm" style="flex: 1;">
+                        <i class="bi bi-eye"></i> View Resume
+                    </a>
+                    <a href="{{ url_for('candidate_resume.upload_resume') }}" class="rf-btn rf-btn-primary rf-btn-sm" style="flex: 1;">
+                        <i class="bi bi-arrow-repeat"></i> Replace
+                    </a>
+                </div>
+                {% else %}
+                <div class="rf-empty-state" style="padding: 20px 10px;">
+                    <i class="bi bi-file-earmark-x" style="font-size: 28px; color: var(--amber); margin-bottom: 8px;"></i>
+                    <div class="rf-empty-title" style="font-size: 13px;">No resume on file</div>
+                    <p class="rf-empty-desc" style="font-size: 11.5px; margin-bottom: 12px;">Upload a PDF or Word doc to power ATS score &amp; interview questions.</p>
+                    <a href="{{ url_for('candidate_resume.upload_resume') }}" class="rf-btn rf-btn-primary rf-btn-sm">
+                        <i class="bi bi-upload"></i> Upload Now
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI Chatbot Shortcut Card -->
+        <div class="rf-card" style="margin-top: 20px; background: linear-gradient(135deg, rgba(99, 102, 241, .15) 0%, rgba(13, 30, 53, .8) 100%); border-color: rgba(99, 102, 241, .3);">
+            <div class="rf-card-body" style="text-align: center; padding: 22px 16px;">
+                <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(99, 102, 241, .2); color: #a5b4fc; display: grid; place-items: center; margin: 0 auto 12px; font-size: 22px;">
+                    <i class="bi bi-chat-dots-fill"></i>
+                </div>
+                <h3 style="font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px;">AI Resume Assistant</h3>
+                <p style="font-size: 12px; color: var(--text-sec); margin-bottom: 16px; line-height: 1.4;">
+                    Chat with RecruitFlow AI to get tailored tips, gap analysis, and interview question suggestions.
+                </p>
+                <a href="{{ url_for('chatbot.chatbot', candidate_id=candidate.candidate_id) }}" class="rf-btn rf-btn-outline rf-btn-sm" style="width: 100%;">
+                    <i class="bi bi-robot"></i> Open Resume Chatbot
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

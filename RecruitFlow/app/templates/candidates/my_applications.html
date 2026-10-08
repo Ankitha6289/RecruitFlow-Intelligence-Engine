@@ -1,0 +1,291 @@
+{% extends "candidate_base.html" %}
+{% block title %}My Applications{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Application Tracking Pipeline</div>
+<div class="rf-topbar-sub">Monitor the status of your job submissions, screening stages &amp; recruiter feedback</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Pipeline Stepper */
+    .app-pipeline {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(0, 0, 0, .2);
+        padding: 8px 12px;
+        border-radius: 99px;
+        border: 1px solid var(--border);
+        width: fit-content;
+    }
+    .pipeline-step {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--text-dim);
+        font-weight: 600;
+        padding: 2px 6px;
+    }
+    .pipeline-step.active {
+        color: #38bdf8;
+    }
+    .pipeline-step.completed {
+        color: #34d399;
+    }
+    .pipeline-step.rejected {
+        color: #f87171;
+    }
+    .step-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .15);
+    }
+    .pipeline-step.active .step-dot {
+        background: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8;
+    }
+    .pipeline-step.completed .step-dot {
+        background: #34d399;
+    }
+    .pipeline-step.rejected .step-dot {
+        background: #f87171;
+    }
+    .step-arrow {
+        color: rgba(255, 255, 255, .15);
+        font-size: 10px;
+    }
+
+    .app-remarks-box {
+        background: rgba(14, 165, 233, .07);
+        border-left: 3px solid var(--accent);
+        border-radius: 0 var(--r-sm) var(--r-sm) 0;
+        padding: 8px 12px;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #cbd5e1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header Stats Row -->
+{% set total_apps = applications|length %}
+{% set under_review = namespace(count=0) %}
+{% set in_interview = namespace(count=0) %}
+{% set offers_count = namespace(count=0) %}
+
+{% for a in applications %}
+    {% if a.status in ['Applied', 'Resume Screening', 'Shortlisted'] %}
+        {% set under_review.count = under_review.count + 1 %}
+    {% elif a.status in ['Interview', 'Technical Interview', 'HR Interview'] %}
+        {% set in_interview.count = in_interview.count + 1 %}
+    {% elif a.status in ['Selected', 'Offer Sent', 'Joined'] %}
+        {% set offers_count.count = offers_count.count + 1 %}
+    {% endif %}
+{% endfor %}
+
+<div class="rf-grid-4" style="margin-bottom: 22px;">
+    <div class="rf-stat-card">
+        <div class="rf-stat-info">
+            <span class="rf-stat-lbl">Total Submitted</span>
+            <span class="rf-stat-val">{{ total_apps }}</span>
+            <span class="rf-stat-sub">Across all roles</span>
+        </div>
+        <div class="rf-stat-icon"><i class="bi bi-send"></i></div>
+    </div>
+
+    <div class="rf-stat-card stat-amber">
+        <div class="rf-stat-info">
+            <span class="rf-stat-lbl">Under Screening</span>
+            <span class="rf-stat-val">{{ under_review.count }}</span>
+            <span class="rf-stat-sub">Recruiter evaluation</span>
+        </div>
+        <div class="rf-stat-icon"><i class="bi bi-clock-history"></i></div>
+    </div>
+
+    <div class="rf-stat-card stat-green">
+        <div class="rf-stat-info">
+            <span class="rf-stat-lbl">In Interview</span>
+            <span class="rf-stat-val">{{ in_interview.count }}</span>
+            <span class="rf-stat-sub">Technical &amp; HR rounds</span>
+        </div>
+        <div class="rf-stat-icon"><i class="bi bi-camera-video"></i></div>
+    </div>
+
+    <div class="rf-stat-card stat-purple">
+        <div class="rf-stat-info">
+            <span class="rf-stat-lbl">Offers &amp; Selected</span>
+            <span class="rf-stat-val">{{ offers_count.count }}</span>
+            <span class="rf-stat-sub">Final stage success</span>
+        </div>
+        <div class="rf-stat-icon"><i class="bi bi-award"></i></div>
+    </div>
+</div>
+
+<!-- Applications Table Card -->
+<div class="rf-card">
+    <div class="rf-card-header">
+        <div>
+            <h2 class="rf-card-title">
+                <i class="bi bi-list-check"></i>
+                My Job Applications
+            </h2>
+            <div class="rf-card-subtitle">Real-time status updates synced with employer applicant tracking</div>
+        </div>
+        <a href="{{ url_for('candidate_jobs.jobs') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+            <i class="bi bi-plus-circle"></i> Browse More Jobs
+        </a>
+    </div>
+
+    <div class="rf-card-body" style="padding: 0;">
+        {% if applications %}
+        <div class="rf-table-responsive">
+            <table class="rf-table">
+                <thead>
+                    <tr>
+                        <th>Role &amp; Company</th>
+                        <th>Applied On</th>
+                        <th>Current Stage</th>
+                        <th>Hiring Pipeline</th>
+                        <th style="text-align: right;">Next Step</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <!-- Role & Company -->
+                        <td>
+                            <div style="font-weight: 700; color: #fff; font-size: 14px; margin-bottom: 2px;">
+                                {{ app.job.title if app.job else 'Position' }}
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-sec); display: flex; align-items: center; gap: 8px;">
+                                <span><i class="bi bi-building"></i> {{ app.job.company if app.job else 'Company' }}</span>
+                                {% if app.job and app.job.location %}
+                                <span>&bull;</span>
+                                <span><i class="bi bi-geo-alt"></i> {{ app.job.location }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if app.remarks %}
+                            <div class="app-remarks-box">
+                                <i class="bi bi-chat-quote-fill" style="color: var(--accent2); margin-right: 4px;"></i>
+                                <span>{{ app.remarks }}</span>
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <!-- Applied Date -->
+                        <td>
+                            <div style="font-size: 13px; color: #cbd5e1;">
+                                {% if app.created_at %}
+                                {{ app.created_at.strftime('%b %d, %Y') }}
+                                {% elif app.applied_date %}
+                                {{ app.applied_date }}
+                                {% else %}
+                                Active
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Status Badge -->
+                        <td>
+                            {% if app.status == "Applied" %}
+                                <span class="rf-badge rf-badge-info"><i class="bi bi-send"></i> Applied</span>
+                            {% elif app.status == "Resume Screening" %}
+                                <span class="rf-badge rf-badge-info"><i class="bi bi-file-earmark-text"></i> Screening</span>
+                            {% elif app.status == "Shortlisted" %}
+                                <span class="rf-badge rf-badge-purple"><i class="bi bi-check2-circle"></i> Shortlisted</span>
+                            {% elif app.status in ["Interview", "Technical Interview", "HR Interview"] %}
+                                <span class="rf-badge rf-badge-warning"><i class="bi bi-camera-video"></i> {{ app.status }}</span>
+                            {% elif app.status in ["Selected", "Offer Sent", "Joined"] %}
+                                <span class="rf-badge rf-badge-success"><i class="bi bi-trophy"></i> {{ app.status }}</span>
+                            {% elif app.status == "Rejected" %}
+                                <span class="rf-badge rf-badge-danger"><i class="bi bi-x-circle"></i> Not Selected</span>
+                            {% else %}
+                                <span class="rf-badge rf-badge-gray">{{ app.status }}</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Pipeline Visual Stepper -->
+                        <td>
+                            <div class="app-pipeline">
+                                <!-- Step 1: Applied -->
+                                <div class="pipeline-step completed">
+                                    <div class="step-dot"></div>
+                                    <span>Applied</span>
+                                </div>
+                                <span class="step-arrow">&rsaquo;</span>
+
+                                <!-- Step 2: Screened -->
+                                <div class="pipeline-step {% if app.status != 'Applied' and app.status != 'Rejected' %}completed{% elif app.status == 'Applied' %}active{% else %}rejected{% endif %}">
+                                    <div class="step-dot"></div>
+                                    <span>Screening</span>
+                                </div>
+                                <span class="step-arrow">&rsaquo;</span>
+
+                                <!-- Step 3: Interview -->
+                                <div class="pipeline-step {% if app.status in ['Selected', 'Offer Sent', 'Joined'] %}completed{% elif app.status in ['Interview', 'Technical Interview', 'HR Interview', 'Shortlisted'] %}active{% elif app.status == 'Rejected' %}rejected{% endif %}">
+                                    <div class="step-dot"></div>
+                                    <span>Interview</span>
+                                </div>
+                                <span class="step-arrow">&rsaquo;</span>
+
+                                <!-- Step 4: Offer -->
+                                <div class="pipeline-step {% if app.status in ['Selected', 'Offer Sent', 'Joined'] %}completed{% elif app.status == 'Rejected' %}rejected{% endif %}">
+                                    <div class="step-dot"></div>
+                                    <span>Offer</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Action -->
+                        <td style="text-align: right;">
+                            {% if app.status in ["Interview", "Technical Interview", "HR Interview", "Shortlisted"] %}
+                            <a href="{{ url_for('candidate_interview.questions') }}" class="rf-btn rf-btn-primary rf-btn-sm" title="Practice AI Interview Questions">
+                                <i class="bi bi-robot"></i> Practice AI
+                            </a>
+                            {% elif app.status in ["Selected", "Offer Sent"] %}
+                            <a href="{{ url_for('candidate_offer.offers') }}" class="rf-btn rf-btn-success rf-btn-sm">
+                                <i class="bi bi-award"></i> View Offer
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('candidate_jobs.jobs') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+                                <i class="bi bi-briefcase"></i> View Roles
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="rf-empty-state">
+            <div class="rf-empty-icon">
+                <i class="bi bi-send-x"></i>
+            </div>
+            <div class="rf-empty-title">No applications submitted yet</div>
+            <p class="rf-empty-desc">
+                Explore our job listings, search for positions matching your experience, and apply with 1-click using your profile.
+            </p>
+            <a href="{{ url_for('candidate_jobs.jobs') }}" class="rf-btn rf-btn-primary">
+                <i class="bi bi-search"></i> Explore Active Openings
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="rf-card-footer">
+        <span style="font-size: 12px; color: var(--text-sec);">
+            Showing {{ applications|length }} total applications
+        </span>
+        <a href="{{ url_for('candidate_dashboard.dashboard') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+{% endblock %}

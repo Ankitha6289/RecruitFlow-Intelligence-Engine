@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>Interview Management</h2>
+
+        <a href="{{ url_for('interview_management.add_interview') }}"
+           class="btn btn-success">
+
+            Schedule Interview
+
+        </a>
+
+    </div>
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+
+                Scheduled Interviews
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover table-striped">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Candidate</th>
+
+                        <th>Interviewer</th>
+
+                        <th>Date</th>
+
+                        <th>Time</th>
+
+                        <th>Mode</th>
+
+                        <th>Status</th>
+
+                        <th width="280">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for interview in interviews %}
+
+                    <tr>
+
+                        <td>{{ interview.interview_id }}</td>
+
+                        <td>
+
+                            {{ interview.candidate.full_name }}
+
+                            <br>
+
+                            <small>{{ interview.candidate.email }}</small>
+
+                        </td>
+
+                        <td>{{ interview.interviewer }}</td>
+
+                        <td>{{ interview.interview_date }}</td>
+
+                        <td>{{ interview.interview_time }}</td>
+
+                        <td>{{ interview.interview_mode }}</td>
+
+                        <td>
+
+                            {% if interview.status == "Scheduled" %}
+
+                                <span class="badge bg-warning text-dark">
+
+                                    Scheduled
+
+                                </span>
+
+                            {% elif interview.status == "Completed" %}
+
+                                <span class="badge bg-success">
+
+                                    Completed
+
+                                </span>
+
+                            {% elif interview.status == "Cancelled" %}
+
+                                <span class="badge bg-danger">
+
+                                    Cancelled
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    {{ interview.status }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a href="{{ url_for('interview_management.update_status',
+                                                interview_id=interview.interview_id,
+                                                status='Completed') }}"
+                               class="btn btn-success btn-sm">
+
+                                Complete
+
+                            </a>
+
+                            <a href="{{ url_for('interview_management.update_status',
+                                                interview_id=interview.interview_id,
+                                                status='Cancelled') }}"
+                               class="btn btn-warning btn-sm">
+
+                                Cancel
+
+                            </a>
+
+                            <a href="{{ url_for('interview_management.delete_interview',
+                                                interview_id=interview.interview_id) }}"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Delete this interview?')">
+
+                                Delete
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td colspan="8" class="text-center">
+
+                            No Interviews Scheduled
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,397 @@
+{% extends "candidate_base.html" %}
+{% block title %}Account Settings{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Security &amp; Account Settings</div>
+<div class="rf-topbar-sub">Manage your login credentials, password security &amp; privacy preferences</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .settings-nav-tabs {
+        display: flex;
+        gap: 8px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+        margin-bottom: 24px;
+        overflow-x: auto;
+    }
+    .settings-tab-btn {
+        background: transparent;
+        border: none;
+        padding: 9px 18px;
+        border-radius: var(--r-sm);
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-sec);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all .15s ease;
+        white-space: nowrap;
+    }
+    .settings-tab-btn:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, .04);
+    }
+    .settings-tab-btn.active {
+        color: #fff;
+        background: rgba(14, 165, 233, .16);
+        border: 1px solid rgba(14, 165, 233, .35);
+    }
+
+    .pass-input-wrap {
+        position: relative;
+    }
+    .pass-toggle-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-sec);
+        cursor: pointer;
+        font-size: 15px;
+        padding: 4px;
+    }
+    .pass-toggle-btn:hover { color: #fff; }
+
+    .strength-bar-wrap {
+        height: 4px;
+        background: rgba(255, 255, 255, .08);
+        border-radius: 99px;
+        margin-top: 6px;
+        overflow: hidden;
+    }
+    .strength-bar-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 99px;
+        transition: width .3s ease, background-color .3s ease;
+    }
+
+    /* Switch list */
+    .pref-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .pref-item:last-child { border-bottom: none; }
+    .pref-title { font-size: 13.5px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+    .pref-desc { font-size: 12px; color: var(--text-sec); }
+
+    /* Custom Toggle Switch */
+    .rf-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+    }
+    .rf-switch input { opacity: 0; width: 0; height: 0; }
+    .rf-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(255, 255, 255, .15);
+        border-radius: 24px;
+        transition: .3s;
+    }
+    .rf-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px; width: 18px;
+        left: 3px; bottom: 3px;
+        background-color: white;
+        border-radius: 50%;
+        transition: .3s;
+    }
+    input:checked + .rf-slider { background-color: var(--accent); }
+    input:checked + .rf-slider:before { transform: translateX(20px); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Tabs Header -->
+<div class="settings-nav-tabs">
+    <button class="settings-tab-btn active" onclick="switchTab('securityTab', this)">
+        <i class="bi bi-shield-lock-fill"></i> Security &amp; Password
+    </button>
+    <button class="settings-tab-btn" onclick="switchTab('prefTab', this)">
+        <i class="bi bi-bell-fill"></i> Email Notifications
+    </button>
+    <button class="settings-tab-btn" onclick="switchTab('privacyTab', this)">
+        <i class="bi bi-eye-slash-fill"></i> Privacy &amp; Visibility
+    </button>
+</div>
+
+<!-- Tab 1: Security & Password -->
+<div id="securityTab" class="settings-tab-pane">
+    <div class="rf-grid-2-1">
+        
+        <!-- Password Form -->
+        <div class="rf-card">
+            <div class="rf-card-header">
+                <div>
+                    <h2 class="rf-card-title">
+                        <i class="bi bi-key-fill"></i>
+                        Update Password
+                    </h2>
+                    <div class="rf-card-subtitle">Ensure your account uses a secure, unique password</div>
+                </div>
+            </div>
+
+            <div class="rf-card-body">
+                <form method="POST">
+                    
+                    <!-- Current Password -->
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="current_password">Current Password</label>
+                        <div class="pass-input-wrap">
+                            <input type="password" id="current_password" name="current_password" class="rf-input" placeholder="Enter current password" required>
+                            <button type="button" class="pass-toggle-btn" onclick="toggleField('current_password', this)">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- New Password -->
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="new_password">New Password</label>
+                        <div class="pass-input-wrap">
+                            <input type="password" id="new_password" name="new_password" class="rf-input" placeholder="Enter new strong password" required oninput="evaluateStrength(this.value)">
+                            <button type="button" class="pass-toggle-btn" onclick="toggleField('new_password', this)">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                        <div class="strength-bar-wrap">
+                            <div class="strength-bar-fill" id="passStrengthBar"></div>
+                        </div>
+                        <small class="rf-helper" id="passStrengthText">Use at least 8 characters with letters, numbers &amp; symbols.</small>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="rf-form-group">
+                        <label class="rf-label" for="confirm_password">Confirm New Password</label>
+                        <div class="pass-input-wrap">
+                            <input type="password" id="confirm_password" name="confirm_password" class="rf-input" placeholder="Re-enter new password" required>
+                            <button type="button" class="pass-toggle-btn" onclick="toggleField('confirm_password', this)">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 22px; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                        <button type="submit" class="rf-btn rf-btn-primary">
+                            <i class="bi bi-check2-circle"></i>
+                            <span>Save New Password</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Security Best Practices -->
+        <div>
+            <div class="rf-card">
+                <div class="rf-card-header">
+                    <h3 class="rf-card-title">
+                        <i class="bi bi-shield-check"></i>
+                        Security Recommendations
+                    </h3>
+                </div>
+                <div class="rf-card-body">
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: #cbd5e1;">
+                        <li style="display: flex; gap: 8px; align-items: flex-start;">
+                            <i class="bi bi-check2-circle" style="color: var(--green); font-size: 15px; margin-top: 1px;"></i>
+                            <span>Minimum 8 characters with a mix of uppercase and lowercase letters.</span>
+                        </li>
+                        <li style="display: flex; gap: 8px; align-items: flex-start;">
+                            <i class="bi bi-check2-circle" style="color: var(--green); font-size: 15px; margin-top: 1px;"></i>
+                            <span>Include numbers (0-9) and special characters (!@#$%^&*).</span>
+                        </li>
+                        <li style="display: flex; gap: 8px; align-items: flex-start;">
+                            <i class="bi bi-check2-circle" style="color: var(--green); font-size: 15px; margin-top: 1px;"></i>
+                            <span>Never share your candidate portal login with external parties.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="rf-card" style="margin-top: 20px; border-color: rgba(244, 63, 94, .3);">
+                <div class="rf-card-header" style="background: rgba(244, 63, 94, .05);">
+                    <h3 class="rf-card-title" style="color: #f87171;">
+                        <i class="bi bi-exclamation-triangle-fill" style="color: #f87171;"></i>
+                        Session &amp; Account
+                    </h3>
+                </div>
+                <div class="rf-card-body">
+                    <p style="font-size: 12.5px; color: var(--text-sec); margin-bottom: 14px;">
+                        Need to end your session across devices? Sign out securely using the button below.
+                    </p>
+                    <a href="{{ url_for('candidate_auth.logout') }}" class="rf-btn rf-btn-danger rf-btn-sm" style="width: 100%;">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out from Portal
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Tab 2: Email Notifications -->
+<div id="prefTab" class="settings-tab-pane" style="display: none;">
+    <div class="rf-card">
+        <div class="rf-card-header">
+            <h2 class="rf-card-title">
+                <i class="bi bi-envelope-check"></i>
+                Email &amp; Alert Notifications
+            </h2>
+        </div>
+        <div class="rf-card-body">
+            <div class="pref-item">
+                <div>
+                    <div class="pref-title">Interview Invitations &amp; Schedule Updates</div>
+                    <div class="pref-desc">Receive immediate email alerts when recruiters schedule or change interview rounds.</div>
+                </div>
+                <label class="rf-switch">
+                    <input type="checkbox" checked>
+                    <span class="rf-slider"></span>
+                </label>
+            </div>
+
+            <div class="pref-item">
+                <div>
+                    <div class="pref-title">Application Status Changes</div>
+                    <div class="pref-desc">Get notified when your application moves from Screening to Interview or Offer stage.</div>
+                </div>
+                <label class="rf-switch">
+                    <input type="checkbox" checked>
+                    <span class="rf-slider"></span>
+                </label>
+            </div>
+
+            <div class="pref-item">
+                <div>
+                    <div class="pref-title">AI Job Recommendations</div>
+                    <div class="pref-desc">Weekly digest of newly posted positions that match your resume skill profile.</div>
+                </div>
+                <label class="rf-switch">
+                    <input type="checkbox" checked>
+                    <span class="rf-slider"></span>
+                </label>
+            </div>
+
+            <div class="pref-item">
+                <div>
+                    <div class="pref-title">AI Mock Interview Feedback Reports</div>
+                    <div class="pref-desc">Send scoring analysis and suggested answers to your registered email address.</div>
+                </div>
+                <label class="rf-switch">
+                    <input type="checkbox">
+                    <span class="rf-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="rf-card-footer">
+            <span style="font-size: 12px; color: var(--text-sec);">Preferences save automatically</span>
+            <span class="rf-badge rf-badge-success">Saved</span>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 3: Privacy & Visibility -->
+<div id="privacyTab" class="settings-tab-pane" style="display: none;">
+    <div class="rf-card">
+        <div class="rf-card-header">
+            <h2 class="rf-card-title">
+                <i class="bi bi-shield-shaded"></i>
+                Candidate Profile Visibility
+            </h2>
+        </div>
+        <div class="rf-card-body">
+            <div class="pref-item">
+                <div>
+                    <div class="pref-title">Discoverable by Verified Employers</div>
+                    <div class="pref-desc">Allow partner corporate recruiters to view your anonymized skills profile.</div>
+                </div>
+                <label class="rf-switch">
+                    <input type="checkbox" checked>
+                    <span class="rf-slider"></span>
+                </label>
+            </div>
+
+            <div class="pref-item">
+                <div>
+                    <div class="pref-title">ATS Resume Indexing</div>
+                    <div class="pref-desc">Include your parsed resume keywords in global talent search algorithms.</div>
+                </div>
+                <label class="rf-switch">
+                    <input type="checkbox" checked>
+                    <span class="rf-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.settings-tab-pane').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.settings-tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).style.display = 'block';
+    btn.classList.add('active');
+}
+
+function toggleField(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    }
+}
+
+function evaluateStrength(val) {
+    const bar = document.getElementById('passStrengthBar');
+    const text = document.getElementById('passStrengthText');
+    let score = 0;
+
+    if (val.length >= 8) score += 25;
+    if (/[A-Z]/.test(val)) score += 25;
+    if (/[0-9]/.test(val)) score += 25;
+    if (/[^A-Za-z0-9]/.test(val)) score += 25;
+
+    bar.style.width = score + '%';
+    if (score <= 25) {
+        bar.style.backgroundColor = '#f43f5e';
+        text.textContent = 'Weak password - please make it longer and more diverse.';
+        text.style.color = '#f87171';
+    } else if (score <= 50) {
+        bar.style.backgroundColor = '#f59e0b';
+        text.textContent = 'Fair password - add special characters or numbers.';
+        text.style.color = '#fbbf24';
+    } else if (score <= 75) {
+        bar.style.backgroundColor = '#38bdf8';
+        text.textContent = 'Good password - almost optimal.';
+        text.style.color = '#38bdf8';
+    } else {
+        bar.style.backgroundColor = '#10b981';
+        text.textContent = 'Strong password! Highly secure.';
+        text.style.color = '#34d399';
+    }
+}
+</script>
+
+{% endblock %}

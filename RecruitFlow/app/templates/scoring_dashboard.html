@@ -1,0 +1,426 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Scoring Dashboard{% endblock %}
+{% block breadcrumb %}Scoring Dashboard{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-graph-up-arrow"></i> AI Tools{% endblock %}
+{% block page_title %}Candidate Scoring Dashboard{% endblock %}
+{% block page_subtitle %}AI suitability scores and ATS rankings across the entire candidate pipeline.{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('candidate_management.candidates') }}" class="btn btn-secondary btn-sm">
+  <i class="bi bi-people-fill"></i> All Candidates
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+
+/* ── KPI strip ── */
+.sd-kpi-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 22px;
+}
+@media(max-width:900px) { .sd-kpi-row { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:500px) { .sd-kpi-row { grid-template-columns: 1fr; } }
+
+.sd-kpi {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); padding: 18px 20px;
+  display: flex; align-items: center; gap: 14px;
+  transition: border-color var(--t-fast);
+  position: relative; overflow: hidden;
+}
+.sd-kpi::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.sd-kpi:nth-child(1)::after { background: linear-gradient(90deg,#60a5fa,#93c5fd); }
+.sd-kpi:nth-child(2)::after { background: linear-gradient(90deg,#10b981,#34d399); }
+.sd-kpi:nth-child(3)::after { background: linear-gradient(90deg,#f59e0b,#fcd34d); }
+.sd-kpi:nth-child(4)::after { background: linear-gradient(90deg,#ef4444,#f87171); }
+.sd-kpi:hover { border-color: var(--border-base); }
+.sd-kpi-icon {
+  width: 40px; height: 40px; border-radius: var(--r-md);
+  display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+}
+.sd-kpi-val { font-size: 26px; font-weight: 900; color: var(--text-primary); line-height: 1; }
+.sd-kpi-lbl { font-size: 11.5px; color: var(--text-sec); margin-top: 3px; }
+
+/* ── Leaderboard table card ── */
+.sd-table-card {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden; margin-bottom: 20px;
+}
+.sd-table-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 15px 20px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+.sd-table-title {
+  font-size: 13.5px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── Score table ── */
+.sd-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sd-table thead th {
+  background: rgba(255,255,255,.025); color: var(--text-dim);
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; padding: 11px 16px; text-align: left;
+  border-bottom: 1px solid var(--border-subtle); white-space: nowrap;
+}
+.sd-table tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--t-fast);
+}
+.sd-table tbody tr:last-child { border-bottom: none; }
+.sd-table tbody tr:hover { background: rgba(255,255,255,.025); }
+.sd-table td { padding: 13px 16px; vertical-align: middle; }
+
+/* Rank badge */
+.rank-badge {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: inline-grid; place-items: center;
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
+}
+.rank-1 { background: linear-gradient(135deg,#f59e0b,#fbbf24); color: #1a0f00; }
+.rank-2 { background: linear-gradient(135deg,#94a3b8,#cbd5e1); color: #0f1a2e; }
+.rank-3 { background: linear-gradient(135deg,#b45309,#d97706); color: #fff; }
+.rank-n { background: rgba(255,255,255,.08); color: var(--text-dim); }
+
+/* Score bar cell */
+.sd-bar-wrap {
+  width: 110px; height: 6px; background: rgba(255,255,255,.08);
+  border-radius: 99px; overflow: hidden; display: inline-block;
+  vertical-align: middle; margin-right: 8px;
+}
+.sd-bar-fill { height: 100%; border-radius: 99px; transition: width .8s ease; }
+
+/* Score badge pill */
+.sd-score-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: 12px; font-weight: 800; white-space: nowrap;
+}
+.sd-score-high   { background: rgba(16,185,129,.14); color: #10b981; border: 1px solid rgba(16,185,129,.28); }
+.sd-score-mid    { background: rgba(245,158,11,.14);  color: #f59e0b; border: 1px solid rgba(245,158,11,.28); }
+.sd-score-low    { background: rgba(99,143,220,.10);  color: #8ba4c8; border: 1px solid rgba(99,143,220,.2); }
+
+/* ── Score distribution chart ── */
+.sd-dist-card {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden;
+}
+.sd-dist-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 20px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+.sd-dist-body { padding: 22px; }
+.sd-dist-row {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+}
+.sd-dist-row:last-child { margin-bottom: 0; }
+.sd-dist-label { font-size: 12px; font-weight: 600; width: 80px; flex-shrink: 0; color: var(--text-sec); }
+.sd-dist-bar-bg {
+  flex: 1; height: 8px; background: rgba(255,255,255,.07); border-radius: 99px; overflow: hidden;
+}
+.sd-dist-bar-fill { height: 100%; border-radius: 99px; transition: width .9s ease; }
+.sd-dist-count { font-size: 12px; font-weight: 700; width: 30px; text-align: right; color: var(--text-primary); flex-shrink: 0; }
+
+/* empty state */
+.sd-empty {
+  text-align: center; padding: 56px 20px; color: var(--text-dim);
+}
+.sd-empty i { font-size: 38px; display: block; margin-bottom: 12px; }
+.sd-empty p  { font-size: 13.5px; margin: 0; }
+
+{% endblock %}
+
+{% block content %}
+
+{# ── Score buckets computed in Jinja ── #}
+{% set top     = data.top_candidates %}
+{% set total   = data.total_candidates %}
+{% set avg     = data.average_score %}
+
+{# Count distribution buckets across top_candidates #}
+{% set high_cnt = top | selectattr('overall_score', 'ge', 70) | list | length %}
+{% set mid_cnt  = top | selectattr('overall_score', 'ge', 40) | selectattr('overall_score', 'lt', 70) | list | length %}
+{% set low_cnt  = top | selectattr('overall_score', 'lt', 40)  | list | length %}
+{% set max_bucket = [high_cnt, mid_cnt, low_cnt, 1] | max %}
+
+<!-- ══════════════════════════════════════════
+     KPI STRIP
+══════════════════════════════════════════ -->
+<div class="sd-kpi-row">
+
+  <div class="sd-kpi">
+    <div class="sd-kpi-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+      <i class="bi bi-people-fill"></i>
+    </div>
+    <div>
+      <div class="sd-kpi-val">{{ total }}</div>
+      <div class="sd-kpi-lbl">Total Candidates</div>
+    </div>
+  </div>
+
+  <div class="sd-kpi">
+    <div class="sd-kpi-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+      <i class="bi bi-stars"></i>
+    </div>
+    <div>
+      <div class="sd-kpi-val">{{ avg }}%</div>
+      <div class="sd-kpi-lbl">Average Score</div>
+    </div>
+  </div>
+
+  <div class="sd-kpi">
+    <div class="sd-kpi-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+      <i class="bi bi-trophy-fill"></i>
+    </div>
+    <div>
+      <div class="sd-kpi-val">
+        {% if top %}{{ top[0].overall_score }}%{% else %}—{% endif %}
+      </div>
+      <div class="sd-kpi-lbl">Highest Score</div>
+    </div>
+  </div>
+
+  <div class="sd-kpi">
+    <div class="sd-kpi-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <div>
+      <div class="sd-kpi-val">{{ high_cnt }}</div>
+      <div class="sd-kpi-lbl">High Scorers (≥70%)</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     LEADERBOARD + DISTRIBUTION (2-col)
+══════════════════════════════════════════ -->
+<div class="grid-2 section-gap" style="gap:18px;">
+
+  <!-- ── Leaderboard Table ── -->
+  <div class="sd-table-card">
+    <div class="sd-table-header">
+      <div class="sd-table-title">
+        <i class="bi bi-award-fill" style="color:#f59e0b;"></i>
+        Top Candidates by Score
+      </div>
+      <span class="badge badge-amber">Top {{ top|length }}</span>
+    </div>
+
+    {% if top %}
+    <table class="sd-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Candidate</th>
+          <th>AI Score</th>
+          <th>ATS Score</th>
+          <th>Overall</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in top %}
+        {% set sc = item.overall_score | float %}
+        {% set score_cls = 'sd-score-high' if sc >= 70 else ('sd-score-mid' if sc >= 40 else 'sd-score-low') %}
+        {% set bar_color = '#10b981' if sc >= 70 else ('#f59e0b' if sc >= 40 else '#8ba4c8') %}
+        <tr>
+          <!-- Rank -->
+          <td>
+            <span class="rank-badge rank-{% if loop.index == 1 %}1{% elif loop.index == 2 %}2{% elif loop.index == 3 %}3{% else %}n{% endif %}">
+              {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+            </span>
+          </td>
+
+          <!-- Candidate -->
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="av" style="background:linear-gradient(135deg,var(--accent-1),var(--purple));flex-shrink:0;">
+                {{ item.candidate.full_name[0]|upper }}
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary);">
+                  {{ item.candidate.full_name }}
+                </div>
+                <div style="font-size:11px;color:var(--text-dim);">
+                  {{ item.candidate.email }}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- AI Score -->
+          <td>
+            <span style="font-size:13px;font-weight:700;color:{{ '#10b981' if item.ai_score >= 70 else ('#f59e0b' if item.ai_score >= 40 else 'var(--text-sec)') }};">
+              {{ item.ai_score }}%
+            </span>
+          </td>
+
+          <!-- ATS Score -->
+          <td>
+            <span style="font-size:13px;font-weight:700;color:{{ '#60a5fa' if item.ats_score >= 70 else ('#f59e0b' if item.ats_score >= 40 else 'var(--text-sec)') }};">
+              {{ item.ats_score }}%
+            </span>
+          </td>
+
+          <!-- Overall + bar -->
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="sd-bar-wrap">
+                <div class="sd-bar-fill"
+                     data-w="{{ [sc, 100]|min }}"
+                     style="width:0;background:{{ bar_color }};"></div>
+              </div>
+              <span class="sd-score-pill {{ score_cls }}">{{ sc }}%</span>
+            </div>
+          </td>
+
+          <!-- Action -->
+          <td style="text-align:right;">
+            <a href="{{ url_for('candidate_management.candidate_details', candidate_id=item.candidate.candidate_id) }}"
+               class="btn btn-ghost btn-sm btn-icon" title="View profile">
+              <i class="bi bi-eye-fill"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="sd-empty">
+      <i class="bi bi-graph-up"></i>
+      <p>No candidate scores available yet. Upload resumes to generate AI scores.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Score Distribution ── -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Distribution bars -->
+    <div class="sd-dist-card">
+      <div class="sd-dist-header">
+        <div style="width:26px;height:26px;border-radius:var(--r-sm);background:rgba(59,130,246,.12);color:#60a5fa;display:grid;place-items:center;font-size:13px;flex-shrink:0;">
+          <i class="bi bi-bar-chart-fill"></i>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:var(--text-primary);">Score Distribution</span>
+      </div>
+      <div class="sd-dist-body">
+
+        <!-- High: ≥70% -->
+        <div class="sd-dist-row">
+          <span class="sd-dist-label" style="color:#10b981;">High (≥70%)</span>
+          <div class="sd-dist-bar-bg">
+            <div class="sd-dist-bar-fill"
+                 data-w="{{ ((high_cnt / max_bucket) * 100)|round|int }}"
+                 style="width:0;background:#10b981;"></div>
+          </div>
+          <span class="sd-dist-count">{{ high_cnt }}</span>
+        </div>
+
+        <!-- Medium: 40–69% -->
+        <div class="sd-dist-row">
+          <span class="sd-dist-label" style="color:#f59e0b;">Mid (40–69%)</span>
+          <div class="sd-dist-bar-bg">
+            <div class="sd-dist-bar-fill"
+                 data-w="{{ ((mid_cnt / max_bucket) * 100)|round|int }}"
+                 style="width:0;background:#f59e0b;"></div>
+          </div>
+          <span class="sd-dist-count">{{ mid_cnt }}</span>
+        </div>
+
+        <!-- Low: <40% -->
+        <div class="sd-dist-row">
+          <span class="sd-dist-label" style="color:#8ba4c8;">Low (&lt;40%)</span>
+          <div class="sd-dist-bar-bg">
+            <div class="sd-dist-bar-fill"
+                 data-w="{{ ((low_cnt / max_bucket) * 100)|round|int }}"
+                 style="width:0;background:#8ba4c8;"></div>
+          </div>
+          <span class="sd-dist-count">{{ low_cnt }}</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Score legend card -->
+    <div class="sd-dist-card">
+      <div class="sd-dist-header">
+        <div style="width:26px;height:26px;border-radius:var(--r-sm);background:rgba(245,158,11,.12);color:#f59e0b;display:grid;place-items:center;font-size:13px;flex-shrink:0;">
+          <i class="bi bi-info-circle-fill"></i>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:var(--text-primary);">Score Legend</span>
+      </div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
+        {% for label, desc, color, bg in [
+          ('≥ 70%', 'Strong candidate — recommend for interview', '#10b981', 'rgba(16,185,129,.10)'),
+          ('40–69%', 'Moderate match — review profile manually', '#f59e0b', 'rgba(245,158,11,.10)'),
+          ('< 40%',  'Low match — may need further screening', '#8ba4c8', 'rgba(99,143,220,.08)'),
+        ] %}
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;
+                    background:{{ bg }};border-radius:var(--r-md);">
+          <div style="width:10px;height:10px;border-radius:50%;background:{{ color }};flex-shrink:0;"></div>
+          <div>
+            <span style="font-size:12.5px;font-weight:700;color:{{ color }};">{{ label }}</span>
+            <span style="font-size:11.5px;color:var(--text-sec);margin-left:6px;">{{ desc }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- AI vs ATS explanation -->
+    <div class="sd-dist-card">
+      <div class="sd-dist-header">
+        <div style="width:26px;height:26px;border-radius:var(--r-sm);background:rgba(139,92,246,.12);color:#a78bfa;display:grid;place-items:center;font-size:13px;flex-shrink:0;">
+          <i class="bi bi-robot"></i>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:var(--text-primary);">Score Components</span>
+      </div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span class="badge badge-purple" style="flex-shrink:0;margin-top:1px;">AI</span>
+          <span style="font-size:12px;color:var(--text-sec);line-height:1.5;">
+            AI Suitability Score — generated by Gemini/Groq using resume content vs. job requirements.
+          </span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span class="badge badge-blue" style="flex-shrink:0;margin-top:1px;">ATS</span>
+          <span style="font-size:12px;color:var(--text-sec);line-height:1.5;">
+            ATS Score — keyword and structure match score from the resume parsing engine.
+          </span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span class="badge badge-green" style="flex-shrink:0;margin-top:1px;">Overall</span>
+          <span style="font-size:12px;color:var(--text-sec);line-height:1.5;">
+            Overall Score — average of AI and ATS scores used for ranking.
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.right col -->
+
+</div><!-- /.grid-2 -->
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* Animate all bar fills on load */
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-w]').forEach(function (el) {
+      var w = parseFloat(el.getAttribute('data-w')) || 0;
+      el.style.transition = 'width .85s cubic-bezier(.4,0,.2,1)';
+      requestAnimationFrame(function () {
+        setTimeout(function () { el.style.width = Math.min(w, 100) + '%'; }, 60);
+      });
+    });
+  });
+</script>
+{% endblock %}

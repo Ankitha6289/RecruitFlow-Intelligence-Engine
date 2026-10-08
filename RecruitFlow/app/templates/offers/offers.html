@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h3>
+
+                    Offer Management
+
+                </h3>
+
+                <a
+                    href="{{ url_for('offer_management.add_offer') }}"
+                    class="btn btn-light">
+
+                    Create Offer
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Candidate</th>
+
+                        <th>Job</th>
+
+                        <th>Salary</th>
+
+                        <th>Offer Date</th>
+
+                        <th>Joining Date</th>
+
+                        <th>Status</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for offer in offers %}
+
+                <tr>
+
+                    <td>
+
+                        {{ offer.offer_id }}
+
+                    </td>
+
+                    <td>
+
+                        {{ offer.candidate.full_name }}
+
+                    </td>
+
+                    <td>
+
+                        {{ offer.job.job_title }}
+
+                    </td>
+
+                    <td>
+
+                        {{ offer.offered_salary }}
+
+                    </td>
+
+                    <td>
+
+                        {{ offer.offer_date }}
+
+                    </td>
+
+                    <td>
+
+                        {{ offer.joining_date }}
+
+                    </td>
+
+                    <td>
+
+                        {% if offer.status=="Pending" %}
+
+                        <span class="badge bg-warning text-dark">
+
+                            Pending
+
+                        </span>
+
+                        {% elif offer.status=="Accepted" %}
+
+                        <span class="badge bg-success">
+
+                            Accepted
+
+                        </span>
+
+                        {% elif offer.status=="Rejected" %}
+
+                        <span class="badge bg-danger">
+
+                            Rejected
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge bg-secondary">
+
+                            {{ offer.status }}
+
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{{ url_for('offer_management.edit_offer', offer_id=offer.offer_id) }}"
+                            class="btn btn-warning btn-sm">
+
+                            Edit
+
+                        </a>
+
+                        <a
+                            href="{{ url_for('offer_management.accept_offer', offer_id=offer.offer_id) }}"
+                            class="btn btn-success btn-sm">
+
+                            Accept
+
+                        </a>
+
+                        <a
+                            href="{{ url_for('offer_management.reject_offer', offer_id=offer.offer_id) }}"
+                            class="btn btn-danger btn-sm">
+
+                            Reject
+
+                        </a>
+
+                        <a
+                            href="{{ url_for('offer_management.offer_pdf', offer_id=offer.offer_id) }}"
+                            class="btn btn-primary btn-sm">
+
+                            PDF
+
+                        </a>
+
+                        <a
+                            href="{{ url_for('offer_management.send_offer_email', offer_id=offer.offer_id) }}"
+                            class="btn btn-info btn-sm">
+
+                            Email
+
+                        </a>
+
+                        <a
+                            href="{{ url_for('offer_management.delete_offer', offer_id=offer.offer_id) }}"
+                            class="btn btn-dark btn-sm"
+                            onclick="return confirm('Delete this offer?')">
+
+                            Delete
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

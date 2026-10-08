@@ -1,0 +1,312 @@
+{% extends "candidate_base.html" %}
+{% block title %}Explore Jobs{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Explore Career Opportunities</div>
+<div class="rf-topbar-sub">Discover and apply to matching roles curated for your skillset</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Search & Filter Header */
+    .jobs-filter-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-sm);
+    }
+    .search-input-wrap {
+        position: relative;
+        flex: 1;
+    }
+    .search-input-wrap i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-sec);
+        font-size: 16px;
+    }
+    .search-input-wrap input {
+        width: 100%;
+        padding: 11px 16px 11px 42px;
+        background: var(--bg);
+        border: 1.5px solid var(--border2);
+        border-radius: var(--r-sm);
+        color: #fff;
+        font-size: 13.5px;
+        outline: none;
+        transition: all .15s ease;
+    }
+    .search-input-wrap input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, .15);
+    }
+
+    /* Job Card Grid */
+    .jobs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 20px;
+    }
+    @media (max-width: 600px) {
+        .jobs-grid { grid-template-columns: 1fr; }
+    }
+
+    .job-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: var(--shadow-sm);
+    }
+    .job-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(14, 165, 233, .35);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, .45);
+    }
+    .job-card-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+    .job-company-avatar {
+        width: 46px; height: 46px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0ea5e9, #6366f1);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; font-weight: 800; color: #fff;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, .3);
+        flex-shrink: 0;
+    }
+    .job-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.25;
+        margin-bottom: 4px;
+        letter-spacing: -0.2px;
+    }
+    .job-company-name {
+        font-size: 13px;
+        color: var(--text-sec);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .job-tags-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    .job-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11.5px;
+        font-weight: 500;
+        color: var(--text-sec);
+        background: rgba(255, 255, 255, .04);
+        padding: 3.5px 9px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+    }
+    .job-tag.salary {
+        color: #34d399;
+        background: rgba(16, 185, 129, .1);
+        border-color: rgba(16, 185, 129, .25);
+        font-weight: 600;
+    }
+
+    .job-desc {
+        font-size: 12.5px;
+        color: #94a3b8;
+        line-height: 1.55;
+        margin-bottom: 18px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .job-skills-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 18px;
+    }
+    .job-skill-chip {
+        font-size: 11px;
+        font-weight: 600;
+        color: #38bdf8;
+        background: rgba(14, 165, 233, .08);
+        border: 1px solid rgba(14, 165, 233, .2);
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .job-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+        margin-top: auto;
+    }
+    .job-posted-time {
+        font-size: 11.5px;
+        color: var(--text-sec);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Search and Filter Bar -->
+<div class="jobs-filter-card">
+    <form method="GET" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+        <div class="search-input-wrap">
+            <i class="bi bi-search"></i>
+            <input type="text" name="keyword" placeholder="Search by job title, role or keywords..." value="{{ keyword }}">
+        </div>
+
+        <button type="submit" class="rf-btn rf-btn-primary">
+            <i class="bi bi-funnel"></i>
+            <span>Search Roles</span>
+        </button>
+
+        {% if keyword %}
+        <a href="{{ url_for('candidate_jobs.jobs') }}" class="rf-btn rf-btn-outline" title="Clear Filters">
+            <i class="bi bi-x-circle"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Header info row -->
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+    <div>
+        <span style="font-size: 15px; font-weight: 700; color: #fff;">Available Positions</span>
+        <span class="rf-badge rf-badge-info" style="margin-left: 8px;">{{ jobs|length }} Found</span>
+    </div>
+    <div style="font-size: 12px; color: var(--text-sec);">
+        Showing all active listings accepting applications
+    </div>
+</div>
+
+<!-- Jobs Grid -->
+{% if jobs %}
+<div class="jobs-grid">
+    {% for job in jobs %}
+    <div class="job-card">
+        <div>
+            <!-- Header -->
+            <div class="job-card-header">
+                <div class="job-company-avatar">
+                    {{ job.company[0]|upper if job.company else 'J' }}
+                </div>
+                <div>
+                    <h3 class="job-title">{{ job.title }}</h3>
+                    <div class="job-company-name">
+                        <i class="bi bi-building"></i>
+                        <span>{{ job.company }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="job-tags-row">
+                {% if job.location %}
+                <span class="job-tag">
+                    <i class="bi bi-geo-alt"></i> {{ job.location }}
+                </span>
+                {% endif %}
+
+                {% if job.experience %}
+                <span class="job-tag">
+                    <i class="bi bi-briefcase"></i> {{ job.experience }}
+                </span>
+                {% endif %}
+
+                {% if job.salary %}
+                <span class="job-tag salary">
+                    <i class="bi bi-cash-stack"></i> {{ job.salary }}
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            {% if job.description %}
+            <p class="job-desc">{{ job.description }}</p>
+            {% else %}
+            <p class="job-desc">Competitive opportunity with opportunities for fast-track career growth.</p>
+            {% endif %}
+
+            <!-- Skills -->
+            {% if job.skills %}
+            <div class="job-skills-chips">
+                {% for skill in job.skills.split(',')[:4] %}
+                <span class="job-skill-chip">{{ skill.strip() }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <div class="job-card-footer">
+            <span class="job-posted-time">
+                <i class="bi bi-clock"></i>
+                {% if job.created_at %}
+                {{ job.created_at.strftime('%b %d, %Y') }}
+                {% else %}
+                Recently Posted
+                {% endif %}
+            </span>
+
+            <a href="{{ url_for('candidate_jobs.apply', job_id=job.job_id) }}" 
+               class="rf-btn rf-btn-success rf-btn-sm" 
+               onclick="return confirm('Submit your candidate profile and current resume for {{ job.title }} at {{ job.company }}?');">
+                <i class="bi bi-send-fill"></i>
+                <span>Easy Apply</span>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="rf-card">
+    <div class="rf-empty-state">
+        <div class="rf-empty-icon">
+            <i class="bi bi-search"></i>
+        </div>
+        <div class="rf-empty-title">No matching jobs found</div>
+        <p class="rf-empty-desc">
+            {% if keyword %}
+            We couldn't find any job postings matching "{{ keyword }}". Try searching for broader terms or clearing your search.
+            {% else %}
+            There are currently no job openings listed. Please check back soon as hiring managers post new roles daily.
+            {% endif %}
+        </p>
+        {% if keyword %}
+        <a href="{{ url_for('candidate_jobs.jobs') }}" class="rf-btn rf-btn-outline">
+            <i class="bi bi-arrow-repeat"></i> Reset Search Filter
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

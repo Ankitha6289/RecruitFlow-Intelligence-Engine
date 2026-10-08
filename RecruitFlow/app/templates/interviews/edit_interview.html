@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-warning text-dark">
+
+            <h3>
+
+                Edit Interview
+
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Interview Date
+
+                        </label>
+
+                        <input
+                            type="date"
+                            name="interview_date"
+                            class="form-control"
+                            value="{{ interview.interview_date }}"
+                            required>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Interview Time
+
+                        </label>
+
+                        <input
+                            type="time"
+                            name="interview_time"
+                            class="form-control"
+                            value="{{ interview.interview_time }}"
+                            required>
+
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Interview Mode
+
+                        </label>
+
+                    <select name="interview_mode" class="form-select">
+
+    <option value="Online"
+        {% if interview.mode == "Online" %}selected{% endif %}>
+        Online
+    </option>
+
+    <option value="Offline"
+        {% if interview.mode == "Offline" %}selected{% endif %}>
+        Offline
+    </option>
+
+</select>   
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Interviewer
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="interviewer"
+                            class="form-control"
+                            value="{{ interview.interviewer }}"
+                            required>
+
+                    </div>
+
+                </div>
+
+                <br>
+
+                <label class="form-label">
+
+                    Meeting Link
+
+                </label>
+
+                <input
+                    type="url"
+                    name="meeting_link"
+                    class="form-control"
+                    value="{{ interview.meeting_link }}">
+
+                <br>
+
+                <label class="form-label">
+
+                    Status
+
+                </label>
+
+                <select
+                    name="status"
+                    class="form-select">
+
+                    <option value="Scheduled"
+                    {% if interview.status=="Scheduled" %}selected{% endif %}>
+
+                        Scheduled
+
+                    </option>
+
+                    <option value="Completed"
+                    {% if interview.status=="Completed" %}selected{% endif %}>
+
+                        Completed
+
+                    </option>
+
+                    <option value="Selected"
+                    {% if interview.status=="Selected" %}selected{% endif %}>
+
+                        Selected
+
+                    </option>
+
+                    <option value="Rejected"
+                    {% if interview.status=="Rejected" %}selected{% endif %}>
+
+                        Rejected
+
+                    </option>
+
+                </select>
+
+                <br>
+
+                <button
+                    type="submit"
+                    class="btn btn-warning">
+
+                    Update Interview
+
+                </button>
+
+                <a
+                    href="{{ url_for('interview_management.interviews') }}"
+                    class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

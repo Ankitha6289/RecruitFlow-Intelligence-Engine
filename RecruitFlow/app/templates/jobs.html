@@ -1,0 +1,220 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Jobs{% endblock %}
+{% block breadcrumb %}Jobs{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-briefcase-fill"></i> Recruitment{% endblock %}
+{% block page_title %}Job Postings{% endblock %}
+{% block page_subtitle %}Browse, manage, and monitor all active and closed job listings across your organization.{%
+endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('job_management.add_job') }}" class="btn btn-primary">
+  <i class="bi bi-plus-lg"></i> Post New Job
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+.job-row-badge { display: inline-flex; align-items: center; gap: 4px; }
+
+.toolbar {
+display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+background: var(--bg-card); border: 1px solid var(--border-subtle);
+border-radius: var(--r-lg); padding: 12px 16px; margin-bottom: 20px;
+}
+.toolbar .rf-input { max-width: 260px; margin: 0; }
+.toolbar .rf-select { max-width: 170px; margin: 0; }
+{% endblock %}
+
+{% block content %}
+
+<!-- KPIs -->
+<div class="stat-grid section-gap" style="grid-template-columns:repeat(4,1fr);">
+  <div class="stat-card" style="--stat-accent:var(--accent-3);--stat-bg:rgba(59,130,246,.12);">
+    <div class="stat-header"><span class="stat-label">Total Jobs</span>
+      <div class="stat-icon"><i class="bi bi-briefcase-fill"></i></div>
+    </div>
+    <div class="stat-value">{{ jobs|length if jobs else 0 }}</div>
+    <div class="stat-footer"><span>All postings</span></div>
+  </div>
+  <div class="stat-card" style="--stat-accent:var(--green);--stat-bg:var(--green-bg);">
+    <div class="stat-header"><span class="stat-label">Active</span>
+      <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+    </div>
+    <div class="stat-value">{{ jobs|selectattr('status','equalto','active')|list|length if jobs else 0 }}</div>
+    <div class="stat-footer"><span>Open listings</span></div>
+  </div>
+  <div class="stat-card" style="--stat-accent:var(--amber);--stat-bg:var(--amber-bg);">
+    <div class="stat-header"><span class="stat-label">Total Applications</span>
+      <div class="stat-icon"><i class="bi bi-send-fill"></i></div>
+    </div>
+    <div class="stat-value">{{ total_applications or 0 }}</div>
+    <div class="stat-footer"><span>Across all jobs</span></div>
+  </div>
+  <div class="stat-card" style="--stat-accent:var(--red);--stat-bg:var(--red-bg);">
+    <div class="stat-header"><span class="stat-label">Closed</span>
+      <div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div>
+    </div>
+    <div class="stat-value">{{ jobs|selectattr('status','equalto','closed')|list|length if jobs else 0 }}</div>
+    <div class="stat-footer"><span>Inactive postings</span></div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <i class="bi bi-funnel" style="color:var(--text-dim);"></i>
+  <input type="text" class="rf-input" id="jobSearch" placeholder="Search jobs, company, location..." />
+  <select class="rf-select" id="jobStatusFilter">
+    <option value="">All Status</option>
+    <option value="active">Active</option>
+    <option value="closed">Closed</option>
+    <option value="draft">Draft</option>
+  </select>
+  <select class="rf-select">
+    <option value="">All Departments</option>
+    <option>Engineering</option>
+    <option>Product</option>
+    <option>Design</option>
+    <option>Marketing</option>
+    <option>Operations</option>
+  </select>
+  <div style="margin-left:auto;font-size:13px;color:var(--text-dim);">
+    <span id="jobCount">{{ jobs|length if jobs else 0 }}</span> jobs found
+  </div>
+</div>
+
+<!-- Jobs Table -->
+<div class="rf-card">
+  <div class="rf-table-wrap" style="border:none;border-radius:0;">
+    <table class="rf-table" id="jobsTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Job Title</th>
+          <th>Company / Recruiter</th>
+          <th>Location</th>
+          <th>Applications</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Posted</th>
+          <th style="text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if jobs %}
+        {% for job in jobs %}
+        <tr data-title="{{ job.title|lower }}" data-status="{{ job.status or 'active' }}">
+          <td style="color:var(--text-dim);font-weight:700;">{{ loop.index }}</td>
+          <td>
+            <div style="font-size:13.5px;font-weight:700;color:var(--text-primary);">{{ job.title }}</div>
+            <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px;">{{ job.department or '—' }}</div>
+          </td>
+          <td>
+            <div style="font-size:13px;color:var(--text-sec);">{{ job.company or '—' }}</div>
+            <div style="font-size:11.5px;color:var(--text-dim);">{{ job.recruiter_name or '—' }}</div>
+          </td>
+          <td><span style="color:var(--text-sec);font-size:13px;"><i class="bi bi-geo-alt" style="font-size:11px;"></i>
+              {{ job.location or 'Remote' }}</span></td>
+          <td>
+            <span style="font-size:15px;font-weight:800;color:var(--accent-3);">{{ job.application_count or 0 }}</span>
+          </td>
+          <td><span class="badge badge-purple">{{ job.type or 'Full-time' }}</span></td>
+          <td>
+            <span
+              class="badge {{ 'badge-green' if job.status == 'active' else 'badge-red' if job.status == 'closed' else 'badge-gray' }}">
+              {{ job.status|title if job.status else 'Active' }}
+            </span>
+          </td>
+          <td style="color:var(--text-dim);font-size:12px;">{{ job.created_at or '—' }}</td>
+          <td>
+            <div style="display:flex;gap:6px;justify-content:flex-end;">
+              <a href="{{ url_for('job_management.edit_job', job_id=job.id) }}"
+                class="btn btn-secondary btn-sm btn-icon" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+              <form method="POST" action="{{ url_for('job_management.delete_job', job_id=job.id) }}"
+                onsubmit="return confirm('Delete this job?');">
+                <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete"><i
+                    class="bi bi-trash-fill"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <!-- Demo rows -->
+        {% set demo_jobs = [
+        ('Senior Python Developer','Engineering','TechCorp','Bangalore',23,'Full-time','active','2 days ago'),
+        ('React Frontend Engineer','Product','InnovateCo','Remote',18,'Full-time','active','3 days ago'),
+        ('ML Engineer','Data','DataDriven Inc','Hyderabad',11,'Full-time','active','1 week ago'),
+        ('DevOps Architect','Engineering','CloudSystems','Mumbai',7,'Contract','active','1 week ago'),
+        ('Product Manager','Product','StartupXYZ','Delhi',15,'Full-time','closed','2 weeks ago'),
+        ('UI/UX Designer','Design','DesignHub','Bangalore',9,'Full-time','active','3 weeks ago'),
+        ] %}
+        {% for title,dept,company,loc,apps,type,status,date in demo_jobs %}
+        <tr>
+          <td style="color:var(--text-dim);font-weight:700;">{{ loop.index }}</td>
+          <td>
+            <div style="font-size:13.5px;font-weight:700;color:var(--text-primary);">{{ title }}</div>
+            <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px;">{{ dept }}</div>
+          </td>
+          <td>
+            <div style="font-size:13px;color:var(--text-sec);">{{ company }}</div>
+          </td>
+          <td><span style="color:var(--text-sec);font-size:13px;"><i class="bi bi-geo-alt" style="font-size:11px;"></i>
+              {{ loc }}</span></td>
+          <td><span style="font-size:15px;font-weight:800;color:var(--accent-3);">{{ apps }}</span></td>
+          <td><span class="badge badge-purple">{{ type }}</span></td>
+          <td><span class="badge {{ 'badge-green' if status == 'active' else 'badge-red' }}">{{ status|title }}</span>
+          </td>
+          <td style="color:var(--text-dim);font-size:12px;">{{ date }}</td>
+          <td>
+            <div style="display:flex;gap:6px;justify-content:flex-end;">
+              <button class="btn btn-secondary btn-sm btn-icon" title="Edit"><i class="bi bi-pencil-fill"></i></button>
+              <button class="btn btn-danger btn-sm btn-icon" title="Delete"><i class="bi bi-trash-fill"></i></button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rf-pagination">
+    <span class="rf-pagination-info">Showing 1–{{ [jobs|length, 10]|min if jobs else 6 }} of {{ jobs|length if jobs else
+      6 }} results</span>
+    <div class="rf-pagination-btns">
+      <span class="pg-btn"><i class="bi bi-chevron-left"></i></span>
+      <span class="pg-btn active">1</span>
+      <span class="pg-btn">2</span>
+      <span class="pg-btn">3</span>
+      <span class="pg-btn"><i class="bi bi-chevron-right"></i></span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const searchInput = document.getElementById('jobSearch');
+  const statusFilter = document.getElementById('jobStatusFilter');
+  const rows = document.querySelectorAll('#jobsTable tbody tr');
+
+  function filterJobs() {
+    const q = searchInput.value.toLowerCase();
+    const s = statusFilter.value.toLowerCase();
+    let visible = 0;
+    rows.forEach(row => {
+      const title = row.dataset.title || row.innerText.toLowerCase();
+      const status = row.dataset.status || '';
+      const matches = title.includes(q) && (s === '' || status.includes(s));
+      row.style.display = matches ? '' : 'none';
+      if (matches) visible++;
+    });
+    const cnt = document.getElementById('jobCount');
+    if (cnt) cnt.textContent = visible;
+  }
+
+  searchInput.addEventListener('input', filterJobs);
+  statusFilter.addEventListener('change', filterJobs);
+</script>
+{% endblock %}

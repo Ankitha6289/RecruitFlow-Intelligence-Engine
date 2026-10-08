@@ -1,0 +1,273 @@
+{% extends "recruiter_base.html" %}
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+/* ── KPI rows ── */
+.an-kpi-row {
+  display: grid; gap: 14px; margin-bottom: 18px;
+}
+.an-kpi-row-4 { grid-template-columns: repeat(4,1fr); }
+.an-kpi-row-4b{ grid-template-columns: repeat(4,1fr); }
+@media(max-width:900px){ .an-kpi-row-4,.an-kpi-row-4b{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:500px){ .an-kpi-row-4,.an-kpi-row-4b{ grid-template-columns:1fr; } }
+
+.an-kpi {
+  border-radius: var(--r-xl);
+  padding: 22px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; text-align: center; position: relative; overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+  min-height: 110px;
+}
+.an-kpi:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.an-kpi-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; opacity: .85; }
+.an-kpi-val   { font-size: 40px; font-weight: 900; line-height: 1; letter-spacing: -2px; }
+
+/* Solid top-row cards */
+.an-kpi-blue   { background: linear-gradient(135deg,#1d4ed8,#2563eb); color:#fff; border:1px solid rgba(255,255,255,.12); }
+.an-kpi-green  { background: linear-gradient(135deg,#065f46,#059669); color:#fff; border:1px solid rgba(255,255,255,.12); }
+.an-kpi-amber  { background: linear-gradient(135deg,#92400e,#d97706); color:#fff; border:1px solid rgba(255,255,255,.12); }
+.an-kpi-red    { background: linear-gradient(135deg,#991b1b,#dc2626); color:#fff; border:1px solid rgba(255,255,255,.12); }
+
+/* Outlined bottom-row cards */
+.an-kpi-outline {
+  background: var(--card-bg); border-radius: var(--r-xl);
+  padding: 20px; display: flex; flex-direction: column;
+  align-items: center; gap: 6px; text-align: center;
+  transition: border-color .2s, transform .2s;
+}
+.an-kpi-outline:hover { transform: translateY(-2px); }
+.an-kpi-out-label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text-sec); }
+.an-kpi-out-val   { font-size: 36px; font-weight: 900; color: var(--text); letter-spacing: -1px; line-height: 1; }
+.an-kpi-out-green  { border: 1.5px solid rgba(16,185,129,.35); }
+.an-kpi-out-green  .an-kpi-out-val { color: #10b981; }
+.an-kpi-out-amber  { border: 1.5px solid rgba(245,158,11,.35); }
+.an-kpi-out-amber  .an-kpi-out-val { color: #f59e0b; }
+.an-kpi-out-red    { border: 1.5px solid rgba(239,68,68,.35); }
+.an-kpi-out-red    .an-kpi-out-val { color: #ef4444; }
+.an-kpi-out-blue   { border: 1.5px solid rgba(59,130,246,.35); }
+.an-kpi-out-blue   .an-kpi-out-val { color: #60a5fa; }
+
+/* ── Chart cards ── */
+.an-chart-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  margin-bottom: 20px;
+}
+@media(max-width:800px){ .an-chart-grid{ grid-template-columns:1fr; } }
+
+.an-chart-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--r-xl); overflow: hidden;
+  transition: border-color .2s;
+}
+.an-chart-card:hover { border-color: var(--border2); }
+.an-chart-header {
+  display: flex; align-items: center; gap: 9px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.an-chart-icon {
+  width: 26px; height: 26px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 13px; flex-shrink: 0;
+}
+.an-chart-body { padding: 18px; position: relative; height: 240px; }
+</style>
+
+<!-- Page heading -->
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+  <div style="width:38px;height:38px;border-radius:var(--r-md);background:rgba(124,58,237,.18);
+              color:var(--accent2);display:grid;place-items:center;font-size:18px;flex-shrink:0;">
+    <i class="bi bi-bar-chart-fill"></i>
+  </div>
+  <div>
+    <h1 style="font-size:22px;font-weight:900;color:var(--text);letter-spacing:-.4px;margin:0;">
+      Advanced Analytics Dashboard
+    </h1>
+    <p style="font-size:12.5px;color:var(--text-sec);margin:3px 0 0;">
+      Real-time recruitment intelligence and pipeline overview.
+    </p>
+  </div>
+</div>
+
+<!-- ── Row 1: Solid KPI cards ── -->
+<div class="an-kpi-row an-kpi-row-4">
+  <div class="an-kpi an-kpi-blue">
+    <div class="an-kpi-label">Total Candidates</div>
+    <div class="an-kpi-val">{{ data.total_candidates }}</div>
+  </div>
+  <div class="an-kpi an-kpi-green">
+    <div class="an-kpi-label">Total Jobs</div>
+    <div class="an-kpi-val">{{ data.total_jobs }}</div>
+  </div>
+  <div class="an-kpi an-kpi-amber">
+    <div class="an-kpi-label">AI Analysis</div>
+    <div class="an-kpi-val">{{ data.total_ai }}</div>
+  </div>
+  <div class="an-kpi an-kpi-red">
+    <div class="an-kpi-label">Applications</div>
+    <div class="an-kpi-val">{{ data.total_applications }}</div>
+  </div>
+</div>
+
+<!-- ── Row 2: Outlined status cards ── -->
+<div class="an-kpi-row an-kpi-row-4b">
+  <div class="an-kpi-outline an-kpi-out-green">
+    <div class="an-kpi-out-label">Selected</div>
+    <div class="an-kpi-out-val">{{ data.selected_candidates }}</div>
+  </div>
+  <div class="an-kpi-outline an-kpi-out-amber">
+    <div class="an-kpi-out-label">Shortlisted</div>
+    <div class="an-kpi-out-val">{{ data.shortlisted_candidates }}</div>
+  </div>
+  <div class="an-kpi-outline an-kpi-out-red">
+    <div class="an-kpi-out-label">Rejected</div>
+    <div class="an-kpi-out-val">{{ data.rejected_candidates }}</div>
+  </div>
+  <div class="an-kpi-outline an-kpi-out-blue">
+    <div class="an-kpi-out-label">Pending</div>
+    <div class="an-kpi-out-val">{{ data.pending_candidates }}</div>
+  </div>
+</div>
+
+<!-- ── Charts row ── -->
+<div class="an-chart-grid">
+
+  <!-- Candidate Status — Pie/Doughnut -->
+  <div class="an-chart-card">
+    <div class="an-chart-header">
+      <div class="an-chart-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      Candidate Status
+    </div>
+    <div class="an-chart-body">
+      <canvas id="statusChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Recruitment Overview — Bar -->
+  <div class="an-chart-card">
+    <div class="an-chart-header">
+      <div class="an-chart-icon" style="background:rgba(124,58,237,.12);color:#a78bfa;">
+        <i class="bi bi-bar-chart-fill"></i>
+      </div>
+      Recruitment Overview
+    </div>
+    <div class="an-chart-body">
+      <canvas id="overviewChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Extra metrics row ── -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+  {% for label, val, color, bg, icon in [
+    ('Total Interviews', data.total_interviews, '#a78bfa', 'rgba(124,58,237,.10)', 'bi-camera-video-fill'),
+    ('Total Offers',     data.total_offers,     '#10b981', 'rgba(16,185,129,.10)', 'bi-file-earmark-check-fill'),
+    ('Hire Rate',
+      ((data.selected_candidates / [data.total_applications,1]|max) * 100)|round|int if data.total_applications else 0,
+      '#f59e0b', 'rgba(245,158,11,.10)', 'bi-percent'),
+  ] %}
+  <div style="background:{{ bg }};border:1px solid {{ color }}33;border-radius:var(--r-xl);
+              padding:18px 20px;display:flex;align-items:center;gap:14px;">
+    <div style="width:40px;height:40px;border-radius:var(--r-md);background:{{ color }}22;
+                color:{{ color }};display:grid;place-items:center;font-size:18px;flex-shrink:0;">
+      <i class="bi {{ icon }}"></i>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+                  letter-spacing:.07em;color:var(--text-sec);margin-bottom:4px;">{{ label }}</div>
+      <div style="font-size:26px;font-weight:900;color:{{ color }};letter-spacing:-1px;line-height:1;">
+        {{ val }}{% if label == 'Hire Rate' %}%{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  Chart.defaults.color          = '#94a3b8';
+  Chart.defaults.borderColor    = 'rgba(255,255,255,.07)';
+  Chart.defaults.font.family    = 'Inter, system-ui, sans-serif';
+  Chart.defaults.font.size      = 11;
+
+  const grid = 'rgba(255,255,255,.06)';
+
+  /* ── Candidate Status — Doughnut ── */
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Selected','Rejected','Shortlisted','Pending'],
+      datasets: [{
+        data: [
+          {{ data.selected_candidates }},
+          {{ data.rejected_candidates }},
+          {{ data.shortlisted_candidates }},
+          {{ data.pending_candidates }}
+        ],
+        backgroundColor: ['#10b981','#ef4444','#f59e0b','#3b82f6'],
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 16, font: { size: 11 },
+            color: '#94a3b8', usePointStyle: true, pointStyleWidth: 8
+          }
+        }
+      }
+    }
+  });
+
+  /* ── Recruitment Overview — Bar ── */
+  new Chart(document.getElementById('overviewChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Candidates','Jobs','AI','Interviews','Offers'],
+      datasets: [{
+        label: 'RecruitFlow Statistics',
+        data: [
+          {{ data.total_candidates }},
+          {{ data.total_jobs }},
+          {{ data.total_ai }},
+          {{ data.total_interviews }},
+          {{ data.total_offers }}
+        ],
+        backgroundColor: 'rgba(124,58,237,.55)',
+        hoverBackgroundColor: 'rgba(167,139,250,.8)',
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#94a3b8' } } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: grid },
+          ticks: { color: '#64748b', precision: 0 }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#64748b' }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

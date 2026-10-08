@@ -1,0 +1,167 @@
+{% extends "base_dark.html" %}
+{% block title %}Candidates{% endblock %}
+
+{% block page_title %}Candidate Management{% endblock %}
+{% block page_subtitle %}View, search, and manage candidate resume records{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-lg">
+    <!-- Header Controls (Export buttons) -->
+    <div class="flex justify-between items-center flex-wrap gap-md">
+        <h3 class="text-headline-sm font-bold text-on-surface">Database Overview</h3>
+        <div class="flex items-center gap-sm">
+            <a href="{{ url_for('candidate_management.export_pdf') }}"
+               class="inline-flex items-center gap-1.5 bg-red-600/20 border border-red-500/35 hover:bg-red-600/30 text-[#fca5a5] px-md py-2 rounded-lg font-body-md text-body-sm font-semibold transition-colors">
+                <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                Export PDF
+            </a>
+            <a href="{{ url_for('candidate_management.export_excel') }}"
+               class="inline-flex items-center gap-1.5 bg-emerald-600/20 border border-emerald-500/35 hover:bg-emerald-600/30 text-[#a7f3d0] px-md py-2 rounded-lg font-body-md text-body-sm font-semibold transition-colors">
+                <span class="material-symbols-outlined text-[18px]">table_chart</span>
+                Export Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filters Form -->
+    <div class="bg-surface-container border border-outline-variant/30 rounded-xl p-md md:p-lg shadow-sm">
+        <form method="GET">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-md items-end">
+                <div class="md:col-span-4 flex flex-col gap-1">
+                    <label class="text-label-md text-secondary font-semibold">Search Candidate</label>
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined text-secondary absolute left-3 text-[18px]">search</span>
+                        <input type="text"
+                               name="search"
+                               class="w-full bg-surface-container-low text-on-surface pl-10 pr-3 py-2 rounded-lg border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary text-body-sm outline-none"
+                               placeholder="Name or Email..."
+                               value="{{ search }}">
+                    </div>
+                </div>
+                
+                <div class="md:col-span-2 flex flex-col gap-1">
+                    <label class="text-label-md text-secondary font-semibold">Status</label>
+                    <select name="status"
+                            class="w-full bg-surface-container-low text-on-surface px-3 py-2 rounded-lg border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary text-body-sm outline-none">
+                        <option value="">All Status</option>
+                        <option value="Applied" {% if status=="Applied" %}selected{% endif %}>Applied</option>
+                        <option value="Selected" {% if status=="Selected" %}selected{% endif %}>Selected</option>
+                        <option value="Rejected" {% if status=="Rejected" %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2 flex flex-col gap-1">
+                    <label class="text-label-md text-secondary font-semibold">Skill Filter</label>
+                    <input type="text"
+                           name="skill"
+                           class="w-full bg-surface-container-low text-on-surface px-3 py-2 rounded-lg border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary text-body-sm outline-none"
+                           placeholder="Python, Java..."
+                           value="{{ skill }}">
+                </div>
+
+                <div class="md:col-span-2 flex flex-col gap-1">
+                    <label class="text-label-md text-secondary font-semibold">Min AI Score</label>
+                    <input type="number"
+                           name="min_score"
+                           class="w-full bg-surface-container-low text-on-surface px-3 py-2 rounded-lg border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary text-body-sm outline-none"
+                           placeholder="0-100"
+                           value="{{ min_score }}">
+                </div>
+
+                <div class="md:col-span-2 flex gap-sm">
+                    <button type="submit" class="flex-1 bg-primary text-on-primary font-semibold text-body-sm py-2 rounded-lg hover:bg-primary-fixed transition-colors shadow-sm cursor-pointer">
+                        Search
+                    </button>
+                    <a href="{{ url_for('candidate_management.candidates') }}"
+                       class="flex-1 text-center bg-surface-container-high border border-outline-variant text-on-surface font-semibold text-body-sm py-2 rounded-lg hover:bg-surface-variant transition-colors">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- AI Score Summary Banner -->
+    <div class="flex items-center gap-sm p-4 rounded-lg bg-surface-container border border-primary/20 text-[#adc6ff] shadow-sm">
+        <span class="material-symbols-outlined text-[20px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+        <div class="text-body-sm font-semibold">
+            AI Score Summary: <span class="text-white ml-2">Average: {{ score_summary.average }}</span> | <span class="text-[#34d399]">High: {{ score_summary.high }}</span> | <span class="text-error">Low: {{ score_summary.low }}</span>
+        </div>
+    </div>
+
+    <!-- Candidate List Table Card -->
+    <div class="bg-surface-container border border-outline-variant/30 rounded-xl overflow-hidden shadow-sm">
+        <div class="px-md md:px-lg py-4 bg-surface-container-high border-b border-outline-variant/30">
+            <h4 class="text-body-md font-semibold text-on-surface">Candidate List</h4>
+        </div>
+        <div class="overflow-x-auto w-full">
+            <table class="w-full text-left text-body-sm whitespace-nowrap">
+                <thead>
+                    <tr class="bg-surface-container-high/50 text-secondary border-b border-outline-variant/30 font-semibold">
+                        <th class="px-md md:px-lg py-3">ID</th>
+                        <th class="px-md md:px-lg py-3">Name</th>
+                        <th class="px-md md:px-lg py-3">Email</th>
+                        <th class="px-md md:px-lg py-3">Phone</th>
+                        <th class="px-md md:px-lg py-3">Status</th>
+                        <th class="px-md md:px-lg py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/15">
+                    {% for candidate in candidates %}
+                    <tr class="hover:bg-surface-container-low/40 transition-colors text-on-surface">
+                        <td class="px-md md:px-lg py-3.5 font-mono text-label-md text-secondary">{{ candidate.candidate_id }}</td>
+                        <td class="px-md md:px-lg py-3.5 font-semibold text-white">{{ candidate.full_name }}</td>
+                        <td class="px-md md:px-lg py-3.5 text-secondary">{{ candidate.email }}</td>
+                        <td class="px-md md:px-lg py-3.5 text-secondary">{{ candidate.phone or '—' }}</td>
+                        <td class="px-md md:px-lg py-3.5">
+                            {% if candidate.status=="Applied" %}
+                            <span class="inline-flex items-center gap-1 bg-[#fb923c]/15 text-[#fb923c] text-[11px] px-2 py-0.5 rounded-full font-semibold border border-[#fb923c]/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#fb923c]"></span> Applied
+                            </span>
+                            {% elif candidate.status=="Selected" %}
+                            <span class="inline-flex items-center gap-1 bg-[#34d399]/15 text-[#34d399] text-[11px] px-2 py-0.5 rounded-full font-semibold border border-[#34d399]/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#34d399]"></span> Selected
+                            </span>
+                            {% elif candidate.status=="Rejected" %}
+                            <span class="inline-flex items-center gap-1 bg-error/15 text-error text-[11px] px-2 py-0.5 rounded-full font-semibold border border-error/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-error"></span> Rejected
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 bg-secondary/15 text-secondary text-[11px] px-2 py-0.5 rounded-full font-semibold border border-secondary/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> {{ candidate.status }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-md md:px-lg py-3.5 text-right flex gap-xs justify-end">
+                            <a href="{{ url_for('candidate_management.candidate_details', candidate_id=candidate.candidate_id) }}"
+                               class="inline-flex items-center gap-1 bg-surface-container-high border border-outline-variant text-on-surface px-2.5 py-1 rounded-md text-[12px] font-semibold hover:bg-surface-variant hover:text-white transition-colors">
+                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                View
+                            </a>
+                            <a href="{{ url_for('candidate_management.edit_candidate', candidate_id=candidate.candidate_id) }}"
+                               class="inline-flex items-center gap-1 bg-[#fb923c]/10 border border-[#fb923c]/30 text-[#fb923c] px-2.5 py-1 rounded-md text-[12px] font-semibold hover:bg-[#fb923c]/20 hover:text-white transition-colors">
+                                <span class="material-symbols-outlined text-[14px]">edit</span>
+                                Edit
+                            </a>
+                            <a href="{{ url_for('candidate_management.delete_candidate', candidate_id=candidate.candidate_id) }}"
+                               class="inline-flex items-center gap-1 bg-error/10 border border-error/30 text-error px-2.5 py-1 rounded-md text-[12px] font-semibold hover:bg-error/20 hover:text-white transition-colors"
+                               onclick="return confirm('Delete Candidate?')">
+                                <span class="material-symbols-outlined text-[14px]">delete</span>
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-secondary py-12">
+                            <span class="material-symbols-outlined text-[48px] text-outline/30 mb-2">person_off</span>
+                            <p class="text-body-md">No Candidates Found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

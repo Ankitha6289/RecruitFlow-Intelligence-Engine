@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / Secrets — NEVER commit these
+.env
+*.env
+
+# Flask / SQLAlchemy
+instance/
+*.db
+*.sqlite3
+
+# Uploads & generated files
+uploads/
+app/generated_offers/
+backups/
+
+# Migrations (optional — remove if you want to include them)
+# migrations/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Pytest
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Logs
+*.log
+logs/
+
+# Distribution
+*.whl
+*.tar.gz

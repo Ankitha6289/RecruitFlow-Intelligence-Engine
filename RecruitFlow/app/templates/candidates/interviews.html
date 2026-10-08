@@ -1,0 +1,287 @@
+{% extends "candidate_base.html" %}
+{% block title %}My Interviews{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Interviews &amp; AI Practice Hub</div>
+<div class="rf-topbar-sub">Manage your scheduled recruiter interviews, video rooms &amp; AI mock simulations</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .interview-card-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .interview-item-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        transition: all .2s ease;
+        position: relative;
+    }
+    .interview-item-card:hover {
+        border-color: rgba(14, 165, 233, .35);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+        transform: translateY(-2px);
+    }
+    .interview-item-card::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 16px; bottom: 16px;
+        width: 4px;
+        border-radius: 0 4px 4px 0;
+        background: var(--accent);
+    }
+    .interview-item-card.scheduled::before { background: var(--amber); }
+    .interview-item-card.completed::before { background: var(--green); }
+    .interview-item-card.rejected::before  { background: var(--pink); }
+
+    .interview-date-pill {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(14, 165, 233, .1);
+        border: 1px solid rgba(14, 165, 233, .25);
+        border-radius: 12px;
+        padding: 12px 18px;
+        min-width: 90px;
+        text-align: center;
+    }
+    .interview-date-day {
+        font-size: 20px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1;
+    }
+    .interview-date-sub {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent2);
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+
+    .interview-details-group {
+        flex: 1;
+        min-width: 260px;
+    }
+    .interview-job-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+    .interview-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 12.5px;
+        color: var(--text-sec);
+        margin-top: 6px;
+    }
+    .interview-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .interview-actions-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header Stats Row -->
+{% set scheduled_count = namespace(count=0) %}
+{% set completed_count = namespace(count=0) %}
+
+{% for i in interviews %}
+    {% if i.status == 'Scheduled' %}
+        {% set scheduled_count.count = scheduled_count.count + 1 %}
+    {% elif i.status in ['Completed', 'Selected'] %}
+        {% set completed_count.count = completed_count.count + 1 %}
+    {% endif %}
+{% endfor %}
+
+<div class="rf-grid-3" style="margin-bottom: 22px;">
+    <div class="rf-stat-card">
+        <div class="rf-stat-info">
+            <span class="rf-stat-lbl">Total Interviews</span>
+            <span class="rf-stat-val">{{ interviews|length }}</span>
+            <span class="rf-stat-sub">Across all applications</span>
+        </div>
+        <div class="rf-stat-icon"><i class="bi bi-calendar-range"></i></div>
+    </div>
+
+    <div class="rf-stat-card stat-amber">
+        <div class="rf-stat-info">
+            <span class="rf-stat-lbl">Upcoming / Scheduled</span>
+            <span class="rf-stat-val">{{ scheduled_count.count }}</span>
+            <span class="rf-stat-sub">Ready for video calls</span>
+        </div>
+        <div class="rf-stat-icon"><i class="bi bi-camera-video"></i></div>
+    </div>
+
+    <div class="rf-stat-card stat-green">
+        <div class="rf-stat-info">
+            <span class="rf-stat-lbl">Completed Rounds</span>
+            <span class="rf-stat-val">{{ completed_count.count }}</span>
+            <span class="rf-stat-sub">Evaluated by hiring teams</span>
+        </div>
+        <div class="rf-stat-icon"><i class="bi bi-check2-all"></i></div>
+    </div>
+</div>
+
+<!-- Main Interviews List -->
+<div class="rf-card">
+    <div class="rf-card-header">
+        <div>
+            <h2 class="rf-card-title">
+                <i class="bi bi-calendar2-check-fill"></i>
+                Interview Sessions
+            </h2>
+            <div class="rf-card-subtitle">Connect to live video rooms or practice AI proctored questions</div>
+        </div>
+        <a href="{{ url_for('candidate_interview.questions') }}" class="rf-btn rf-btn-primary rf-btn-sm">
+            <i class="bi bi-robot"></i> Launch AI Interview Simulator
+        </a>
+    </div>
+
+    <div class="rf-card-body">
+        {% if interviews %}
+        <div class="interview-card-list">
+            {% for interview in interviews %}
+            <div class="interview-item-card {{ interview.status|lower }}">
+                
+                <!-- Date Pill -->
+                <div class="interview-date-pill">
+                    <span class="interview-date-day">
+                        {{ interview.interview_date.strftime('%d') if interview.interview_date else '01' }}
+                    </span>
+                    <span class="interview-date-sub">
+                        {{ interview.interview_date.strftime('%b %Y') if interview.interview_date else 'Date' }}
+                    </span>
+                </div>
+
+                <!-- Interview Details -->
+                <div class="interview-details-group">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 2px;">
+                        <h3 class="interview-job-title">
+                            {{ interview.job.title if interview.job else 'Technical Interview' }}
+                        </h3>
+                        {% if interview.status == "Scheduled" %}
+                            <span class="rf-badge rf-badge-warning"><i class="bi bi-clock-fill"></i> Scheduled</span>
+                        {% elif interview.status in ["Completed", "Selected"] %}
+                            <span class="rf-badge rf-badge-success"><i class="bi bi-check-circle-fill"></i> {{ interview.status }}</span>
+                        {% elif interview.status == "Rejected" %}
+                            <span class="rf-badge rf-badge-danger"><i class="bi bi-x-circle-fill"></i> {{ interview.status }}</span>
+                        {% else %}
+                            <span class="rf-badge rf-badge-gray">{{ interview.status }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="interview-meta-row">
+                        <span class="interview-meta-item">
+                            <i class="bi bi-building"></i>
+                            <strong>{{ interview.job.company if interview.job else 'Hiring Company' }}</strong>
+                        </span>
+                        <span>&bull;</span>
+                        <span class="interview-meta-item">
+                            <i class="bi bi-person-badge"></i>
+                            Interviewer: {{ interview.interviewer }}
+                        </span>
+                        <span>&bull;</span>
+                        <span class="interview-meta-item">
+                            <i class="bi bi-clock"></i>
+                            {{ interview.interview_time }}
+                        </span>
+                        <span>&bull;</span>
+                        <span class="interview-meta-item">
+                            {% if interview.mode == "Online" %}
+                            <span class="rf-badge rf-badge-info" style="font-size: 10px;"><i class="bi bi-camera-video-fill"></i> Online Video</span>
+                            {% else %}
+                            <span class="rf-badge rf-badge-gray" style="font-size: 10px;"><i class="bi bi-geo-alt-fill"></i> In-Person</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if interview.ai_final_score %}
+                    <div style="margin-top: 10px; font-size: 12px; color: #34d399; display: flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-trophy-fill"></i>
+                        <span>AI Performance Score: <strong>{{ "%.1f"|format(interview.ai_final_score) }}%</strong></span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="interview-actions-group">
+                    <!-- Join Video Call Button -->
+                    {% if interview.mode == "Online" and interview.meeting_link %}
+                    <a href="{{ interview.meeting_link }}" target="_blank" class="rf-btn rf-btn-success">
+                        <i class="bi bi-camera-video-fill"></i>
+                        <span>Join Meeting</span>
+                    </a>
+                    {% elif interview.mode == "Offline" and interview.meeting_link %}
+                    <span style="font-size: 12px; color: var(--text-sec); max-width: 180px;">
+                        <i class="bi bi-geo-alt"></i> {{ interview.meeting_link }}
+                    </span>
+                    {% endif %}
+
+                    <!-- AI Mock Practice Button -->
+                    <a href="{{ url_for('candidate_interview.questions', interview_id=interview.interview_id) }}" class="rf-btn rf-btn-primary">
+                        <i class="bi bi-robot"></i>
+                        <span>AI Practice</span>
+                    </a>
+
+                    <!-- Report Download (If Scored) -->
+                    {% if interview.ai_final_score %}
+                    <a href="{{ url_for('candidate_interview_report.export_report', interview_id=interview.interview_id) }}" class="rf-btn rf-btn-outline rf-btn-sm" title="Download Performance Report PDF">
+                        <i class="bi bi-file-earmark-pdf"></i> Report
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="rf-empty-state">
+            <div class="rf-empty-icon">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <div class="rf-empty-title">No interviews scheduled yet</div>
+            <p class="rf-empty-desc">
+                When recruiters shortlist your profile for a role, your interview invites and video meeting links will appear here. In the meantime, you can run AI mock interviews to practice common questions.
+            </p>
+            <a href="{{ url_for('candidate_interview.questions') }}" class="rf-btn rf-btn-primary">
+                <i class="bi bi-robot"></i> Start AI Mock Interview
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="rf-card-footer">
+        <a href="{{ url_for('candidate_dashboard.dashboard') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        <span style="font-size: 12px; color: var(--text-sec);">
+            Tip: Join video rooms 5 minutes early to test microphone and video
+        </span>
+    </div>
+</div>
+
+{% endblock %}

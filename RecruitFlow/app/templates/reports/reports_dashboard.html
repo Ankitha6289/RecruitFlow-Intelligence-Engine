@@ -1,0 +1,519 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Reports & Analytics{% endblock %}
+{% block breadcrumb %}Reports & Analytics{% endblock %}
+{% block page_title %}Reports &amp; Analytics{% endblock %}
+{% block page_subtitle %}Real-time recruitment pipeline insights{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-bar-chart-line-fill"></i> Insights{% endblock %}
+
+{% block page_actions %}
+<a href="/admin/reports/excel" class="btn btn-secondary btn-sm">
+  <i class="bi bi-file-earmark-excel-fill" style="color:#10b981;"></i> Export Excel
+</a>
+<a href="/admin/reports/pdf" class="btn btn-primary btn-sm">
+  <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+
+/* ═══════════════════════════════════════════
+   REPORTS & ANALYTICS — PAGE STYLES
+═══════════════════════════════════════════ */
+
+/* ── 4-column stat card row ── */
+.ra-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+@media (max-width: 1000px) { .ra-stat-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .ra-stat-row { grid-template-columns: 1fr; } }
+
+.ra-stat-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99,143,220,.11);
+  border-radius: var(--r-xl);
+  padding: 18px 20px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  position: relative; overflow: hidden;
+  transition: border-color var(--t-fast), transform var(--t-fast);
+}
+.ra-stat-card:hover { border-color: rgba(99,143,220,.22); transform: translateY(-2px); }
+
+.ra-stat-top {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ra-stat-label {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--text-dim);
+}
+.ra-stat-icon {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+}
+.ra-stat-num {
+  font-size: 34px; font-weight: 900; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.ra-stat-num.red    { color: #ff5c5c; }
+.ra-stat-num.white  { color: var(--text-primary); }
+
+.ra-stat-sub { font-size: 11px; color: var(--text-dim); }
+.ra-stat-sub .hi-g { color: #10b981; }
+.ra-stat-sub .hi-r { color: #ff5c5c; }
+
+.ra-mini-bar-bg   { height: 3px; background: rgba(255,92,92,.12); border-radius: 99px; margin-top: 4px; }
+.ra-mini-bar-fill { height: 3px; background: #ff5c5c; border-radius: 99px; transition: width .8s ease; }
+
+/* top accent line per card */
+.ra-stat-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.ra-accent-red::after    { background: linear-gradient(90deg,#ff5c5c,#ff8c8c); }
+.ra-accent-cyan::after   { background: linear-gradient(90deg,#38bdf8,#7dd3fc); }
+.ra-accent-amber::after  { background: linear-gradient(90deg,#f59e0b,#fcd34d); }
+.ra-accent-purple::after { background: linear-gradient(90deg,#8b5cf6,#c4b5fd); }
+
+/* ── Candidate Pipeline ── */
+.ra-pipeline-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99,143,220,.11);
+  border-radius: var(--r-xl);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.ra-pipeline-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+}
+.ra-pipeline-title {
+  font-size: 13px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.ra-pipeline-legend {
+  display: flex; align-items: center; gap: 14px;
+}
+.ra-pl-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--text-dim); white-space: nowrap;
+}
+.ra-pl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ra-pipeline-track {
+  height: 14px;
+  background: rgba(255,255,255,.04);
+  border-radius: 99px;
+  overflow: hidden;
+  display: flex;
+}
+.ra-pipeline-seg {
+  height: 100%;
+  transition: width .9s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── 2-column chart grid ── */
+.ra-chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+@media (max-width: 900px) { .ra-chart-grid { grid-template-columns: 1fr; } }
+
+.ra-chart-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99,143,220,.11);
+  border-radius: var(--r-xl);
+  padding: 18px 18px 14px;
+  transition: border-color var(--t-fast);
+}
+.ra-chart-card:hover { border-color: rgba(99,143,220,.2); }
+
+.ra-chart-title {
+  font-size: 13px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.ra-chart-icon {
+  width: 24px; height: 24px; border-radius: 6px;
+  display: grid; place-items: center; font-size: 12px; flex-shrink: 0;
+}
+.ra-chart-wrap {
+  position: relative; height: 210px;
+}
+
+{% endblock %}
+
+{% block content %}
+
+{# ── Computed values ── #}
+{% set total_apps      = data.monthly_values | sum %}
+{% set total_offers    = data.offer_status   | sum %}
+{% set total_ivs       = data.interview_status | sum %}
+{% set accepted_offers = data.offer_status[1] %}
+{% set declined_offers = data.offer_status[2] %}
+{% set selected_cnt    = data.interview_status[2] %}
+{% set rejected_cnt    = data.interview_status[3] %}
+{% set ai_pct          = [data.average_ai | float, 100] | min %}
+
+{# Pipeline percentages #}
+{% set pip_total    = total_ivs if total_ivs > 0 else 1 %}
+{% set pip_applied  = ((data.interview_status[0] + data.interview_status[1]) / pip_total * 100) | round(1) %}
+{% set pip_selected = (data.interview_status[2] / pip_total * 100) | round(1) %}
+{% set pip_rejected = (data.interview_status[3] / pip_total * 100) | round(1) %}
+
+{# Candidate pipeline from candidate_status #}
+{% set cand_total    = data.candidate_status | sum %}
+{% set cand_base     = cand_total if cand_total > 0 else 1 %}
+{% set cand_applied  = data.candidate_status[0] %}
+{% set cand_selected = data.candidate_status[1] %}
+{% set cand_rejected = data.candidate_status[2] %}
+{% set pct_applied   = (cand_applied  / cand_base * 100) | round(1) %}
+{% set pct_selected  = (cand_selected / cand_base * 100) | round(1) %}
+{% set pct_rejected  = (cand_rejected / cand_base * 100) | round(1) %}
+
+<!-- ══════════════════════════════════════════
+     STAT CARDS
+══════════════════════════════════════════ -->
+<div class="ra-stat-row">
+
+  <!-- AVG AI SCORE -->
+  <div class="ra-stat-card ra-accent-red">
+    <div class="ra-stat-top">
+      <span class="ra-stat-label">Avg AI Score</span>
+      <div class="ra-stat-icon" style="background:rgba(255,92,92,.12);">
+        <i class="bi bi-stars" style="color:#ff5c5c;"></i>
+      </div>
+    </div>
+    <div class="ra-stat-num red">{{ data.average_ai }}%</div>
+    <div class="ra-mini-bar-bg">
+      <div class="ra-mini-bar-fill" style="width:{{ ai_pct }}%;"></div>
+    </div>
+  </div>
+
+  <!-- APPLICATIONS -->
+  <div class="ra-stat-card ra-accent-cyan">
+    <div class="ra-stat-top">
+      <span class="ra-stat-label">Applications</span>
+      <div class="ra-stat-icon" style="background:rgba(56,189,248,.12);">
+        <i class="bi bi-file-earmark-text-fill" style="color:#38bdf8;"></i>
+      </div>
+    </div>
+    <div class="ra-stat-num white">{{ total_apps }}</div>
+    <div class="ra-stat-sub">total submitted</div>
+  </div>
+
+  <!-- OFFERS -->
+  <div class="ra-stat-card ra-accent-amber">
+    <div class="ra-stat-top">
+      <span class="ra-stat-label">Offers</span>
+      <div class="ra-stat-icon" style="background:rgba(245,158,11,.12);">
+        <i class="bi bi-gift-fill" style="color:#f59e0b;"></i>
+      </div>
+    </div>
+    <div class="ra-stat-num white">{{ total_offers }}</div>
+    <div class="ra-stat-sub">
+      <span class="hi-g">{{ accepted_offers }} accepted</span>
+      &nbsp;·&nbsp;
+      <span class="hi-r">{{ declined_offers }} declined</span>
+    </div>
+  </div>
+
+  <!-- INTERVIEWS -->
+  <div class="ra-stat-card ra-accent-purple">
+    <div class="ra-stat-top">
+      <span class="ra-stat-label">Interviews</span>
+      <div class="ra-stat-icon" style="background:rgba(139,92,246,.12);">
+        <i class="bi bi-camera-video-fill" style="color:#8b5cf6;"></i>
+      </div>
+    </div>
+    <div class="ra-stat-num white">{{ total_ivs }}</div>
+    <div class="ra-stat-sub">
+      <span class="hi-g">{{ selected_cnt }} selected</span>
+      &nbsp;·&nbsp;
+      <span class="hi-r">{{ rejected_cnt }} rejected</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     CANDIDATE PIPELINE
+══════════════════════════════════════════ -->
+<div class="ra-pipeline-card">
+  <div class="ra-pipeline-head">
+    <div class="ra-pipeline-title">
+      <i class="bi bi-people-fill" style="color:#4d8eff;font-size:15px;"></i>
+      Candidate Pipeline
+    </div>
+    <div class="ra-pipeline-legend">
+      <div class="ra-pl-item">
+        <div class="ra-pl-dot" style="background:#f59e0b;"></div>
+        Applied <strong style="color:var(--text-primary);margin-left:4px;">{{ cand_applied }}</strong>
+      </div>
+      <div class="ra-pl-item">
+        <div class="ra-pl-dot" style="background:#10b981;"></div>
+        Selected <strong style="color:#10b981;margin-left:4px;">{{ cand_selected }}</strong>
+      </div>
+      <div class="ra-pl-item">
+        <div class="ra-pl-dot" style="background:#ff5c5c;"></div>
+        Rejected <strong style="color:#ff5c5c;margin-left:4px;">{{ cand_rejected }}</strong>
+      </div>
+    </div>
+  </div>
+  <div class="ra-pipeline-track">
+    <div class="ra-pipeline-seg" style="width:{{ pct_applied }}%;  background:#f59e0b;"></div>
+    <div class="ra-pipeline-seg" style="width:{{ pct_selected }}%; background:#10b981;"></div>
+    <div class="ra-pipeline-seg" style="width:{{ pct_rejected }}%; background:#ff5c5c;"></div>
+    {% if (pct_applied + pct_selected + pct_rejected) == 0 %}
+    <div class="ra-pipeline-seg" style="width:100%; background:rgba(255,255,255,.06);"></div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ROW 1 — Monthly Applications + Job-wise Applications
+══════════════════════════════════════════ -->
+<div class="ra-chart-grid">
+
+  <!-- Monthly Applications — bar -->
+  <div class="ra-chart-card">
+    <div class="ra-chart-title">
+      <div class="ra-chart-icon" style="background:rgba(77,142,255,.15);">
+        <i class="bi bi-bar-chart-fill" style="color:#4d8eff;"></i>
+      </div>
+      Monthly Applications
+    </div>
+    <div class="ra-chart-wrap">
+      <canvas id="monthlyChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Job-wise Applications — line -->
+  <div class="ra-chart-card">
+    <div class="ra-chart-title">
+      <div class="ra-chart-icon" style="background:rgba(16,185,129,.15);">
+        <i class="bi bi-graph-up-arrow" style="color:#10b981;"></i>
+      </div>
+      Job-wise Applications
+    </div>
+    <div class="ra-chart-wrap">
+      <canvas id="jobChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     ROW 2 — Interview Status + Offer Status
+══════════════════════════════════════════ -->
+<div class="ra-chart-grid">
+
+  <!-- Interview Status — doughnut -->
+  <div class="ra-chart-card">
+    <div class="ra-chart-title">
+      <div class="ra-chart-icon" style="background:rgba(245,158,11,.15);">
+        <i class="bi bi-people-fill" style="color:#f59e0b;"></i>
+      </div>
+      Interview Status
+    </div>
+    <div class="ra-chart-wrap">
+      <canvas id="interviewChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Offer Status — doughnut -->
+  <div class="ra-chart-card">
+    <div class="ra-chart-title">
+      <div class="ra-chart-icon" style="background:rgba(16,185,129,.15);">
+        <i class="bi bi-gift-fill" style="color:#10b981;"></i>
+      </div>
+      Offer Status
+    </div>
+    <div class="ra-chart-wrap">
+      <canvas id="offerChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+
+  /* ── Global Chart.js dark defaults ── */
+  Chart.defaults.color       = '#4b6080';
+  Chart.defaults.borderColor = 'rgba(255,255,255,.06)';
+  Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+  Chart.defaults.font.size   = 11;
+
+  const gridColor = 'rgba(255,255,255,.05)';
+
+  /* ────────────────────────────────────────
+     1. Monthly Applications — bar chart
+  ──────────────────────────────────────── */
+  const monthlyLabels = {{ data.monthly_labels | tojson }};
+  const monthlyValues = {{ data.monthly_values | tojson }};
+
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: {
+      labels: monthlyLabels.length ? monthlyLabels : ['—'],
+      datasets: [{
+        label: 'Applications',
+        data: monthlyValues.length ? monthlyValues : [0],
+        backgroundColor:      'rgba(77,142,255,.5)',
+        hoverBackgroundColor: 'rgba(173,198,255,.75)',
+        borderRadius: 5,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: gridColor },
+          ticks: { color: '#4b6080', precision: 0 }
+        },
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#4b6080',
+            callback: function(val, idx) {
+              const months = ['','Jan','Feb','Mar','Apr','May','Jun',
+                              'Jul','Aug','Sep','Oct','Nov','Dec'];
+              const n = parseInt(monthlyLabels[idx]);
+              return (n >= 1 && n <= 12) ? months[n] : monthlyLabels[idx];
+            }
+          }
+        }
+      }
+    }
+  });
+
+  /* ────────────────────────────────────────
+     2. Job-wise Applications — line (green area)
+  ──────────────────────────────────────── */
+  const jobLabels = {{ data.job_labels | tojson }};
+  const jobValues = {{ data.job_values | tojson }};
+
+  new Chart(document.getElementById('jobChart'), {
+    type: 'line',
+    data: {
+      labels: jobLabels.length ? jobLabels : ['—'],
+      datasets: [{
+        label: 'Applications',
+        data: jobValues.length ? jobValues : [0],
+        borderColor:          '#10b981',
+        backgroundColor:      'rgba(16,185,129,.12)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor:     '#10b981',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: gridColor },
+          ticks: { color: '#4b6080', precision: 0 }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#4b6080', maxRotation: 20, maxTicksLimit: 8 }
+        }
+      }
+    }
+  });
+
+  /* ────────────────────────────────────────
+     3. Interview Status — doughnut
+  ──────────────────────────────────────── */
+  new Chart(document.getElementById('interviewChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Scheduled', 'Completed', 'Selected', 'Rejected'],
+      datasets: [{
+        data: [
+          {{ data.interview_status[0] }},
+          {{ data.interview_status[1] }},
+          {{ data.interview_status[2] }},
+          {{ data.interview_status[3] }}
+        ],
+        backgroundColor: ['#f59e0b', '#38bdf8', '#10b981', '#ff5c5c'],
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 14,
+            font: { size: 11 },
+            color: '#6b7fa3',
+            usePointStyle: true,
+            pointStyleWidth: 8
+          }
+        }
+      }
+    }
+  });
+
+  /* ────────────────────────────────────────
+     4. Offer Status — doughnut
+  ──────────────────────────────────────── */
+  new Chart(document.getElementById('offerChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Pending', 'Accepted', 'Declined'],
+      datasets: [{
+        data: [
+          {{ data.offer_status[0] }},
+          {{ data.offer_status[1] }},
+          {{ data.offer_status[2] }}
+        ],
+        backgroundColor: ['#f59e0b', '#10b981', '#ff5c5c'],
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 14,
+            font: { size: 11 },
+            color: '#6b7fa3',
+            usePointStyle: true,
+            pointStyleWidth: 8
+          }
+        }
+      }
+    }
+  });
+
+})();
+</script>
+{% endblock %}

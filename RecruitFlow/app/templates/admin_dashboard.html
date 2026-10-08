@@ -1,0 +1,1042 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+{% block hide_page_header %}page-header-blank{% endblock %}
+{% block page_eyebrow %}{% endblock %}
+{% block page_title %}{% endblock %}
+{% block page_subtitle %}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('upload.home') }}" class="btn btn-secondary btn-sm">
+  <i class="bi bi-cloud-upload"></i> Upload Resumes
+</a>
+<a href="{{ url_for('job_management.add_job') }}" class="btn btn-primary btn-sm">
+  <i class="bi bi-plus-lg"></i> Post Job
+</a>
+{% endblock %}
+
+{% block extra_styles %}
+
+/* ═══════════════════════════════════════════
+   EXECUTIVE COMMAND CENTER — PAGE STYLES
+═══════════════════════════════════════════ */
+
+/* ── Welcome Banner ── */
+.ecc-banner {
+  background: linear-gradient(135deg,
+    rgba(15, 31, 53, 0.98) 0%,
+    rgba(10, 22, 40, 0.98) 100%);
+  border: 1px solid rgba(99, 143, 220, 0.18);
+  border-radius: var(--r-xl);
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.ecc-banner::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(37,99,235,.10) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ecc-banner-tags {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.ecc-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 99px;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+}
+.ecc-tag-live {
+  background: rgba(16,185,129,.12);
+  border: 1px solid rgba(16,185,129,.3);
+  color: #10b981;
+}
+.ecc-tag-ai {
+  background: rgba(59,130,246,.12);
+  border: 1px solid rgba(59,130,246,.3);
+  color: #60a5fa;
+}
+.ecc-tag .live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #10b981;
+  animation: livePulse 2s ease-in-out infinite;
+}
+.ecc-banner-title {
+  font-size: 26px; font-weight: 800; color: var(--text-primary);
+  letter-spacing: -.4px; line-height: 1.2; margin-bottom: 8px;
+}
+.ecc-banner-title .wave { font-size: 24px; }
+.ecc-banner-sub {
+  font-size: 13px; color: var(--text-sec); line-height: 1.6; max-width: 540px;
+}
+.ecc-banner-btns {
+  display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+}
+
+/* ── Primary KPI Grid (4 cards) ── */
+.kpi-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 1100px) { .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .kpi-grid-4 { grid-template-columns: 1fr; } }
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99, 143, 220, 0.12);
+  border-radius: var(--r-xl);
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--t-base);
+}
+.kpi-card:hover {
+  border-color: rgba(99, 143, 220, 0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+.kpi-card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.kpi-card-icon {
+  width: 34px; height: 34px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 16px;
+}
+.kpi-card-tag {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.kpi-card-label {
+  font-size: 11px; font-weight: 600; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px;
+}
+.kpi-card-value {
+  font-size: 38px; font-weight: 900; color: var(--text-primary);
+  letter-spacing: -2px; line-height: 1; margin-bottom: 8px;
+}
+.kpi-card-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 99px;
+  margin-bottom: 10px;
+}
+.kpi-card-footer {
+  border-top: 1px solid rgba(99,143,220,.08);
+  padding-top: 10px;
+  font-size: 11.5px; color: var(--text-dim);
+}
+
+/* KPI card accent bars */
+.kpi-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 0;
+}
+.kpi-blue::after   { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.kpi-green::after  { background: linear-gradient(90deg, #10b981, #34d399); }
+.kpi-amber::after  { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+.kpi-pink::after   { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+/* ── Secondary Metric Row (4 chips) ── */
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+@media (max-width: 1100px) { .metric-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .metric-row { grid-template-columns: 1fr 1fr; } }
+
+.metric-chip {
+  background: var(--bg-card);
+  border: 1px solid rgba(99, 143, 220, 0.10);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px;
+  transition: all var(--t-fast);
+}
+.metric-chip:hover { border-color: rgba(99,143,220,.2); }
+.metric-chip-icon {
+  width: 40px; height: 40px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+}
+.metric-chip-label { font-size: 11.5px; color: var(--text-sec); margin-bottom: 3px; }
+.metric-chip-value { font-size: 17px; font-weight: 800; color: var(--text-primary); }
+.metric-chip-value span { font-size: 12px; font-weight: 500; color: var(--text-dim); }
+
+/* ── Bottom Half Two-Column Layout ── */
+.dash-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+@media (max-width: 900px) { .dash-bottom { grid-template-columns: 1fr; } }
+
+/* ── Quick Operational Actions ── */
+.quick-ops-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99,143,220,.10);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+.quick-ops-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid rgba(99,143,220,.08);
+}
+.quick-ops-title {
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.quick-ops-subtitle {
+  font-size: 11px; color: var(--text-dim); font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.quick-ops-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  padding: 18px; gap: 12px;
+}
+.quick-op-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 16px 10px; border-radius: var(--r-lg);
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(99,143,220,.10);
+  cursor: pointer; transition: all var(--t-fast); text-decoration: none;
+}
+.quick-op-btn:hover {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(99,143,220,.22);
+  transform: translateY(-2px);
+}
+.quick-op-icon {
+  width: 40px; height: 40px; border-radius: var(--r-md);
+  display: grid; place-items: center; font-size: 18px;
+}
+.quick-op-label { font-size: 11.5px; font-weight: 600; color: var(--text-sec); }
+.quick-op-btn:hover .quick-op-label { color: var(--text-primary); }
+
+/* ── Interview Status Breakdown ── */
+.interview-breakdown-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99,143,220,.10);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+.interview-breakdown-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid rgba(99,143,220,.08);
+}
+.interview-breakdown-title {
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.breakdown-donut-wrap {
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 20px 10px;
+}
+.breakdown-donut {
+  width: 130px; height: 130px; position: relative; flex-shrink: 0;
+}
+.breakdown-donut svg { transform: rotate(-90deg); }
+.donut-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  text-align: center;
+}
+.donut-center-val { font-size: 26px; font-weight: 900; color: var(--text-primary); line-height: 1; }
+.donut-center-lbl { font-size: 10px; color: var(--text-dim); font-weight: 600; margin-top: 3px; }
+.breakdown-legend { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.legend-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.legend-dot-label { display: flex; align-items: center; gap: 8px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 12.5px; color: var(--text-sec); }
+.legend-count { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.legend-pct { font-size: 11px; color: var(--text-dim); }
+
+/* ── Top Skills Chart ── */
+.skills-chart-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99,143,220,.10);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+.skills-chart-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid rgba(99,143,220,.08);
+}
+.skills-chart-title {
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.skills-bar-chart {
+  padding: 16px 20px 8px;
+  display: flex; align-items: flex-end; gap: 10px; height: 140px;
+}
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+.bar-col-bar {
+  width: 100%; background: linear-gradient(180deg, rgba(59,130,246,.7) 0%, rgba(37,99,235,.4) 100%);
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  transition: height .6s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.bar-col-bar:hover { background: linear-gradient(180deg, rgba(96,165,250,.9) 0%, rgba(59,130,246,.6) 100%); }
+.bar-col-label { font-size: 10px; color: var(--text-dim); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
+.skills-skill-list { padding: 4px 20px 16px; }
+.skill-list-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid rgba(99,143,220,.06);
+}
+.skill-list-row:last-child { border-bottom: none; }
+.skill-list-num { width: 18px; font-size: 11px; font-weight: 700; color: var(--text-dim); flex-shrink: 0; }
+.skill-list-name { flex: 1; font-size: 12.5px; color: var(--text-primary); font-weight: 600; }
+.skill-list-badge {
+  font-size: 11px; font-weight: 700; color: var(--accent-3);
+  background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.2);
+  border-radius: 99px; padding: 2px 10px;
+}
+
+/* ── AI Recommended Roles ── */
+.ai-roles-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99,143,220,.10);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+.ai-roles-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid rgba(99,143,220,.08);
+}
+.ai-roles-title {
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 8px;
+}
+.ai-role-item {
+  padding: 14px 20px; border-bottom: 1px solid rgba(99,143,220,.06);
+  transition: background var(--t-fast);
+}
+.ai-role-item:last-child { border-bottom: none; }
+.ai-role-item:hover { background: rgba(255,255,255,.02); }
+.ai-role-person {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+}
+.ai-role-identity { display: flex; align-items: center; gap: 10px; }
+.ai-role-av {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-1), var(--purple));
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.ai-role-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.ai-role-email { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.ai-role-matched {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700; color: #10b981;
+  background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.25);
+  border-radius: 99px; padding: 3px 9px;
+}
+.ai-role-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.ai-role-tag {
+  font-size: 10.5px; font-weight: 600; color: var(--text-sec);
+  background: rgba(255,255,255,.05); border: 1px solid rgba(99,143,220,.12);
+  border-radius: var(--r-sm); padding: 3px 9px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.ai-role-tag i { font-size: 10px; }
+
+/* ── Recent Tables Grid ── */
+.recent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 1200px) { .recent-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 700px)  { .recent-grid { grid-template-columns: 1fr; } }
+
+.recent-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(99,143,220,.10);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+.recent-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid rgba(99,143,220,.08);
+}
+.recent-card-title {
+  font-size: 13px; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 7px;
+}
+.recent-card-link {
+  font-size: 11px; font-weight: 600; color: var(--accent-3);
+  text-decoration: none; display: flex; align-items: center; gap: 3px;
+}
+.recent-card-link:hover { color: var(--text-primary); }
+.recent-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid rgba(99,143,220,.05);
+  transition: background var(--t-fast);
+}
+.recent-item:last-child { border-bottom: none; }
+.recent-item:hover { background: rgba(255,255,255,.02); }
+.recent-item-identity { display: flex; align-items: center; gap: 9px; }
+.recent-item-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-1), var(--purple));
+  display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.recent-item-name { font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.recent-item-sub { font-size: 10.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.recent-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+  white-space: nowrap;
+}
+.rb-applied  { background: rgba(59,130,246,.12); color: #60a5fa; border: 1px solid rgba(59,130,246,.2); }
+.rb-active   { background: rgba(16,185,129,.12); color: #10b981; border: 1px solid rgba(16,185,129,.2); }
+.rb-selected { background: rgba(139,92,246,.12); color: #a78bfa; border: 1px solid rgba(139,92,246,.2); }
+.rb-closed   { background: rgba(148,163,184,.1); color: #8ba4c8; border: 1px solid rgba(148,163,184,.15); }
+.rb-scheduled { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+.rb-completed { background: rgba(16,185,129,.12); color: #10b981; border: 1px solid rgba(16,185,129,.2); }
+
+{% endblock %}
+
+{% block content %}
+{% set stats = stats if stats is defined and stats else (data if data is defined and data else {}) %}
+
+<!-- ══════════════════════════════════════════
+     WELCOME BANNER
+════════════════════════════════════════════ -->
+<div class="ecc-banner">
+  <div style="position:relative;z-index:1;">
+    <div class="ecc-banner-tags">
+      <span class="ecc-tag ecc-tag-live">
+        <span class="live-dot"></span> Live System Active
+      </span>
+      <span class="ecc-tag ecc-tag-ai">
+        <i class="bi bi-robot"></i> AI Engine v2.4
+      </span>
+    </div>
+    <div class="ecc-banner-title">
+      Welcome back, {{ session.username or 'admin' }} <span class="wave">👋</span>
+    </div>
+    <div class="ecc-banner-sub">
+      RecruitFlow is tracking candidate pipelines, automating AI interviews, verifying proctoring integrity, and calculating real-time suitability scores.
+    </div>
+  </div>
+  <div class="ecc-banner-btns">
+    <a href="{{ url_for('upload.home') }}" class="btn btn-secondary">
+      <i class="bi bi-cloud-upload"></i> Upload Resumes
+    </a>
+    <a href="{{ url_for('job_management.add_job') }}" class="btn btn-primary">
+      <i class="bi bi-plus-lg"></i> Post Job
+    </a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PRIMARY KPI CARDS (4 columns)
+════════════════════════════════════════════ -->
+<div class="kpi-grid-4">
+
+  <!-- Total Candidates -->
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-card-top">
+      <div class="kpi-card-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <span class="kpi-card-tag" style="color:#60a5fa;">Talent Pool</span>
+    </div>
+    <div class="kpi-card-label">Total Candidates</div>
+    <div class="kpi-card-value">{{ stats.total_candidates or 0 }}</div>
+    <div class="kpi-card-status" style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2);">
+      <i class="bi bi-activity" style="font-size:10px;"></i> Live
+    </div>
+    <div class="kpi-card-footer">
+      Applied: <strong style="color:var(--text-primary);">{{ stats.applied or 0 }}</strong>
+      &nbsp;&nbsp; Selected: <strong style="color:#10b981;">{{ stats.selected or 0 }}</strong>
+    </div>
+  </div>
+
+  <!-- Active Recruiters -->
+  <div class="kpi-card kpi-green">
+    <div class="kpi-card-top">
+      <div class="kpi-card-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+        <i class="bi bi-person-badge-fill"></i>
+      </div>
+      <span class="kpi-card-tag" style="color:#10b981;">Hiring Team</span>
+    </div>
+    <div class="kpi-card-label">Active Recruiters</div>
+    <div class="kpi-card-value">{{ stats.total_recruiters or 0 }}</div>
+    <div class="kpi-card-status" style="background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.2);">
+      <i class="bi bi-circle-fill" style="font-size:7px;"></i> Active
+    </div>
+    <div class="kpi-card-footer">
+      System Users: <strong style="color:var(--text-primary);">{{ stats.total_users or 0 }}</strong>
+      &nbsp; Role: <strong style="color:#10b981;">Admin &amp; Recruiter</strong>
+    </div>
+  </div>
+
+  <!-- Job Postings -->
+  <div class="kpi-card kpi-amber">
+    <div class="kpi-card-top">
+      <div class="kpi-card-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+        <i class="bi bi-briefcase-fill"></i>
+      </div>
+      <span class="kpi-card-tag" style="color:#f59e0b;">Openings</span>
+    </div>
+    <div class="kpi-card-label">Job Postings</div>
+    <div class="kpi-card-value">{{ stats.total_jobs or 0 }}</div>
+    <div class="kpi-card-status" style="background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2);">
+      <i class="bi bi-lightning-fill" style="font-size:10px;"></i> Active
+    </div>
+    <div class="kpi-card-footer">
+      Active: <strong style="color:#f59e0b;">{{ stats.active_jobs or 0 }}</strong>
+      &nbsp;&nbsp; Closed: <strong style="color:var(--text-dim);">{{ stats.closed_jobs or 0 }}</strong>
+    </div>
+  </div>
+
+  <!-- Total Interviews -->
+  <div class="kpi-card kpi-pink">
+    <div class="kpi-card-top">
+      <div class="kpi-card-icon" style="background:rgba(236,72,153,.12);color:#ec4899;">
+        <i class="bi bi-camera-video-fill"></i>
+      </div>
+      <span class="kpi-card-tag" style="color:#ec4899;">AI Sessions</span>
+    </div>
+    <div class="kpi-card-label">Total Interviews</div>
+    <div class="kpi-card-value">{{ stats.total_interviews or 0 }}</div>
+    <div class="kpi-card-status" style="background:rgba(236,72,153,.1);color:#ec4899;border:1px solid rgba(236,72,153,.2);">
+      <i class="bi bi-record-circle-fill" style="font-size:10px;"></i> Conducted
+    </div>
+    <div class="kpi-card-footer">
+      Scheduled: <strong style="color:#f59e0b;">{{ stats.scheduled or 0 }}</strong>
+      &nbsp;&nbsp; Completed: <strong style="color:#10b981;">{{ stats.completed or 0 }}</strong>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECONDARY METRIC ROW (4 chips)
+════════════════════════════════════════════ -->
+<div class="metric-row">
+
+  <div class="metric-chip">
+    <div class="metric-chip-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+      <i class="bi bi-robot"></i>
+    </div>
+    <div>
+      <div class="metric-chip-label">AI Analyses Generated</div>
+      <div class="metric-chip-value">
+        {{ stats.total_ai_analysis or 0 }}
+        <span>profiles</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="metric-chip">
+    <div class="metric-chip-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+      <i class="bi bi-bar-chart-fill"></i>
+    </div>
+    <div>
+      <div class="metric-chip-label">Selection Rate</div>
+      <div class="metric-chip-value">
+        {{ stats.selection_rate or 0 }}%
+        <span>of evaluated</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="metric-chip">
+    <div class="metric-chip-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+      <i class="bi bi-star-fill"></i>
+    </div>
+    <div>
+      <div class="metric-chip-label">Avg Suitability Score</div>
+      <div class="metric-chip-value">
+        {{ stats.average_score or '—' }}
+        <span>/ 100</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="metric-chip">
+    <div class="metric-chip-icon" style="background:rgba(139,92,246,.12);color:#8b5cf6;">
+      <i class="bi bi-file-earmark-check-fill"></i>
+    </div>
+    <div>
+      <div class="metric-chip-label">Offer Acceptance Rate</div>
+      <div class="metric-chip-value">
+        {{ stats.offer_acceptance_rate or 0 }}%
+        <span>accepted</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     QUICK ACTIONS + INTERVIEW BREAKDOWN
+════════════════════════════════════════════ -->
+<div class="dash-bottom">
+
+  <!-- Quick Operational Actions -->
+  <div class="quick-ops-card">
+    <div class="quick-ops-header">
+      <div class="quick-ops-title">
+        <i class="bi bi-lightning-fill" style="color:#f59e0b;"></i>
+        Quick Operational Actions
+      </div>
+      <span class="quick-ops-subtitle">Shortcuts</span>
+    </div>
+    <div class="quick-ops-grid">
+      <a href="{{ url_for('candidate_management.candidates') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <span class="quick-op-label">Candidates</span>
+      </a>
+      <a href="{{ url_for('job_management.add_job') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+          <i class="bi bi-briefcase-fill"></i>
+        </div>
+        <span class="quick-op-label">Post Job</span>
+      </a>
+      <a href="{{ url_for('interview_management.interviews') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(236,72,153,.12);color:#ec4899;">
+          <i class="bi bi-camera-video-fill"></i>
+        </div>
+        <span class="quick-op-label">Interviews</span>
+      </a>
+      <a href="{{ url_for('offer_management.offers') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(139,92,246,.12);color:#8b5cf6;">
+          <i class="bi bi-file-earmark-check-fill"></i>
+        </div>
+        <span class="quick-op-label">Offers</span>
+      </a>
+      <a href="{{ url_for('recruiter.recruiters') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+          <i class="bi bi-person-badge-fill"></i>
+        </div>
+        <span class="quick-op-label">Recruiters</span>
+      </a>
+      <a href="{{ url_for('match.job_matching') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(6,182,212,.12);color:#06b6d4;">
+          <i class="bi bi-diagram-3-fill"></i>
+        </div>
+        <span class="quick-op-label">Job Matching</span>
+      </a>
+      <a href="{{ url_for('upload.home') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+          <i class="bi bi-cloud-upload-fill"></i>
+        </div>
+        <span class="quick-op-label">Upload</span>
+      </a>
+      <a href="{{ url_for('skill_gap.skill_gap') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+          <i class="bi bi-puzzle-fill"></i>
+        </div>
+        <span class="quick-op-label">Skill Gap</span>
+      </a>
+      <a href="{{ url_for('report.reports') }}" class="quick-op-btn">
+        <div class="quick-op-icon" style="background:rgba(139,92,246,.12);color:#8b5cf6;">
+          <i class="bi bi-file-text-fill"></i>
+        </div>
+        <span class="quick-op-label">Reports</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Interview Status Breakdown -->
+  <div class="interview-breakdown-card">
+    <div class="interview-breakdown-header">
+      <div class="interview-breakdown-title">
+        <i class="bi bi-circle-half" style="color:#f59e0b;"></i>
+        Interview Status Breakdown
+      </div>
+      <span class="quick-ops-subtitle">Distribution</span>
+    </div>
+
+    {% set iv_total = (stats.total_interviews or 1) %}
+    {% set iv_completed = stats.completed or 0 %}
+    {% set iv_scheduled = stats.scheduled or 0 %}
+    {% set iv_pending = [iv_total - iv_completed - iv_scheduled, 0]|max %}
+
+    {% set pct_completed = ((iv_completed / iv_total) * 100)|round|int if iv_total > 0 else 0 %}
+    {% set pct_scheduled = ((iv_scheduled / iv_total) * 100)|round|int if iv_total > 0 else 0 %}
+    {% set pct_pending   = [100 - pct_completed - pct_scheduled, 0]|max %}
+
+    <!-- Donut chart via SVG -->
+    <div class="breakdown-donut-wrap">
+      <div class="breakdown-donut">
+        <svg viewBox="0 0 120 120" width="130" height="130">
+          <!-- Track -->
+          <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(99,143,220,.1)" stroke-width="14"/>
+          <!-- Completed (green) -->
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#10b981" stroke-width="14"
+            stroke-dasharray="{{ pct_completed * 3.016 }} 301.6"
+            stroke-dashoffset="0"
+            stroke-linecap="round"/>
+          <!-- Scheduled (amber) -->
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#f59e0b" stroke-width="14"
+            stroke-dasharray="{{ pct_scheduled * 3.016 }} 301.6"
+            stroke-dashoffset="{{ -(pct_completed * 3.016) }}"
+            stroke-linecap="round"/>
+          <!-- Pending (blue) -->
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#3b82f6" stroke-width="14"
+            stroke-dasharray="{{ pct_pending * 3.016 }} 301.6"
+            stroke-dashoffset="{{ -((pct_completed + pct_scheduled) * 3.016) }}"
+            stroke-linecap="round"/>
+        </svg>
+        <div class="donut-center">
+          <div class="donut-center-val">{{ stats.total_interviews or 0 }}</div>
+          <div class="donut-center-lbl">Total</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown-legend">
+      <div class="legend-row">
+        <div class="legend-dot-label">
+          <div class="legend-dot" style="background:#10b981;"></div>
+          <span class="legend-label">Completed</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="legend-count">{{ iv_completed }}</span>
+          <span class="legend-pct">{{ pct_completed }}%</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-dot-label">
+          <div class="legend-dot" style="background:#f59e0b;"></div>
+          <span class="legend-label">Scheduled</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="legend-count">{{ iv_scheduled }}</span>
+          <span class="legend-pct">{{ pct_scheduled }}%</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-dot-label">
+          <div class="legend-dot" style="background:#3b82f6;"></div>
+          <span class="legend-label">In Progress</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="legend-count">{{ iv_pending }}</span>
+          <span class="legend-pct">{{ pct_pending }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     TOP SKILLS + AI RECOMMENDED ROLES
+════════════════════════════════════════════ -->
+<div class="dash-bottom" style="margin-bottom:20px;">
+
+  <!-- Top Skills in Talent Pool -->
+  <div class="skills-chart-card">
+    <div class="skills-chart-header">
+      <div class="skills-chart-title">
+        <i class="bi bi-geo-alt-fill" style="color:#60a5fa;"></i>
+        Top Skills in Talent Pool
+      </div>
+      <span class="quick-ops-subtitle">Ranked</span>
+    </div>
+
+    {% set top_skills_data = top_skills if top_skills is defined and top_skills else [] %}
+    {% if top_skills_data %}
+      {% set max_count = top_skills_data[0][1] if top_skills_data[0][1] > 0 else 1 %}
+    {% else %}
+      {% set max_count = 1 %}
+    {% endif %}
+
+    <!-- Bar chart -->
+    <div class="skills-bar-chart">
+      {% if top_skills_data %}
+        {% for skill_name, count in top_skills_data[:6] %}
+        {% set bar_h = ((count / max_count) * 90)|round|int %}
+        <div class="bar-col">
+          <div class="bar-col-bar" style="height:{{ [bar_h, 6]|max }}px;" title="{{ skill_name }}: {{ count }} candidates"></div>
+          <span class="bar-col-label">{{ skill_name[:6] }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        {% for s, h in [('Python',90),('React',72),('SQL',68),('Java',60),('CSS',50),('Git',44)] %}
+        <div class="bar-col">
+          <div class="bar-col-bar" style="height:{{ h }}px;"></div>
+          <span class="bar-col-label">{{ s }}</span>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- Skill list -->
+    <div class="skills-skill-list">
+      {% if top_skills_data %}
+        {% for skill_name, count in top_skills_data[:4] %}
+        <div class="skill-list-row">
+          <span class="skill-list-num">{{ loop.index }}</span>
+          <span class="skill-list-name">{{ skill_name }}</span>
+          <span class="skill-list-badge">{{ count }} candidates</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        {% for i, s, c in [(1,'Python',17),(2,'React.js',16),(3,'SQL',16),(4,'Java',15)] %}
+        <div class="skill-list-row">
+          <span class="skill-list-num">{{ i }}</span>
+          <span class="skill-list-name">{{ s }}</span>
+          <span class="skill-list-badge">{{ c }} candidates</span>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- AI Recommended Roles -->
+  <div class="ai-roles-card">
+    <div class="ai-roles-header">
+      <div class="ai-roles-title">
+        <i class="bi bi-stars" style="color:#60a5fa;"></i>
+        AI Recommended Roles
+      </div>
+      <span class="quick-ops-subtitle">Neural Matching</span>
+    </div>
+
+    {% set roles_data = recommended_roles if recommended_roles is defined and recommended_roles else [] %}
+    {% if roles_data %}
+      {% for person in roles_data %}
+      <div class="ai-role-item">
+        <div class="ai-role-person">
+          <div class="ai-role-identity">
+            <div class="ai-role-av">{{ person.name[0]|upper if person.name else 'C' }}</div>
+            <div>
+              <div class="ai-role-name">{{ person.name }}</div>
+              <div class="ai-role-email">{{ person.email }}</div>
+            </div>
+          </div>
+          <span class="ai-role-matched"><i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Matched</span>
+        </div>
+        <div class="ai-role-tags">
+          {% for role in person.roles %}
+          <span class="ai-role-tag"><i class="bi bi-briefcase"></i> {{ role }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <!-- Placeholder -->
+      {% for name, email, roles in [
+        ('Abhishek Mishra', 'abhishek.mishra15@gmail.com', ['Junior Java Developer','Entry-level Software Eng.','Trainee Programmer']),
+        ('Aditi Chauhan',   'aditi.chauhan30@gmail.com',  ['Junior Full Stack Dev.','Entry-level Software Eng.','Trainee Developer']),
+        ('Aditya Reddy',    'aditya.reddy50@gmail.com',   ['Junior Python Developer','Entry-level Web Dev.','Trainee Software Eng.']),
+      ] %}
+      <div class="ai-role-item">
+        <div class="ai-role-person">
+          <div class="ai-role-identity">
+            <div class="ai-role-av">{{ name[0] }}</div>
+            <div>
+              <div class="ai-role-name">{{ name }}</div>
+              <div class="ai-role-email">{{ email }}</div>
+            </div>
+          </div>
+          <span class="ai-role-matched"><i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Matched</span>
+        </div>
+        <div class="ai-role-tags">
+          {% for role in roles %}
+          <span class="ai-role-tag"><i class="bi bi-briefcase"></i> {{ role }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     RECENT CANDIDATES / JOBS / INTERVIEWS
+════════════════════════════════════════════ -->
+<div class="recent-grid">
+
+  <!-- Recent Candidates -->
+  <div class="recent-card">
+    <div class="recent-card-header">
+      <div class="recent-card-title">
+        <i class="bi bi-people-fill" style="color:#60a5fa;font-size:14px;"></i>
+        Recent Candidates
+      </div>
+      <a href="{{ url_for('candidate_management.candidates') }}" class="recent-card-link">
+        View All <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+    {% set rcand = recent_candidates if recent_candidates is defined and recent_candidates else [] %}
+    {% if rcand %}
+      {% for c in rcand %}
+      <div class="recent-item">
+        <div class="recent-item-identity">
+          <div class="recent-item-av">{{ (c.full_name or 'C')[0]|upper }}</div>
+          <div>
+            <div class="recent-item-name">{{ c.full_name or 'Candidate' }}</div>
+            <div class="recent-item-sub">{{ c.email or '' }}</div>
+          </div>
+        </div>
+        <span class="recent-badge {{ 'rb-selected' if c.status in ['Selected','Hired'] else 'rb-applied' }}">
+          {{ c.status or 'Applied' }}
+        </span>
+      </div>
+      {% endfor %}
+    {% else %}
+      {% for name, email, status in [
+        ('Abhishek Mishra','abhishek@mail.com','Applied'),
+        ('Aditi Chauhan','aditi@mail.com','Applied'),
+        ('Aditya Reddy','aditya@mail.com','Selected'),
+        ('Sneha SA','sneha@mail.com','Applied'),
+        ('Raj Kumar','raj@mail.com','Applied'),
+      ] %}
+      <div class="recent-item">
+        <div class="recent-item-identity">
+          <div class="recent-item-av">{{ name[0] }}</div>
+          <div>
+            <div class="recent-item-name">{{ name }}</div>
+            <div class="recent-item-sub">{{ email }}</div>
+          </div>
+        </div>
+        <span class="recent-badge {{ 'rb-selected' if status == 'Selected' else 'rb-applied' }}">{{ status }}</span>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Recent Job Openings -->
+  <div class="recent-card">
+    <div class="recent-card-header">
+      <div class="recent-card-title">
+        <i class="bi bi-briefcase-fill" style="color:#f59e0b;font-size:14px;"></i>
+        Recent Job Openings
+      </div>
+      <a href="{{ url_for('job_management.jobs') }}" class="recent-card-link">
+        View All <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+    {% set rjobs = recent_jobs if recent_jobs is defined and recent_jobs else [] %}
+    {% if rjobs %}
+      {% for job in rjobs %}
+      <div class="recent-item">
+        <div>
+          <div class="recent-item-name" style="max-width:180px;">{{ job.title }}</div>
+          <div class="recent-item-sub">{{ job.company_name or job.company or 'Company' }}</div>
+        </div>
+        <span class="recent-badge {{ 'rb-active' if (job.status or '').lower() == 'active' else 'rb-closed' }}">
+          {{ (job.status or 'Active')|title }}
+        </span>
+      </div>
+      {% endfor %}
+    {% else %}
+      {% for title, company, status in [
+        ('Graduate Software Eng.','Siemens','Active'),
+        ('Cloud Support Engineer','Zoho','Active'),
+        ('Python Developer','Infosys','Active'),
+        ('React Frontend Dev','TCS','Active'),
+        ('Data Analyst','Wipro','Closed'),
+      ] %}
+      <div class="recent-item">
+        <div>
+          <div class="recent-item-name" style="max-width:180px;">{{ title }}</div>
+          <div class="recent-item-sub">{{ company }}</div>
+        </div>
+        <span class="recent-badge {{ 'rb-active' if status == 'Active' else 'rb-closed' }}">{{ status }}</span>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Recent Interviews -->
+  <div class="recent-card">
+    <div class="recent-card-header">
+      <div class="recent-card-title">
+        <i class="bi bi-camera-video-fill" style="color:#ec4899;font-size:14px;"></i>
+        Recent Interviews
+      </div>
+      <a href="{{ url_for('interview_management.interviews') }}" class="recent-card-link">
+        View All <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+    {% set rivs = recent_interviews if recent_interviews is defined and recent_interviews else [] %}
+    {% if rivs %}
+      {% for iv in rivs %}
+      <div class="recent-item">
+        <div class="recent-item-identity">
+          <div class="recent-item-av" style="background:linear-gradient(135deg,#ec4899,#8b5cf6);">
+            {{ (iv.candidate_name or iv.candidate.full_name if iv.candidate is defined else 'C')[0]|upper }}
+          </div>
+          <div>
+            <div class="recent-item-name">{{ iv.candidate_name or (iv.candidate.full_name if iv.candidate is defined else 'Candidate') }}</div>
+            <div class="recent-item-sub">{{ iv.job_title or (iv.job.title if iv.job is defined else 'Role') }}</div>
+          </div>
+        </div>
+        <span class="recent-badge {{ 'rb-selected' if (iv.status or '').lower() == 'selected' else 'rb-scheduled' if (iv.status or '').lower() == 'scheduled' else 'rb-completed' }}">
+          {{ (iv.status or 'Scheduled')|title }}
+        </span>
+      </div>
+      {% endfor %}
+    {% else %}
+      {% for name, role, status in [
+        ('Ankitha An','Data Analyst','Selected'),
+        ('Sneha S A','Python Developer','Selected'),
+        ('Raj Kumar','Java Developer','Scheduled'),
+        ('Priya Sharma','React Developer','Completed'),
+        ('Arjun Mehta','ML Engineer','Completed'),
+      ] %}
+      <div class="recent-item">
+        <div class="recent-item-identity">
+          <div class="recent-item-av" style="background:linear-gradient(135deg,#ec4899,#8b5cf6);">{{ name[0] }}</div>
+          <div>
+            <div class="recent-item-name">{{ name }}</div>
+            <div class="recent-item-sub">{{ role }}</div>
+          </div>
+        </div>
+        <span class="recent-badge {{ 'rb-selected' if status == 'Selected' else 'rb-scheduled' if status == 'Scheduled' else 'rb-completed' }}">{{ status }}</span>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Animate bar chart heights on load
+  (function() {
+    function animateBars() {
+      document.querySelectorAll('.bar-col-bar').forEach(function(bar) {
+        var h = bar.style.height;
+        bar.style.height = '0';
+        bar.style.transition = 'height .6s cubic-bezier(.4,0,.2,1)';
+        setTimeout(function() { bar.style.height = h; }, 80);
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', animateBars);
+    } else {
+      animateBars();
+    }
+  })();
+</script>
+{% endblock %}

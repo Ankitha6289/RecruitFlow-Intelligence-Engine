@@ -1,0 +1,292 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Skill Gap Analysis{% endblock %}
+{% block breadcrumb %}Skill Gap Analysis{% endblock %}
+{% block page_eyebrow %}<i class="bi bi-puzzle-fill"></i> AI Tools{% endblock %}
+{% block page_title %}Skill Gap Analysis{% endblock %}
+{% block page_subtitle %}Identify the skills a candidate is missing for a specific role and get AI-powered recommendations.{% endblock %}
+
+{% block extra_styles %}
+/* ── Selector card ── */
+.sg-select-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden;
+  margin-bottom: 22px;
+}
+.sg-select-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 22px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,.015);
+}
+.sg-select-icon {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 14px; flex-shrink: 0;
+}
+.sg-select-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.sg-select-body {
+  padding: 22px;
+  display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: flex-end;
+}
+@media(max-width:760px){ .sg-select-body{ grid-template-columns: 1fr; } }
+
+.sg-label {
+  display: block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-sec); margin-bottom: 7px;
+}
+.sg-select {
+  width: 100%;
+  background: rgba(5,12,30,.65) !important;
+  border: 1.5px solid var(--border-base);
+  border-radius: var(--r-md);
+  padding: 11px 36px 11px 14px;
+  font-size: 13.5px; font-family: 'Inter', sans-serif;
+  color: var(--text-primary) !important;
+  outline: none;
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%238ba4c8' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 13px center !important;
+  background-size: 11px !important;
+  transition: border-color .2s, box-shadow .2s;
+}
+.sg-select:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.13);
+  background-color: rgba(5,12,35,.85) !important;
+}
+.sg-select option { background: #0f1f35; color: var(--text-primary); }
+
+/* ── Result grid ── */
+.sg-result-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
+  margin-bottom: 20px;
+}
+@media(max-width:900px){ .sg-result-grid{ grid-template-columns: 1fr 1fr; } }
+@media(max-width:560px){ .sg-result-grid{ grid-template-columns: 1fr; } }
+
+.sg-result-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl); overflow: hidden;
+  transition: border-color var(--t-fast);
+}
+.sg-result-card:hover { border-color: var(--border-base); }
+
+.sg-result-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border-subtle);
+}
+.sg-result-header-icon {
+  width: 28px; height: 28px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 13px; flex-shrink: 0;
+}
+.sg-result-header-title { font-size: 12.5px; font-weight: 700; color: var(--text-primary); }
+
+.sg-result-body { padding: 16px 18px; }
+
+/* ── Skill pill chips ── */
+.sg-skill-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.sg-skill-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 99px;
+  font-size: 11.5px; font-weight: 600;
+}
+.sg-chip-matched {
+  background: rgba(16,185,129,.12); color: #10b981;
+  border: 1px solid rgba(16,185,129,.25);
+}
+.sg-chip-missing {
+  background: rgba(239,68,68,.12); color: #ef4444;
+  border: 1px solid rgba(239,68,68,.25);
+}
+
+/* ── Recommendation card ── */
+.sg-rec-card {
+  background: linear-gradient(135deg,
+    rgba(59,130,246,.08) 0%,
+    rgba(139,92,246,.06) 100%);
+  border: 1px solid rgba(59,130,246,.18);
+  border-radius: var(--r-xl);
+  padding: 20px 22px;
+}
+.sg-rec-header {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 12px;
+}
+.sg-rec-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.sg-rec-text { font-size: 13.5px; color: var(--text-sec); line-height: 1.65; }
+
+/* ── Empty state (no report yet) ── */
+.sg-empty {
+  background: var(--bg-card); border: 1px dashed rgba(99,143,220,.2);
+  border-radius: var(--r-xl); padding: 48px 24px;
+  text-align: center; color: var(--text-dim);
+}
+.sg-empty i { font-size: 38px; display: block; margin-bottom: 12px; color: var(--text-dim); }
+.sg-empty p { font-size: 13.5px; margin: 0; }
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Selector form ── -->
+<div class="sg-select-card">
+  <div class="sg-select-header">
+    <div class="sg-select-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;">
+      <i class="bi bi-sliders"></i>
+    </div>
+    <span class="sg-select-title">Select Candidate &amp; Job to Analyse</span>
+  </div>
+  <form method="POST" action="{{ url_for('skill_gap.skill_gap') }}">
+    <div class="sg-select-body">
+      <div>
+        <label class="sg-label" for="candidate_id">Candidate</label>
+        <select id="candidate_id" name="candidate_id" class="sg-select" required>
+          <option value="" disabled selected>— Select Candidate —</option>
+          {% for c in candidates %}
+          <option value="{{ c.candidate_id }}"
+            {% if report and report.candidate_id == c.candidate_id %}selected{% endif %}>
+            {{ c.full_name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="sg-label" for="job_id">Job Role</label>
+        <select id="job_id" name="job_id" class="sg-select" required>
+          <option value="" disabled selected>— Select Job —</option>
+          {% for j in jobs %}
+          <option value="{{ j.job_id }}"
+            {% if report and report.job_id == j.job_id %}selected{% endif %}>
+            {{ j.title }}{% if j.company %} — {{ j.company }}{% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+          <i class="bi bi-robot"></i> Run Analysis
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ── Analysis results ── -->
+{% if report %}
+
+  {# Parse comma-separated skills into lists #}
+  {% set matched_list = report.matched_skills.split(',') | map('trim') | reject('equalto','') | list if report.matched_skills else [] %}
+  {% set missing_list = report.missing_skills.split(',') | map('trim') | reject('equalto','') | list if report.missing_skills else [] %}
+  {% set total_skills = matched_list|length + missing_list|length %}
+  {% set match_pct    = ((matched_list|length / total_skills) * 100) | round | int if total_skills > 0 else 0 %}
+
+  <!-- Score row -->
+  <div class="stat-grid section-gap" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px;">
+    <div class="stat-card" style="--stat-accent:var(--green);--stat-bg:var(--green-bg);">
+      <div class="stat-header">
+        <span class="stat-label">Matched Skills</span>
+        <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+      </div>
+      <div class="stat-value">{{ matched_list|length }}</div>
+      <div class="stat-footer"><span>Candidate already has</span></div>
+    </div>
+    <div class="stat-card" style="--stat-accent:var(--red);--stat-bg:var(--red-bg);">
+      <div class="stat-header">
+        <span class="stat-label">Missing Skills</span>
+        <div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div>
+      </div>
+      <div class="stat-value">{{ missing_list|length }}</div>
+      <div class="stat-footer"><span>Needs to acquire</span></div>
+    </div>
+    <div class="stat-card" style="--stat-accent:var(--accent-3);--stat-bg:rgba(59,130,246,.12);">
+      <div class="stat-header">
+        <span class="stat-label">Match Score</span>
+        <div class="stat-icon"><i class="bi bi-percent"></i></div>
+      </div>
+      <div class="stat-value">{{ match_pct }}%</div>
+      <div class="stat-footer">
+        <!-- Mini progress bar -->
+        <div style="width:100%;height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;">
+          <div style="height:100%;width:{{ match_pct }}%;background:var(--accent-2);border-radius:99px;transition:width .8s ease;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skills breakdown -->
+  <div class="sg-result-grid">
+
+    <!-- Matched -->
+    <div class="sg-result-card">
+      <div class="sg-result-header">
+        <div class="sg-result-header-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+          <i class="bi bi-check2-circle"></i>
+        </div>
+        <span class="sg-result-header-title">Matched Skills</span>
+        <span class="badge badge-green" style="margin-left:auto;">{{ matched_list|length }}</span>
+      </div>
+      <div class="sg-result-body">
+        {% if matched_list %}
+        <div class="sg-skill-chips">
+          {% for skill in matched_list %}
+          <span class="sg-skill-chip sg-chip-matched">
+            <i class="bi bi-check-lg"></i>{{ skill }}
+          </span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="font-size:12.5px;color:var(--text-dim);margin:0;">No matching skills found.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Missing -->
+    <div class="sg-result-card">
+      <div class="sg-result-header">
+        <div class="sg-result-header-icon" style="background:rgba(239,68,68,.12);color:#ef4444;">
+          <i class="bi bi-x-circle"></i>
+        </div>
+        <span class="sg-result-header-title">Missing Skills</span>
+        <span class="badge badge-red" style="margin-left:auto;">{{ missing_list|length }}</span>
+      </div>
+      <div class="sg-result-body">
+        {% if missing_list %}
+        <div class="sg-skill-chips">
+          {% for skill in missing_list %}
+          <span class="sg-skill-chip sg-chip-missing">
+            <i class="bi bi-dash-lg"></i>{{ skill }}
+          </span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="font-size:12.5px;color:var(--green);margin:0;">
+          <i class="bi bi-stars"></i> Candidate matches all required skills!
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- AI Recommendation -->
+    <div class="sg-rec-card">
+      <div class="sg-rec-header">
+        <div style="width:28px;height:28px;border-radius:var(--r-sm);background:rgba(139,92,246,.14);color:#a78bfa;display:grid;place-items:center;font-size:14px;flex-shrink:0;">
+          <i class="bi bi-robot"></i>
+        </div>
+        <span class="sg-rec-title">AI Recommendation</span>
+      </div>
+      <p class="sg-rec-text">{{ report.recommendation or 'No recommendation available.' }}</p>
+    </div>
+
+  </div>
+
+{% else %}
+  <!-- Empty state -->
+  <div class="sg-empty">
+    <i class="bi bi-puzzle"></i>
+    <p>Select a candidate and a job role above, then click <strong>Run Analysis</strong> to see the skill gap report.</p>
+  </div>
+{% endif %}
+
+{% endblock %}

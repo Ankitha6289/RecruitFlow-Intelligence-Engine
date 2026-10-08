@@ -1,0 +1,314 @@
+{% extends "candidate_base.html" %}
+{% block title %}Upload Resume{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Resume &amp; CV Management</div>
+<div class="rf-topbar-sub">Upload your latest resume to power AI parsing, job matching, and ATS screening</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .upload-dropzone {
+        border: 2px dashed rgba(14, 165, 233, .35);
+        border-radius: var(--r-lg);
+        background: rgba(14, 165, 233, .03);
+        padding: 42px 24px;
+        text-align: center;
+        transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+    }
+    .upload-dropzone:hover, .upload-dropzone.dragover {
+        border-color: var(--accent);
+        background: rgba(14, 165, 233, .08);
+        box-shadow: 0 0 24px rgba(14, 165, 233, .15);
+    }
+    .upload-icon {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: rgba(14, 165, 233, .12);
+        border: 1px solid rgba(14, 165, 233, .25);
+        color: var(--accent2);
+        display: grid; place-items: center;
+        font-size: 28px;
+        margin: 0 auto 16px;
+        transition: transform .2s ease;
+    }
+    .upload-dropzone:hover .upload-icon {
+        transform: translateY(-4px) scale(1.05);
+    }
+    .upload-dropzone h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
+    }
+    .upload-dropzone p {
+        font-size: 13px;
+        color: var(--text-sec);
+        margin-bottom: 14px;
+    }
+    .file-input-hidden {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+    .format-chips {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .format-chip {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--accent2);
+        background: rgba(14, 165, 233, .1);
+        border: 1px solid rgba(14, 165, 233, .2);
+        padding: 3px 10px;
+        border-radius: 6px;
+    }
+    .selected-file-info {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 14px;
+        padding: 10px 16px;
+        background: rgba(16, 185, 129, .12);
+        border: 1px solid rgba(16, 185, 129, .25);
+        border-radius: 10px;
+        color: #34d399;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Tip Card List */
+    .ats-tip-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .ats-tip-item:last-child { border-bottom: none; }
+    .ats-tip-icon {
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: grid; place-items: center;
+        font-size: 15px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .ats-tip-icon.blue { background: rgba(14, 165, 233, .12); color: #38bdf8; }
+    .ats-tip-icon.green { background: rgba(16, 185, 129, .12); color: #34d399; }
+    .ats-tip-icon.amber { background: rgba(245, 158, 11, .12); color: #fbbf24; }
+    .ats-tip-icon.purple { background: rgba(139, 92, 246, .12); color: #a78bfa; }
+    .ats-tip-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .ats-tip-desc { font-size: 12px; color: var(--text-sec); line-height: 1.45; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="rf-grid-2-1">
+
+    <!-- Left Column: Upload Form & Current Resume -->
+    <div>
+
+        <!-- Upload Card -->
+        <div class="rf-card">
+            <div class="rf-card-header">
+                <div>
+                    <h2 class="rf-card-title">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                        Upload Resume Document
+                    </h2>
+                    <div class="rf-card-subtitle">RecruitFlow AI will parse your skills, work history &amp; generate ATS scores</div>
+                </div>
+                <span class="rf-badge rf-badge-info">AI Parser Ready</span>
+            </div>
+
+            <div class="rf-card-body">
+                <form method="POST" enctype="multipart/form-data" id="resumeUploadForm">
+
+                    <div class="upload-dropzone" id="dropzone">
+                        <input type="file" name="resume" id="resumeFileInput" class="file-input-hidden" accept=".pdf,.doc,.docx" required onchange="handleFileSelect(this)">
+                        
+                        <div class="upload-icon">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                        </div>
+
+                        <h3>Drag &amp; drop your resume here, or <span style="color: var(--accent2); text-decoration: underline;">browse</span></h3>
+                        <p>Maximum file size: 10MB. We support high-fidelity text extraction.</p>
+
+                        <div class="format-chips">
+                            <span class="format-chip"><i class="bi bi-filetype-pdf"></i> PDF</span>
+                            <span class="format-chip"><i class="bi bi-filetype-docx"></i> DOCX</span>
+                            <span class="format-chip"><i class="bi bi-filetype-doc"></i> DOC</span>
+                        </div>
+
+                        <div class="selected-file-info" id="selectedFileInfo">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span id="selectedFileName">resume.pdf</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <a href="{{ url_for('candidate_dashboard.dashboard') }}" class="rf-btn rf-btn-outline">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+
+                        <button type="submit" class="rf-btn rf-btn-primary" id="uploadSubmitBtn">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                            <span>Upload &amp; Analyze with AI</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Resume Card -->
+        <div class="rf-card" style="margin-top: 22px;">
+            <div class="rf-card-header">
+                <div>
+                    <h2 class="rf-card-title">
+                        <i class="bi bi-file-earmark-check"></i>
+                        Current Active Resume
+                    </h2>
+                    <div class="rf-card-subtitle">The file currently used for job applications and recruiter reviews</div>
+                </div>
+            </div>
+
+            <div class="rf-card-body">
+                {% if candidate.resume_path %}
+                <div style="background: rgba(16, 185, 129, .08); border: 1px solid rgba(16, 185, 129, .25); border-radius: 12px; padding: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="width: 48px; height: 48px; border-radius: 10px; background: rgba(239, 68, 68, .15); border: 1px solid rgba(239, 68, 68, .3); color: #ef4444; display: grid; place-items: center; font-size: 24px; flex-shrink: 0;">
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 3px;">
+                                {{ candidate.resume_path }}
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-sec); display: flex; align-items: center; gap: 8px;">
+                                <span class="rf-badge rf-badge-success" style="font-size: 10px;"><i class="bi bi-check2"></i> Active on Profile</span>
+                                <span>&bull; Ready for applications</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <a href="/uploads/resumes/{{ candidate.resume_path }}" target="_blank" class="rf-btn rf-btn-outline rf-btn-sm">
+                            <i class="bi bi-eye"></i> View PDF
+                        </a>
+                        <a href="{{ url_for('chatbot.chatbot', candidate_id=candidate.candidate_id) }}" class="rf-btn rf-btn-primary rf-btn-sm">
+                            <i class="bi bi-chat-dots"></i> Chat with Resume
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="rf-empty-state">
+                    <div class="rf-empty-icon" style="background: rgba(245, 158, 11, .1); border-color: rgba(245, 158, 11, .25); color: #fbbf24;">
+                        <i class="bi bi-file-earmark-x"></i>
+                    </div>
+                    <div class="rf-empty-title">No Resume on File</div>
+                    <p class="rf-empty-desc">
+                        You have not uploaded a resume yet. Upload one above to get your ATS compatibility score and recommended job matches.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Column: ATS Optimization Guide -->
+    <div>
+        <div class="rf-card">
+            <div class="rf-card-header">
+                <div>
+                    <h2 class="rf-card-title">
+                        <i class="bi bi-patch-check"></i>
+                        ATS Optimization Tips
+                    </h2>
+                    <div class="rf-card-subtitle">Maximize your score with RecruitFlow AI</div>
+                </div>
+            </div>
+
+            <div class="rf-card-body">
+                <div class="ats-tip-item">
+                    <div class="ats-tip-icon blue"><i class="bi bi-layout-text-window-reverse"></i></div>
+                    <div>
+                        <div class="ats-tip-title">Clean Standard Layout</div>
+                        <div class="ats-tip-desc">Avoid multi-column tables, graphics, or text inside images that ATS parsers cannot read.</div>
+                    </div>
+                </div>
+
+                <div class="ats-tip-item">
+                    <div class="ats-tip-icon green"><i class="bi bi-tags"></i></div>
+                    <div>
+                        <div class="ats-tip-title">Targeted Skill Keywords</div>
+                        <div class="ats-tip-desc">Include exact technical competencies (e.g. Python, SQL, Docker, React) matching your target roles.</div>
+                    </div>
+                </div>
+
+                <div class="ats-tip-item">
+                    <div class="ats-tip-icon amber"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div>
+                        <div class="ats-tip-title">Quantifiable Results</div>
+                        <div class="ats-tip-desc">Highlight metrics (e.g., "Reduced latency by 35%", "Grew user retention by 20%").</div>
+                    </div>
+                </div>
+
+                <div class="ats-tip-item">
+                    <div class="ats-tip-icon purple"><i class="bi bi-clock-history"></i></div>
+                    <div>
+                        <div class="ats-tip-title">Reverse Chronological</div>
+                        <div class="ats-tip-desc">List your most recent job and academic achievements first with clear month/year dates.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rf-card-footer">
+                <span style="font-size: 11.5px; color: var(--text-sec);">AI score updates immediately on upload</span>
+                <span class="rf-badge rf-badge-info">Auto Parsing</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const infoDiv = document.getElementById('selectedFileInfo');
+        const nameSpan = document.getElementById('selectedFileName');
+        
+        nameSpan.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+        infoDiv.style.display = 'inline-flex';
+    }
+}
+
+// Drag & drop highlights
+const dropzone = document.getElementById('dropzone');
+['dragenter', 'dragover'].forEach(evtName => {
+    dropzone.addEventListener(evtName, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+});
+['dragleave', 'drop'].forEach(evtName => {
+    dropzone.addEventListener(evtName, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+    });
+});
+</script>
+
+{% endblock %}

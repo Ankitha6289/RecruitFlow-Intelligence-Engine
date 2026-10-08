@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-info text-white">
+
+            <h3>Job Details</h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <tr>
+
+                    <th width="220">Job ID</th>
+
+                    <td>{{ job.job_id }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Job Title</th>
+
+                    <td>{{ job.title }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Company</th>
+
+                    <td>{{ job.company }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Location</th>
+
+                    <td>{{ job.location }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Salary</th>
+
+                    <td>{{ job.salary }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Experience</th>
+
+                    <td>{{ job.experience }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Required Skills</th>
+
+                    <td>{{ job.skills }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Description</th>
+
+                    <td>{{ job.description }}</td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Status</th>
+
+                    <td>
+
+                        {% if job.status == "Active" %}
+
+                            <span class="badge bg-success">
+
+                                Active
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger">
+
+                                Closed
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Created On</th>
+
+                    <td>{{ job.created_at }}</td>
+
+                </tr>
+
+            </table>
+
+            <div class="mt-3">
+
+                <a href="{{ url_for('job_management.edit_job', job_id=job.job_id) }}"
+                   class="btn btn-warning">
+
+                    Edit Job
+
+                </a>
+
+                <a href="{{ url_for('job_management.jobs') }}"
+                   class="btn btn-secondary">
+
+                    Back
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

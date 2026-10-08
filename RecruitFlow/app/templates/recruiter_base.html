@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RecruitFlow{% endblock %} — Recruiter Portal</title>
+    <meta name="description" content="RecruitFlow Recruiter Portal — Manage jobs, applications, interviews and offers with AI-powered tools.">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* ══════════════════════════════════════
+           DESIGN TOKENS
+        ══════════════════════════════════════ */
+        :root {
+            --sidebar-w: 256px;
+            --topbar-h: 64px;
+
+            /* Colors */
+            --bg:        #07060f;
+            --bg2:       #0d0b1a;
+            --card-bg:   #110f24;
+            --card-bg2:  #16132e;
+            --border:    rgba(255,255,255,.07);
+            --border2:   rgba(255,255,255,.12);
+
+            --text:      #f1f5f9;
+            --text-sec:  #94a3b8;
+            --text-dim:  #64748b;
+
+            /* Accent — violet/indigo for recruiter */
+            --accent:    #7c3aed;
+            --accent2:   #a78bfa;
+            --accent3:   #c4b5fd;
+            --accent-glow: rgba(124,58,237,.35);
+
+            /* Status colors */
+            --green:  #10b981;
+            --amber:  #f59e0b;
+            --red:    #ef4444;
+            --blue:   #3b82f6;
+            --cyan:   #06b6d4;
+            --pink:   #ec4899;
+
+            /* Radii */
+            --r-sm: 8px;
+            --r-md: 12px;
+            --r-lg: 16px;
+            --r-xl: 20px;
+
+            /* Shadows */
+            --shadow-sm:  0 2px 8px rgba(0,0,0,.4);
+            --shadow-md:  0 4px 20px rgba(0,0,0,.5);
+            --shadow-lg:  0 8px 32px rgba(0,0,0,.6);
+        }
+
+        /* ── Reset ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ══════════════════════════════════════
+           SIDEBAR
+        ══════════════════════════════════════ */
+        .rf-sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: linear-gradient(180deg, #100d22 0%, #080611 100%);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,.08) transparent;
+            transition: transform .28s cubic-bezier(.4,0,.2,1);
+        }
+        .rf-sidebar::-webkit-scrollbar { width: 3px; }
+        .rf-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 3px; }
+
+        /* Brand */
+        .rf-brand {
+            padding: 20px 18px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .rf-brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            text-decoration: none;
+        }
+        .rf-brand-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--accent), #5b21b6);
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 17px;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+        .rf-brand-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.3px;
+        }
+        .rf-brand-tag {
+            font-size: 10px;
+            color: var(--text-dim);
+            font-weight: 500;
+            letter-spacing: .2px;
+        }
+
+        /* Nav */
+        .rf-nav-section {
+            padding: 16px 10px 4px;
+        }
+        .rf-nav-label {
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: .9px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            padding: 0 10px;
+            margin-bottom: 5px;
+        }
+        .rf-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all .18s ease;
+            margin-bottom: 2px;
+            position: relative;
+        }
+        .rf-nav-item:hover {
+            background: rgba(124,58,237,.12);
+            color: var(--accent3);
+        }
+        .rf-nav-item.active {
+            background: linear-gradient(90deg, rgba(124,58,237,.25), rgba(124,58,237,.08));
+            color: var(--accent3);
+            border-left: 2px solid var(--accent2);
+        }
+        .rf-nav-item i {
+            font-size: 14.5px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .rf-nav-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+        .rf-nav-badge-red {
+            background: var(--red);
+        }
+
+        /* Sidebar Footer */
+        .rf-sidebar-footer {
+            margin-top: auto;
+            padding: 12px 10px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .rf-sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+        .rf-sidebar-avatar {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent), #5b21b6);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .rf-sidebar-uname {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rf-sidebar-role {
+            font-size: 10.5px;
+            color: var(--accent2);
+            font-weight: 500;
+        }
+
+        /* ══════════════════════════════════════
+           TOPBAR
+        ══════════════════════════════════════ */
+        .rf-topbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-w);
+            right: 0;
+            height: var(--topbar-h);
+            background: rgba(11,9,25,.85);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 26px;
+            gap: 14px;
+            z-index: 999;
+            transition: left .28s cubic-bezier(.4,0,.2,1);
+        }
+        .rf-topbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-sec);
+            font-size: 20px;
+            padding: 4px 6px;
+            border-radius: 7px;
+            transition: background .15s;
+        }
+        .rf-topbar-toggle:hover { background: rgba(255,255,255,.07); color: var(--text); }
+        .rf-topbar-title {
+            flex: 1;
+            font-size: 14.5px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -.2px;
+        }
+        .rf-topbar-sub {
+            font-size: 12px;
+            color: var(--text-sec);
+            font-weight: 400;
+            letter-spacing: 0;
+        }
+        .rf-topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rf-topbar-pill {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid var(--border2);
+            border-radius: 50px;
+            padding: 6px 14px 6px 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .rf-topbar-pill:hover { background: rgba(255,255,255,.09); color: var(--text); }
+        .rf-topbar-avatar {
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, var(--accent), #5b21b6);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* ══════════════════════════════════════
+           MAIN CONTENT
+        ══════════════════════════════════════ */
+        .rf-main {
+            margin-left: var(--sidebar-w);
+            padding-top: var(--topbar-h);
+            min-height: 100vh;
+            transition: margin-left .28s cubic-bezier(.4,0,.2,1);
+        }
+        .rf-content {
+            padding: 28px 30px;
+            max-width: 1400px;
+        }
+
+        /* ══════════════════════════════════════
+           DESIGN COMPONENTS
+        ══════════════════════════════════════ */
+
+        /* Cards */
+        .rf-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+        }
+        .rf-card-header {
+            padding: 16px 22px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .rf-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+        .rf-card-body {
+            padding: 20px 22px;
+        }
+
+        /* Stat Cards */
+        .rf-stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            transition: all .2s ease;
+        }
+        .rf-stat-card:hover {
+            border-color: rgba(124,58,237,.3);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .rf-stat-info { flex: 1; }
+        .rf-stat-lbl {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sec);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: 6px;
+        }
+        .rf-stat-val {
+            display: block;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+        .rf-stat-sub {
+            display: block;
+            font-size: 11.5px;
+            color: var(--text-dim);
+            margin-top: 6px;
+        }
+        .rf-stat-icon {
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            background: rgba(124,58,237,.14);
+            color: var(--accent2);
+        }
+        .rf-stat-card.stat-green .rf-stat-icon { background: rgba(16,185,129,.12); color: #34d399; }
+        .rf-stat-card.stat-amber .rf-stat-icon { background: rgba(245,158,11,.12); color: #fbbf24; }
+        .rf-stat-card.stat-blue  .rf-stat-icon { background: rgba(59,130,246,.12); color: #60a5fa; }
+        .rf-stat-card.stat-red   .rf-stat-icon { background: rgba(239,68,68,.12);  color: #f87171; }
+        .rf-stat-card.stat-cyan  .rf-stat-icon { background: rgba(6,182,212,.12);  color: #22d3ee; }
+        .rf-stat-card.stat-pink  .rf-stat-icon { background: rgba(236,72,153,.12); color: #f472b6; }
+
+        /* Grid helpers */
+        .rf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .rf-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+        .rf-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+        @media (max-width: 1100px) {
+            .rf-grid-4 { grid-template-columns: repeat(2,1fr); }
+            .rf-grid-3 { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 768px) {
+            .rf-grid-2, .rf-grid-3, .rf-grid-4 { grid-template-columns: 1fr; }
+        }
+
+        /* Badges */
+        .rf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+        .rf-badge-purple  { background: rgba(124,58,237,.18); color: var(--accent3); border: 1px solid rgba(124,58,237,.3); }
+        .rf-badge-green   { background: rgba(16,185,129,.15); color: #34d399; border: 1px solid rgba(16,185,129,.25); }
+        .rf-badge-amber   { background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.25); }
+        .rf-badge-red     { background: rgba(239,68,68,.15);  color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+        .rf-badge-blue    { background: rgba(59,130,246,.15); color: #60a5fa; border: 1px solid rgba(59,130,246,.25); }
+        .rf-badge-gray    { background: rgba(148,163,184,.12); color: #94a3b8; border: 1px solid rgba(148,163,184,.2); }
+        .rf-badge-cyan    { background: rgba(6,182,212,.15);  color: #22d3ee; border: 1px solid rgba(6,182,212,.25); }
+        .rf-badge-pink    { background: rgba(236,72,153,.15); color: #f472b6; border: 1px solid rgba(236,72,153,.25); }
+        /* Aliases */
+        .rf-badge-success { background: rgba(16,185,129,.15); color: #34d399; }
+        .rf-badge-warning { background: rgba(245,158,11,.15); color: #fbbf24; }
+        .rf-badge-danger  { background: rgba(239,68,68,.15);  color: #f87171; }
+        .rf-badge-info    { background: rgba(59,130,246,.15); color: #60a5fa; }
+
+        /* Buttons */
+        .rf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border-radius: var(--r-sm);
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .18s ease;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+        .rf-btn-primary {
+            background: linear-gradient(135deg, var(--accent), #5b21b6);
+            color: #fff;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+        .rf-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+            color: #fff;
+        }
+        .rf-btn-outline {
+            background: transparent;
+            color: var(--text-sec);
+            border: 1px solid var(--border2);
+        }
+        .rf-btn-outline:hover { background: rgba(255,255,255,.06); color: var(--text); border-color: rgba(255,255,255,.2); }
+        .rf-btn-success  { background: rgba(16,185,129,.15); color: #34d399; border: 1px solid rgba(16,185,129,.25); }
+        .rf-btn-success:hover { background: rgba(16,185,129,.25); color: #34d399; }
+        .rf-btn-danger   { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.2); }
+        .rf-btn-danger:hover { background: rgba(239,68,68,.22); color: #f87171; }
+        .rf-btn-amber    { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+        .rf-btn-amber:hover { background: rgba(245,158,11,.22); color: #fbbf24; }
+        .rf-btn-blue     { background: rgba(59,130,246,.12); color: #60a5fa; border: 1px solid rgba(59,130,246,.2); }
+        .rf-btn-blue:hover { background: rgba(59,130,246,.22); color: #60a5fa; }
+        .rf-btn-sm { padding: 5px 12px; font-size: 11.5px; border-radius: 7px; gap: 5px; }
+        .rf-btn-lg { padding: 12px 26px; font-size: 14px; }
+
+        /* Tables */
+        .rf-table-wrap {
+            overflow-x: auto;
+            border-radius: var(--r-lg);
+            border: 1px solid var(--border);
+        }
+        .rf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .rf-table thead th {
+            background: rgba(255,255,255,.03);
+            color: var(--text-dim);
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .rf-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .12s;
+        }
+        .rf-table tbody tr:last-child { border-bottom: none; }
+        .rf-table tbody tr:hover { background: rgba(255,255,255,.025); }
+        .rf-table tbody td {
+            padding: 13px 16px;
+            color: var(--text-sec);
+            vertical-align: middle;
+        }
+        .rf-table .td-primary { color: var(--text); font-weight: 600; }
+
+        /* Forms */
+        .rf-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+            letter-spacing: .2px;
+        }
+        .rf-input, .rf-select, .rf-textarea {
+            width: 100%;
+            padding: 10px 13px;
+            background: rgba(255,255,255,.04);
+            border: 1.5px solid var(--border2);
+            border-radius: var(--r-sm);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            outline: none;
+            transition: border-color .15s, box-shadow .15s, background .15s;
+        }
+        .rf-input::placeholder, .rf-textarea::placeholder { color: var(--text-dim); }
+        .rf-input:focus, .rf-select:focus, .rf-textarea:focus {
+            border-color: var(--accent2);
+            box-shadow: 0 0 0 3px rgba(124,58,237,.2);
+            background: rgba(255,255,255,.06);
+        }
+        .rf-input[readonly], .rf-select[disabled] {
+            color: var(--text-sec);
+            background: rgba(255,255,255,.02);
+            cursor: not-allowed;
+        }
+        .rf-select option { background: #1e1b3a; color: var(--text); }
+        .rf-textarea { resize: vertical; min-height: 110px; }
+        .rf-form-group { margin-bottom: 18px; }
+        .rf-form-hint { font-size: 11.5px; color: var(--text-dim); margin-top: 5px; }
+
+        /* Alerts */
+        .rf-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            padding: 13px 16px;
+            border-radius: var(--r-md);
+            font-size: 13px;
+            margin-bottom: 16px;
+            animation: alertIn .3s ease;
+        }
+        @keyframes alertIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+        .rf-alert-success { background: rgba(16,185,129,.1);  border: 1px solid rgba(16,185,129,.25); color: #34d399; }
+        .rf-alert-danger  { background: rgba(239,68,68,.1);   border: 1px solid rgba(239,68,68,.25);  color: #f87171; }
+        .rf-alert-warning { background: rgba(245,158,11,.1);  border: 1px solid rgba(245,158,11,.25); color: #fbbf24; }
+        .rf-alert-info    { background: rgba(124,58,237,.1);  border: 1px solid rgba(124,58,237,.25); color: #a78bfa; }
+        .rf-alert-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: .5;
+            color: inherit;
+            line-height: 1;
+            transition: opacity .15s;
+            flex-shrink: 0;
+        }
+        .rf-alert-close:hover { opacity: 1; }
+
+        /* Empty State */
+        .rf-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 20px;
+            text-align: center;
+        }
+        .rf-empty-icon {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: rgba(124,58,237,.12);
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            color: var(--accent2);
+            margin-bottom: 16px;
+        }
+        .rf-empty-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .rf-empty-desc  { font-size: 13px; color: var(--text-sec); line-height: 1.6; max-width: 360px; }
+
+        /* Divider */
+        .rf-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+        /* Scrollbar global */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 5px; }
+
+        /* Tooltips / hover helpers */
+        [title] { cursor: help; }
+
+        /* ══════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════ */
+        @media (max-width: 992px) {
+            .rf-sidebar {
+                transform: translateX(-100%);
+            }
+            .rf-sidebar.open {
+                transform: translateX(0);
+                box-shadow: 4px 0 30px rgba(0,0,0,.6);
+            }
+            .rf-topbar {
+                left: 0;
+            }
+            .rf-topbar-toggle {
+                display: flex;
+            }
+            .rf-main {
+                margin-left: 0;
+            }
+            .rf-content {
+                padding: 20px 16px;
+            }
+        }
+
+        /* Sidebar overlay */
+        .rf-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+        .rf-overlay.active { display: block; }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="rf-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ══════ SIDEBAR ══════ -->
+<aside class="rf-sidebar" id="rfSidebar">
+
+    <div class="rf-brand">
+        <a href="{{ url_for('recruiter_dashboard.dashboard') }}" class="rf-brand-logo">
+            <div class="rf-brand-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+            <div>
+                <div class="rf-brand-name">RecruitFlow</div>
+                <div class="rf-brand-tag">Recruiter Portal</div>
+            </div>
+        </a>
+    </div>
+
+    <div class="rf-nav-section">
+        <div class="rf-nav-label">Overview</div>
+        <a href="{{ url_for('recruiter_dashboard.dashboard') }}" class="rf-nav-item {% if request.endpoint == 'recruiter_dashboard.dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="rf-nav-section">
+        <div class="rf-nav-label">Recruitment</div>
+        <a href="{{ url_for('recruiter_job.jobs') }}" class="rf-nav-item {% if 'recruiter_job' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-briefcase"></i> My Jobs
+        </a>
+        <a href="{{ url_for('recruiter_application.applications') }}" class="rf-nav-item {% if 'recruiter_application' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-file-earmark-person"></i> Applications
+        </a>
+        <a href="{{ url_for('recruiter_interview_list.interviews') }}" class="rf-nav-item {% if 'recruiter_interview' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-calendar-check"></i> Interviews
+        </a>
+        <a href="{{ url_for('recruiter_offer.offers') }}" class="rf-nav-item {% if 'recruiter_offer' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-file-earmark-check"></i> Offers
+        </a>
+    </div>
+
+    <div class="rf-nav-section">
+        <div class="rf-nav-label">Tools</div>
+        <a href="/search" class="rf-nav-item {% if request.endpoint == 'search' %}active{% endif %}">
+            <i class="bi bi-search"></i> Search Candidates
+        </a>
+        <a href="/analytics" class="rf-nav-item {% if request.endpoint == 'analytics' %}active{% endif %}">
+            <i class="bi bi-bar-chart-line"></i> Analytics
+        </a>
+    </div>
+
+    <div class="rf-sidebar-footer">
+        <div class="rf-sidebar-user">
+            <div class="rf-sidebar-avatar">{{ session.username[0]|upper if session.username else 'R' }}</div>
+            <div style="min-width:0;">
+                <div class="rf-sidebar-uname">{{ session.username or 'Recruiter' }}</div>
+                <div class="rf-sidebar-role">Recruiter</div>
+            </div>
+        </div>
+        <a href="{{ url_for('recruiter_profile.profile') }}" class="rf-nav-item {% if 'recruiter_profile' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-person-circle"></i> My Profile
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="rf-nav-item" style="color:#f87171;">
+            <i class="bi bi-box-arrow-right"></i> Sign Out
+        </a>
+    </div>
+</aside>
+
+<!-- ══════ TOPBAR ══════ -->
+<header class="rf-topbar" id="rfTopbar">
+    <button class="rf-topbar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+    <div class="rf-topbar-title">
+        {% block page_title %}
+        Recruiter Portal
+        <div class="rf-topbar-sub">RecruitFlow — AI-Powered Recruitment</div>
+        {% endblock %}
+    </div>
+    <div class="rf-topbar-actions">
+        {% block topbar_actions %}{% endblock %}
+        <a href="{{ url_for('recruiter_profile.profile') }}" class="rf-topbar-pill">
+            <div class="rf-topbar-avatar">{{ session.username[0]|upper if session.username else 'R' }}</div>
+            <span>{{ session.username or 'Recruiter' }}</span>
+        </a>
+    </div>
+</header>
+
+<!-- ══════ MAIN ══════ -->
+<main class="rf-main" id="rfMain">
+    <div class="rf-content" id="rfContent">
+
+        {% with messages=get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="rf-alert rf-alert-{{ 'success' if category=='success' else 'danger' if category=='danger' else 'warning' if category=='warning' else 'info' }}">
+                <i class="bi {{ 'bi-check-circle-fill' if category=='success' else 'bi-exclamation-triangle-fill' if category=='warning' else 'bi-x-circle-fill' if category=='danger' else 'bi-info-circle-fill' }}"></i>
+                <span>{{ message }}</span>
+                <button class="rf-alert-close" onclick="this.parentElement.remove()">×</button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<script>
+    // Sidebar toggle
+    function toggleSidebar() {
+        const s = document.getElementById('rfSidebar');
+        const o = document.getElementById('sidebarOverlay');
+        s.classList.toggle('open');
+        o.classList.toggle('active');
+    }
+    function closeSidebar() {
+        document.getElementById('rfSidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+    }
+
+    // Chart.js global defaults
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255,255,255,.06)';
+        Chart.defaults.font.family = 'Inter';
+        Chart.defaults.font.size = 12;
+    }
+</script>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

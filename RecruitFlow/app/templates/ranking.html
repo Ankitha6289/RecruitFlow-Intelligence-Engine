@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="card shadow-lg">
+
+        <div class="card-header bg-primary text-white">
+
+            <h2 class="mb-0">
+                Candidate Ranking
+            </h2>
+
+            <h5 class="mt-2">
+
+                Job :
+                {{ job.job_title }}
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th width="80">Rank</th>
+
+                        <th>Candidate</th>
+
+                        <th>Email</th>
+
+                        <th width="180">Match Score</th>
+
+                        <th>Matched Skills</th>
+
+                        <th>Missing Skills</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for item in rankings %}
+
+                <tr>
+
+                    <td class="text-center">
+
+                        {% if loop.index == 1 %}
+                            🥇
+                        {% elif loop.index == 2 %}
+                            🥈
+                        {% elif loop.index == 3 %}
+                            🥉
+                        {% endif %}
+
+                        <br>
+
+                        {{ loop.index }}
+
+                    </td>
+
+                    <td>
+
+                        <strong>
+
+                            {{ item.candidate.full_name }}
+
+                        </strong>
+
+                    </td>
+
+                    <td>
+
+                        {{ item.candidate.email }}
+
+                    </td>
+
+                    <td>
+
+                        <div class="progress" style="height:28px;">
+
+                            <div
+
+                                class="progress-bar
+
+                                {% if item.score >= 80 %}
+
+                                    bg-success
+
+                                {% elif item.score >= 60 %}
+
+                                    bg-warning
+
+                                {% else %}
+
+                                    bg-danger
+
+                                {% endif %}"
+
+                                role="progressbar"
+
+                                style="width: {{ item.score }}%;">
+
+                                {{ item.score }}%
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <td>
+
+                        {% if item.matched_skills %}
+
+                            {% for skill in item.matched_skills %}
+
+                                <span class="badge bg-success mb-1">
+
+                                    {{ skill }}
+
+                                </span>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <span class="badge bg-secondary">
+
+                                None
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if item.missing_skills %}
+
+                            {% for skill in item.missing_skills %}
+
+                                <span class="badge bg-danger mb-1">
+
+                                    {{ skill }}
+
+                                </span>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <span class="badge bg-primary">
+
+                                Perfect Match
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="6" class="text-center">
+
+                        No Candidates Available
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            <div class="mt-4">
+
+                <a href="{{ url_for('job.jobs') }}"
+                   class="btn btn-secondary">
+
+                    ← Back to Jobs
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

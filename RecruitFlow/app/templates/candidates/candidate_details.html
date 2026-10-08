@@ -1,0 +1,659 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h3>Candidate Details</h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <table class="table table-bordered">
+
+                        <tr>
+
+                            <th width="35%">Full Name</th>
+
+                            <td>{{ candidate.full_name }}</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Email</th>
+
+                            <td>{{ candidate.email }}</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Phone</th>
+
+                            <td>{{ candidate.phone }}</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Address</th>
+
+                            <td>{{ candidate.address }}</td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Status</th>
+
+                            <td>
+
+                                {% if candidate.status=="Applied" %}
+
+                                <span class="badge bg-warning text-dark">
+
+                                    Applied
+
+                                </span>
+
+                                {% elif candidate.status=="Selected" %}
+
+                                <span class="badge bg-success">
+
+                                    Selected
+
+                                </span>
+
+                                {% elif candidate.status=="Rejected" %}
+
+                                <span class="badge bg-danger">
+
+                                    Rejected
+
+                                </span>
+
+                                {% else %}
+
+                                <span class="badge bg-primary">
+
+                                    {{ candidate.status }}
+
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <table class="table table-bordered">
+
+                        <tr>
+
+                            <th width="35%">LinkedIn</th>
+
+                            <td>
+
+                                {% if candidate.linkedin %}
+
+                                <a href="{{ candidate.linkedin }}" target="_blank">
+
+                                    Open LinkedIn
+
+                                </a>
+
+                                {% else %}
+
+                                -
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>GitHub</th>
+
+                            <td>
+
+                                {% if candidate.github %}
+
+                                <a href="{{ candidate.github }}" target="_blank">
+
+                                    Open GitHub
+
+                                </a>
+
+                                {% else %}
+
+                                -
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Portfolio</th>
+
+                            <td>
+
+                                {% if candidate.portfolio %}
+
+                                <a href="{{ candidate.portfolio }}" target="_blank">
+
+                                    Open Portfolio
+
+                                </a>
+
+                                {% else %}
+
+                                -
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>Resume</th>
+
+                            <td>
+
+                                {% if candidate.resume_path %}
+
+                                <a
+
+                                    href="{{ url_for('candidate_management.download_resume', candidate_id=candidate.candidate_id) }}"
+
+                                    class="btn btn-success btn-sm">
+
+                                    Download Resume
+
+                                </a>
+
+                                {% else %}
+
+                                <span class="text-danger">
+
+                                    Resume Not Uploaded
+
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>AI Resume Chat</th>
+
+                            <td>
+
+                                <a
+
+                                    href="{{ url_for('chatbot.chatbot', candidate_id=candidate.candidate_id) }}"
+
+                                    class="btn btn-info btn-sm">
+
+                                    Open Chat
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <br>
+        <!-- Education -->
+
+    <div class="card shadow">
+
+        <div class="card-header bg-success text-white">
+
+            <h5 class="mb-0">
+
+                Education
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            {% if education %}
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Degree</th>
+
+                        <th>Institution</th>
+
+                        <th>CGPA</th>
+
+                        <th>Year</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for edu in education %}
+
+                    <tr>
+
+                        <td>{{ edu.degree }}</td>
+
+                        <td>{{ edu.institution }}</td>
+
+                        <td>{{ edu.cgpa }}</td>
+
+                        <td>{{ edu.year }}</td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            {% else %}
+
+                <div class="alert alert-warning">
+
+                    No education records found.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <!-- Experience -->
+
+    <div class="card shadow">
+
+        <div class="card-header bg-warning">
+
+            <h5 class="mb-0">
+
+                Experience
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            {% if experience %}
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Company</th>
+
+                        <th>Role</th>
+
+                        <th>Duration</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for exp in experience %}
+
+                    <tr>
+
+                        <td>{{ exp.company_name }}</td>
+
+                        <td>{{ exp.role }}</td>
+
+                        <td>{{ exp.duration }}</td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            {% else %}
+
+                <div class="alert alert-warning">
+
+                    No experience records found.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <!-- Additional Parsed Profile -->
+
+    <div class="card shadow">
+
+        <div class="card-header bg-secondary text-white">
+
+            <h5 class="mb-0">
+
+                Parsed Resume Profile
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold">College / Institution</h6>
+
+                    <p>{% if candidate.address %}{{ candidate.address }}{% else %}Not provided.{% endif %}</p>
+
+                    <h6 class="fw-bold">Certifications</h6>
+
+                    <p>{% if certifications %}{{ certifications|join(', ') }}{% else %}Not provided.{% endif %}</p>
+
+                    <h6 class="fw-bold">Languages Known</h6>
+
+                    <p>{% if languages %}{{ languages|join(', ') }}{% else %}Not provided.{% endif %}</p>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold">Projects</h6>
+
+                    <p>{% if projects %}{{ projects|join(' | ') }}{% else %}Not provided.{% endif %}</p>
+
+                    <h6 class="fw-bold">Achievements</h6>
+
+                    <p>{% if achievements %}{{ achievements|join(' | ') }}{% else %}Not provided.{% endif %}</p>
+
+                    <h6 class="fw-bold">Years of Experience</h6>
+
+                    <p>{% if years_of_experience %}{{ years_of_experience }}{% else %}Not provided.{% endif %}</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <!-- Skills -->
+
+    <div class="card shadow">
+
+        <div class="card-header bg-info text-white">
+
+            <h5 class="mb-0">
+
+                Skills
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            {% if skills %}
+
+                {% for skill in skills %}
+
+                <span class="badge bg-primary m-1 p-2">
+
+                    {{ skill.skill_name }}
+
+                </span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="alert alert-warning">
+
+                    No skills available.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <br>
+        <!-- AI Resume Analysis -->
+
+    <div class="card shadow">
+
+        <div class="card-header bg-dark text-white">
+
+            <h5 class="mb-0">
+
+                AI Resume Analysis
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            {% if analysis %}
+
+            <table class="table table-bordered">
+
+                <tr>
+
+                    <th width="30%">
+
+                        ATS Score
+
+                    </th>
+
+                    <td>
+
+                        <span class="badge bg-success fs-6">
+
+                            {% if ats_analysis and ats_analysis.ats_score is not none %}
+                                {{ ats_analysis.ats_score }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+
+                        </span>
+
+                        {% if ats_analysis and ats_analysis.suggestions %}
+                        <div class="mt-2 small text-muted">
+                            {{ ats_analysis.suggestions }}
+                        </div>
+                        {% endif %}
+
+                        {% if ats_analysis and ats_analysis.matched_keywords %}
+                        <div class="mt-3">
+                            <div class="fw-bold">Matched keywords</div>
+                            <div class="mt-1">
+                                {% for keyword in ats_analysis.matched_keywords.split(',') %}
+                                <span class="badge bg-success me-1">{{ keyword.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if ats_analysis and ats_analysis.missing_keywords %}
+                        <div class="mt-3">
+                            <div class="fw-bold">Missing keywords</div>
+                            <div class="mt-1">
+                                {% for keyword in ats_analysis.missing_keywords.split(',') %}
+                                <span class="badge bg-warning text-dark me-1">{{ keyword.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Suitability Score
+
+                    </th>
+
+                    <td>
+
+                        <span class="badge bg-primary fs-6">
+
+                            {% if analysis and analysis.suitability_scores is not none %}
+                                {{ analysis.suitability_scores }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Recommended Roles
+
+                    </th>
+
+                    <td>
+
+                        <pre class="mb-0">{% if analysis and analysis.recommended_roles %}{{ analysis.recommended_roles }}{% else %}No recommended roles available.{% endif %}</pre>
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        AI Summary
+
+                    </th>
+
+                    <td>
+
+                        <pre class="mb-0">{% if analysis and analysis.candidate_summary %}{{ analysis.candidate_summary }}{% else %}No summary available.{% endif %}</pre>
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+            {% else %}
+
+            <div class="alert alert-warning">
+
+                <strong>No AI Analysis Available.</strong>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <div class="text-end">
+
+        <a
+
+            href="{{ url_for('candidate_management.edit_candidate', candidate_id=candidate.candidate_id) }}"
+
+            class="btn btn-warning">
+
+            Edit Candidate
+
+        </a>
+
+        <a
+
+            href="{{ url_for('candidate_management.candidates') }}"
+
+            class="btn btn-secondary">
+
+            Back
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

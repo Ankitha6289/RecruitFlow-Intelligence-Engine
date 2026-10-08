@@ -1,0 +1,232 @@
+{% extends "recruiter_base.html" %}
+{% block title %}ATS Resume Analysis{% endblock %}
+
+{% block content %}
+<style>
+/* ── Page header ── */
+.ats-page-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 22px;
+}
+.ats-page-icon {
+  width: 38px; height: 38px; border-radius: var(--r-md);
+  background: rgba(124,58,237,.15); color: var(--accent2);
+  display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+}
+
+/* ── Score ring card ── */
+.ats-score-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 28px 28px 24px;
+  display: flex; align-items: center; gap: 28px; flex-wrap: wrap;
+  margin-bottom: 16px; position: relative; overflow: hidden;
+}
+.ats-score-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.ats-ring-wrap { position: relative; width: 130px; height: 130px; flex-shrink: 0; }
+.ats-ring-wrap svg { transform: rotate(-90deg); }
+.ats-ring-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  text-align: center;
+}
+.ats-ring-val {
+  font-size: 28px; font-weight: 900; line-height: 1;
+}
+.ats-ring-lbl { font-size: 10px; color: var(--text-sec); font-weight: 600;
+                text-transform: uppercase; letter-spacing: .07em; margin-top: 3px; }
+.ats-score-meta { flex: 1; min-width: 180px; }
+.ats-score-label { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.ats-score-desc  { font-size: 13px; color: var(--text-sec); line-height: 1.6; margin-bottom: 14px; }
+.ats-score-verdict {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 14px; border-radius: 99px;
+  font-size: 12px; font-weight: 700;
+}
+.ats-verdict-high   { background:rgba(16,185,129,.12); color:#10b981; border:1px solid rgba(16,185,129,.28); }
+.ats-verdict-mid    { background:rgba(245,158,11,.12);  color:#f59e0b; border:1px solid rgba(245,158,11,.28); }
+.ats-verdict-low    { background:rgba(239,68,68,.12);   color:#ef4444; border:1px solid rgba(239,68,68,.28); }
+
+/* ── Section cards ── */
+.ats-section-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;
+}
+@media(max-width:760px){ .ats-section-grid{ grid-template-columns:1fr; } }
+
+.ats-section-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--r-xl); overflow: hidden;
+  transition: border-color .2s;
+}
+.ats-section-card:hover { border-color: var(--border2); }
+.ats-section-header {
+  display: flex; align-items: center; gap: 9px;
+  padding: 13px 18px; border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.ats-section-icon {
+  width: 26px; height: 26px; border-radius: var(--r-sm);
+  display: grid; place-items: center; font-size: 12px; flex-shrink: 0;
+}
+.ats-section-body { padding: 16px 18px; }
+
+/* keyword chips */
+.ats-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.ats-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 99px;
+  font-size: 11.5px; font-weight: 600;
+}
+.ats-chip-matched {
+  background: rgba(16,185,129,.12); color: #10b981;
+  border: 1px solid rgba(16,185,129,.25);
+}
+.ats-chip-missing {
+  background: rgba(239,68,68,.12); color: #ef4444;
+  border: 1px solid rgba(239,68,68,.25);
+}
+
+/* ── Suggestions card ── */
+.ats-sug-card {
+  background: linear-gradient(135deg,rgba(124,58,237,.08),rgba(10,9,25,.9));
+  border: 1px solid rgba(124,58,237,.20);
+  border-radius: var(--r-xl); padding: 20px 22px;
+}
+.ats-sug-header {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 12px; font-size: 13px; font-weight: 700; color: var(--text);
+}
+.ats-sug-text { font-size: 13.5px; color: var(--text-sec); line-height: 1.7; }
+</style>
+
+<!-- Page header -->
+<div class="ats-page-header">
+  <div class="ats-page-icon"><i class="bi bi-bar-chart-fill"></i></div>
+  <div>
+    <h1 style="font-size:22px;font-weight:900;color:var(--text);letter-spacing:-.4px;margin:0;">
+      ATS Resume Analysis
+    </h1>
+    <p style="font-size:12.5px;color:var(--text-sec);margin:3px 0 0;">
+      Keyword match score and improvement recommendations.
+    </p>
+  </div>
+</div>
+
+<!-- ── ATS Score Card ── -->
+{% set score = report.ats_score | float %}
+{% set ring_color = '#10b981' if score >= 70 else ('#f59e0b' if score >= 40 else '#ef4444') %}
+{% set ring_dash  = (score * 2.827) | round(1) %}  {# circumference = 2π×45 ≈ 282.7 #}
+{% set verdict_cls = 'ats-verdict-high' if score >= 70 else ('ats-verdict-mid' if score >= 40 else 'ats-verdict-low') %}
+{% set verdict_txt = 'Strong Match'  if score >= 70 else ('Moderate Match' if score >= 40 else 'Needs Improvement') %}
+
+<div class="ats-score-card">
+  <!-- Donut ring -->
+  <div class="ats-ring-wrap">
+    <svg viewBox="0 0 100 100" width="130" height="130">
+      <circle cx="50" cy="50" r="45" fill="none"
+              stroke="rgba(255,255,255,.07)" stroke-width="10"/>
+      <circle cx="50" cy="50" r="45" fill="none"
+              stroke="{{ ring_color }}" stroke-width="10"
+              stroke-dasharray="{{ ring_dash }} 282.7"
+              stroke-linecap="round"
+              style="filter:drop-shadow(0 0 6px {{ ring_color }}66);"/>
+    </svg>
+    <div class="ats-ring-center">
+      <div class="ats-ring-val" style="color:{{ ring_color }};">{{ report.ats_score }}%</div>
+      <div class="ats-ring-lbl">ATS Score</div>
+    </div>
+  </div>
+
+  <!-- Meta -->
+  <div class="ats-score-meta">
+    <div class="ats-score-label">ATS Score</div>
+    <div class="ats-score-desc">
+      This score reflects how well the candidate's resume matches
+      the job's required keywords and structure.
+    </div>
+    <span class="ats-score-verdict {{ verdict_cls }}">
+      <i class="bi bi-{% if score >= 70 %}check-circle-fill{% elif score >= 40 %}exclamation-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+      {{ verdict_txt }}
+    </span>
+  </div>
+</div>
+
+<!-- ── Matched + Missing keywords ── -->
+<div class="ats-section-grid">
+
+  <!-- Matched keywords -->
+  <div class="ats-section-card">
+    <div class="ats-section-header">
+      <div class="ats-section-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+      Matched Keywords
+      {% set matched_list = report.matched_keywords.split(',') | map('trim') | reject('equalto','') | list if report.matched_keywords else [] %}
+      <span style="margin-left:auto;background:rgba(16,185,129,.12);color:#10b981;
+                   border:1px solid rgba(16,185,129,.25);border-radius:99px;
+                   font-size:10.5px;font-weight:700;padding:2px 9px;">
+        {{ matched_list | length }}
+      </span>
+    </div>
+    <div class="ats-section-body">
+      {% if matched_list %}
+      <div class="ats-chips">
+        {% for kw in matched_list %}
+        <span class="ats-chip ats-chip-matched">
+          <i class="bi bi-check-lg" style="font-size:10px;"></i>{{ kw }}
+        </span>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="font-size:12.5px;color:var(--text-dim);margin:0;">No matched keywords found.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Missing keywords -->
+  <div class="ats-section-card">
+    <div class="ats-section-header">
+      <div class="ats-section-icon" style="background:rgba(239,68,68,.12);color:#ef4444;">
+        <i class="bi bi-x-circle"></i>
+      </div>
+      Missing Keywords
+      {% set missing_list = report.missing_keywords.split(',') | map('trim') | reject('equalto','') | list if report.missing_keywords else [] %}
+      <span style="margin-left:auto;background:rgba(239,68,68,.12);color:#ef4444;
+                   border:1px solid rgba(239,68,68,.25);border-radius:99px;
+                   font-size:10.5px;font-weight:700;padding:2px 9px;">
+        {{ missing_list | length }}
+      </span>
+    </div>
+    <div class="ats-section-body">
+      {% if missing_list %}
+      <div class="ats-chips">
+        {% for kw in missing_list %}
+        <span class="ats-chip ats-chip-missing">
+          <i class="bi bi-dash-lg" style="font-size:10px;"></i>{{ kw }}
+        </span>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="font-size:12.5px;color:var(--green);margin:0;">
+        <i class="bi bi-stars"></i> No missing keywords — perfect match!
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Suggestions ── -->
+<div class="ats-sug-card">
+  <div class="ats-sug-header">
+    <div style="width:26px;height:26px;border-radius:var(--r-sm);
+                background:rgba(124,58,237,.15);color:var(--accent2);
+                display:grid;place-items:center;font-size:13px;flex-shrink:0;">
+      <i class="bi bi-lightbulb-fill"></i>
+    </div>
+    Suggestions
+  </div>
+  <p class="ats-sug-text">{{ report.suggestions or 'No suggestions available.' }}</p>
+</div>
+
+{% endblock %}

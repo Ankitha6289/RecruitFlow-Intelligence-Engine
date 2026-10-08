@@ -1,0 +1,326 @@
+{% extends "recruiter_base.html" %}
+{% block title %}Candidate Search{% endblock %}
+
+{% block content %}
+
+<style>
+/* ── Page header ── */
+.sr-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.sr-title {
+  font-size: 22px; font-weight: 900; color: var(--text);
+  letter-spacing: -.4px; display: flex; align-items: center; gap: 10px;
+}
+.sr-title-icon {
+  width: 36px; height: 36px; border-radius: var(--r-md);
+  background: rgba(124,58,237,.15); color: var(--accent2);
+  display: grid; place-items: center; font-size: 17px; flex-shrink: 0;
+}
+
+/* ── Search bar ── */
+.sr-search-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 16px 18px;
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 18px;
+}
+.sr-search-wrap {
+  flex: 1; position: relative;
+}
+.sr-search-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--text-dim); font-size: 15px; pointer-events: none;
+}
+.sr-search-input {
+  width: 100%;
+  background: rgba(5,4,15,.6) !important;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 11px 14px 11px 42px;
+  font-size: 13.5px; font-family: 'Inter', sans-serif;
+  color: var(--text) !important; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.sr-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+}
+.sr-search-input::placeholder { color: var(--text-dim); }
+
+/* ── Table card ── */
+.sr-table-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--r-xl); overflow: hidden;
+}
+.sr-table-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.015);
+}
+.sr-table-title {
+  font-size: 13.5px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── Table ── */
+.sr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sr-table thead th {
+  background: rgba(255,255,255,.03); color: var(--text-dim);
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; padding: 11px 14px; text-align: left;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.sr-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.sr-table tbody tr:last-child { border-bottom: none; }
+.sr-table tbody tr:hover { background: rgba(124,58,237,.04); }
+.sr-table td { padding: 14px 14px; color: var(--text-sec); vertical-align: top; }
+.sr-table td.td-name { color: var(--text); font-weight: 600; }
+
+/* candidate name link */
+.sr-cand-link {
+  color: var(--accent2); text-decoration: none; font-weight: 700; font-size: 13px;
+  display: block; margin-bottom: 3px;
+}
+.sr-cand-link:hover { color: var(--accent3); text-decoration: underline; }
+.sr-cand-email { font-size: 11px; color: var(--text-dim); }
+
+/* skill chips */
+.sr-skills { display: flex; flex-wrap: wrap; gap: 5px; }
+.sr-skill {
+  display: inline-block; padding: 2px 8px; border-radius: 99px;
+  font-size: 10.5px; font-weight: 600;
+  background: rgba(124,58,237,.14); color: var(--accent3);
+  border: 1px solid rgba(124,58,237,.25);
+}
+
+/* status badge */
+.sr-status {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 99px;
+  font-size: 10.5px; font-weight: 700;
+}
+.sr-st-applied    { background:rgba(59,130,246,.12); color:#60a5fa; border:1px solid rgba(59,130,246,.25); }
+.sr-st-selected   { background:rgba(16,185,129,.12); color:#10b981; border:1px solid rgba(16,185,129,.25); }
+.sr-st-rejected   { background:rgba(239,68,68,.12);  color:#ef4444; border:1px solid rgba(239,68,68,.25); }
+.sr-st-shortlisted{ background:rgba(245,158,11,.12); color:#f59e0b; border:1px solid rgba(245,158,11,.25); }
+.sr-st-default    { background:rgba(148,163,184,.1); color:#94a3b8; border:1px solid rgba(148,163,184,.2); }
+
+/* ── AI action buttons ── */
+.sr-ai-actions { display: flex; flex-direction: column; gap: 5px; min-width: 120px; }
+.sr-ai-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: var(--r-sm);
+  font-size: 11px; font-weight: 700; text-decoration: none;
+  transition: all .15s; white-space: nowrap; border: 1px solid transparent;
+}
+.sr-ai-btn:hover { transform: translateY(-1px); }
+.sr-ai-chat     { background:rgba(6,182,212,.12); color:#06b6d4; border-color:rgba(6,182,212,.25); }
+.sr-ai-chat:hover { background:rgba(6,182,212,.22); }
+.sr-ai-ats      { background:rgba(59,130,246,.12); color:#60a5fa; border-color:rgba(59,130,246,.25); }
+.sr-ai-ats:hover { background:rgba(59,130,246,.22); }
+.sr-ai-gap      { background:rgba(148,163,184,.08); color:#94a3b8; border-color:rgba(148,163,184,.2); }
+.sr-ai-gap:hover { background:rgba(148,163,184,.16); }
+.sr-ai-iv       { background:rgba(124,58,237,.14); color:#a78bfa; border-color:rgba(124,58,237,.28); }
+.sr-ai-iv:hover  { background:rgba(124,58,237,.24); }
+.sr-ai-match    { background:rgba(16,185,129,.12); color:#10b981; border-color:rgba(16,185,129,.25); }
+.sr-ai-match:hover { background:rgba(16,185,129,.22); }
+.sr-sched-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: var(--r-sm);
+  font-size: 11.5px; font-weight: 700; text-decoration: none;
+  background: rgba(16,185,129,.12); color: #10b981;
+  border: 1px solid rgba(16,185,129,.25); white-space: nowrap;
+  transition: all .15s;
+}
+.sr-sched-btn:hover { background:rgba(16,185,129,.22); transform:translateY(-1px); }
+
+/* ── Empty state ── */
+.sr-empty {
+  text-align: center; padding: 52px 20px; color: var(--text-dim);
+}
+.sr-empty i  { font-size: 36px; display: block; margin-bottom: 12px; }
+.sr-empty p  { font-size: 13.5px; margin: 0; }
+
+/* count chip */
+#srCount { font-size: 11.5px; color: var(--text-dim); }
+</style>
+
+<!-- ── Header ── -->
+<div class="sr-header">
+  <div class="sr-title">
+    <div class="sr-title-icon"><i class="bi bi-search"></i></div>
+    Candidate Search
+  </div>
+  <a href="/export/excel"
+     style="display:inline-flex;align-items:center;gap:7px;
+            padding:9px 16px;border-radius:var(--r-md);
+            background:rgba(16,185,129,.12);color:#10b981;
+            border:1px solid rgba(16,185,129,.28);
+            font-size:13px;font-weight:700;text-decoration:none;
+            transition:all .15s;"
+     onmouseover="this.style.background='rgba(16,185,129,.22)'"
+     onmouseout="this.style.background='rgba(16,185,129,.12)'">
+    <i class="bi bi-file-earmark-excel-fill"></i> Download Excel Report
+  </a>
+</div>
+
+<!-- ── Search bar ── -->
+<div class="sr-search-card">
+  <form method="GET" style="display:contents;">
+    <div class="sr-search-wrap">
+      <i class="bi bi-search sr-search-icon"></i>
+      <input type="text" name="keyword" class="sr-search-input"
+             placeholder="Search by Name, Email, Phone or Skill…"
+             value="{{ keyword }}"
+             id="srInput" autocomplete="off" />
+    </div>
+    <button type="submit"
+            style="padding:10px 22px;border-radius:var(--r-md);
+                   background:linear-gradient(135deg,var(--accent),#5b21b6);
+                   color:#fff;border:none;font-size:13.5px;font-weight:700;
+                   cursor:pointer;white-space:nowrap;
+                   box-shadow:0 4px 14px rgba(124,58,237,.35);">
+      <i class="bi bi-search"></i> Search
+    </button>
+  </form>
+</div>
+
+<!-- ── Candidate table ── -->
+<div class="sr-table-card">
+  <div class="sr-table-header">
+    <div class="sr-table-title">
+      <i class="bi bi-people-fill" style="color:var(--accent2);"></i>
+      Candidate List
+    </div>
+    <span id="srCount">{{ candidates|length }} candidate{{ 's' if candidates|length != 1 else '' }}</span>
+  </div>
+
+  {% if candidates %}
+  <div style="overflow-x:auto;">
+    <table class="sr-table" id="srTable">
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Phone</th>
+          <th>Skills</th>
+          <th>Status</th>
+          <th>Interview</th>
+          <th>AI Features</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in candidates %}
+        {% set st = (c.status or 'Applied')|lower %}
+        {% set st_cls = 'sr-st-selected' if st == 'selected'
+                   else 'sr-st-rejected'    if st == 'rejected'
+                   else 'sr-st-shortlisted' if st == 'shortlisted'
+                   else 'sr-st-applied'     if st == 'applied'
+                   else 'sr-st-default' %}
+        <tr>
+          <!-- Candidate name + email -->
+          <td class="td-name" style="min-width:140px;">
+            <a href="{{ url_for('profile.profile', candidate_id=c.candidate_id) }}"
+               class="sr-cand-link">{{ c.full_name }}</a>
+            <span class="sr-cand-email">{{ c.email }}</span>
+          </td>
+
+          <!-- Phone -->
+          <td style="white-space:nowrap;font-size:12.5px;">{{ c.phone or '—' }}</td>
+
+          <!-- Skills -->
+          <td style="max-width:280px;">
+            {% if c.skills %}
+            <div class="sr-skills">
+              {% for skill in c.skills %}
+              <span class="sr-skill">{{ skill.skill_name }}</span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <span style="font-size:11.5px;color:var(--text-dim);">No skills</span>
+            {% endif %}
+          </td>
+
+          <!-- Status -->
+          <td>
+            <span class="sr-status {{ st_cls }}">
+              {{ c.status or 'Applied' }}
+            </span>
+          </td>
+
+          <!-- Schedule -->
+          <td style="white-space:nowrap;">
+            <a href="{{ url_for('interview.schedule_interview', candidate_id=c.candidate_id) }}"
+               class="sr-sched-btn">
+              <i class="bi bi-calendar-plus-fill"></i> Schedule
+            </a>
+          </td>
+
+          <!-- AI Features -->
+          <td>
+            <div class="sr-ai-actions">
+              <a href="{{ url_for('chatbot.chatbot', candidate_id=c.candidate_id) }}"
+                 class="sr-ai-btn sr-ai-chat">
+                <i class="bi bi-chat-heart-fill"></i> Resume Chat
+              </a>
+              <a href="{{ url_for('ats.ats', candidate_id=c.candidate_id) }}"
+                 class="sr-ai-btn sr-ai-ats">
+                <i class="bi bi-bar-chart-fill"></i> ATS Analysis
+              </a>
+              <a href="{{ url_for('skill_gap.skill_gap') }}?candidate_id={{ c.candidate_id }}"
+                 class="sr-ai-btn sr-ai-gap">
+                <i class="bi bi-puzzle-fill"></i> Skill Gap
+              </a>
+              <a href="{{ url_for('interview.interviews') }}"
+                 class="sr-ai-btn sr-ai-iv">
+                <i class="bi bi-robot"></i> AI Interview
+              </a>
+              <a href="{{ url_for('match.job_matching') }}"
+                 class="sr-ai-btn sr-ai-match">
+                <i class="bi bi-diagram-3-fill"></i> Job Match
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="sr-empty">
+    <i class="bi bi-person-slash"></i>
+    <p>
+      {% if keyword %}
+        No candidates found for "<strong style="color:var(--text);">{{ keyword }}</strong>".
+      {% else %}
+        No candidates in the system yet.
+      {% endif %}
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* Live client-side filter on keyword field */
+  const inp   = document.getElementById('srInput');
+  const count = document.getElementById('srCount');
+  inp?.addEventListener('input', function() {
+    const q    = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#srTable tbody tr');
+    let vis = 0;
+    rows.forEach(r => {
+      const show = !q || r.innerText.toLowerCase().includes(q);
+      r.style.display = show ? '' : 'none';
+      if (show) vis++;
+    });
+    if (count) count.textContent = vis + ' candidate' + (vis !== 1 ? 's' : '');
+  });
+</script>
+{% endblock %}

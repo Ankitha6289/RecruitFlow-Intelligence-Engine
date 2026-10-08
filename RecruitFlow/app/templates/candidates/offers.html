@@ -1,0 +1,308 @@
+{% extends "candidate_base.html" %}
+{% block title %}My Job Offers{% endblock %}
+
+{% block page_title %}
+<div class="rf-topbar-title">Job Offers &amp; Compensation</div>
+<div class="rf-topbar-sub">Review formal employment offers, compensation packages &amp; official offer letters</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Celebratory Banner */
+    .offers-celebrate-hero {
+        background: linear-gradient(135deg, rgba(16, 185, 129, .15) 0%, rgba(14, 165, 233, .12) 50%, rgba(13, 30, 53, .8) 100%);
+        border: 1px solid rgba(16, 185, 129, .3);
+        border-radius: var(--r-lg);
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .celebrate-icon-box {
+        width: 60px; height: 60px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        display: grid; place-items: center;
+        font-size: 28px; color: #fff;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, .35);
+        flex-shrink: 0;
+    }
+    .celebrate-text h2 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+    .celebrate-text p {
+        font-size: 13px;
+        color: #cbd5e1;
+        margin: 0;
+    }
+
+    /* Offer Cards Grid */
+    .offers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+        gap: 20px;
+    }
+    @media (max-width: 640px) {
+        .offers-grid { grid-template-columns: 1fr; }
+    }
+
+    .offer-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        padding: 26px;
+        position: relative;
+        overflow: hidden;
+        transition: all .2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .offer-card:hover {
+        border-color: rgba(14, 165, 233, .35);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, .4);
+    }
+    .offer-card.pending {
+        border-color: rgba(245, 158, 11, .35);
+    }
+    .offer-card.accepted {
+        border-color: rgba(16, 185, 129, .4);
+    }
+    .offer-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981, #0ea5e9);
+    }
+    .offer-card.pending::before {
+        background: linear-gradient(90deg, #f59e0b, #0ea5e9);
+    }
+
+    .offer-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .offer-role-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.3px;
+        margin-bottom: 4px;
+    }
+    .offer-company-name {
+        font-size: 13.5px;
+        color: var(--text-sec);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Salary Callout */
+    .offer-salary-box {
+        background: rgba(16, 185, 129, .08);
+        border: 1px solid rgba(16, 185, 129, .25);
+        border-radius: var(--r-md);
+        padding: 16px 20px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .offer-salary-lbl {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #34d399;
+        margin-bottom: 2px;
+    }
+    .offer-salary-val {
+        font-size: 26px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.1;
+    }
+
+    .offer-meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+    .offer-meta-item {
+        background: rgba(255, 255, 255, .02);
+        border: 1px solid var(--border);
+        border-radius: var(--r-sm);
+        padding: 10px 14px;
+    }
+    .offer-meta-lbl {
+        font-size: 11px;
+        color: var(--text-sec);
+        margin-bottom: 2px;
+    }
+    .offer-meta-val {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .offer-action-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+        margin-top: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if offers %}
+<!-- Celebration Hero -->
+<div class="offers-celebrate-hero">
+    <div class="celebrate-icon-box">
+        <i class="bi bi-gift-fill"></i>
+    </div>
+    <div class="celebrate-text">
+        <h2>Congratulations! You Have Received Job Offer(s)</h2>
+        <p>Review the compensation packages, expected joining dates, and download official offer letter documents below.</p>
+    </div>
+</div>
+
+<!-- Offers Grid -->
+<div class="offers-grid">
+    {% for offer in offers %}
+    <div class="offer-card {{ offer.status|lower }}">
+        <div>
+            <!-- Header -->
+            <div class="offer-header">
+                <div>
+                    <h3 class="offer-role-title">
+                        {{ offer.job.title if offer.job else 'Position Offer' }}
+                    </h3>
+                    <div class="offer-company-name">
+                        <i class="bi bi-building"></i>
+                        <span>{{ offer.job.company if offer.job else 'Employer' }}</span>
+                    </div>
+                </div>
+
+                <!-- Status Badge -->
+                {% if offer.status == "Pending" %}
+                <span class="rf-badge rf-badge-warning" style="font-size: 12px; padding: 4px 12px;">
+                    <i class="bi bi-clock-fill"></i> Pending Decision
+                </span>
+                {% elif offer.status == "Accepted" %}
+                <span class="rf-badge rf-badge-success" style="font-size: 12px; padding: 4px 12px;">
+                    <i class="bi bi-check-circle-fill"></i> Offer Accepted
+                </span>
+                {% elif offer.status in ["Declined", "Rejected"] %}
+                <span class="rf-badge rf-badge-danger" style="font-size: 12px; padding: 4px 12px;">
+                    <i class="bi bi-x-circle-fill"></i> {{ offer.status }}
+                </span>
+                {% else %}
+                <span class="rf-badge rf-badge-gray">{{ offer.status }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Salary Highlight -->
+            <div class="offer-salary-box">
+                <div>
+                    <div class="offer-salary-lbl">Offered Compensation</div>
+                    <div class="offer-salary-val">{{ offer.salary or 'Competitive' }}</div>
+                </div>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16, 185, 129, .15); color: #34d399; display: grid; place-items: center; font-size: 20px;">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+            </div>
+
+            <!-- Dates Grid -->
+            <div class="offer-meta-grid">
+                <div class="offer-meta-item">
+                    <div class="offer-meta-lbl"><i class="bi bi-calendar-event"></i> Offer Date</div>
+                    <div class="offer-meta-val">{{ offer.offer_date or 'Recent' }}</div>
+                </div>
+                <div class="offer-meta-item">
+                    <div class="offer-meta-lbl"><i class="bi bi-calendar-check"></i> Joining Date</div>
+                    <div class="offer-meta-val">{{ offer.joining_date or 'Flexible' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="offer-action-bar">
+            <!-- Download PDF Button -->
+            {% if offer.pdf_path %}
+            <a href="{{ url_for('offer.download_offer', offer_id=offer.offer_id) }}" class="rf-btn rf-btn-outline" style="flex: 1;">
+                <i class="bi bi-file-earmark-pdf-fill" style="color: #ef4444;"></i>
+                <span>Download PDF</span>
+            </a>
+            {% else %}
+            <span style="font-size: 12px; color: var(--text-sec);"><i class="bi bi-file-earmark"></i> PDF Pending</span>
+            {% endif %}
+
+            <!-- Interactive Decision Buttons for Pending Offers -->
+            {% if offer.status == "Pending" %}
+            <a href="{{ url_for('candidate_offer.accept_offer', offer_id=offer.offer_id) }}" 
+               class="rf-btn rf-btn-success" 
+               onclick="return confirm('Accept this formal job offer from {{ offer.job.company if offer.job else 'the employer' }}?');">
+                <i class="bi bi-check2-circle"></i>
+                <span>Accept Offer</span>
+            </a>
+
+            <a href="{{ url_for('candidate_offer.reject_offer', offer_id=offer.offer_id) }}" 
+               class="rf-btn rf-btn-danger rf-btn-sm" 
+               onclick="return confirm('Decline this job offer? This action is permanent.');"
+               title="Decline Offer">
+                <i class="bi bi-x-lg"></i>
+            </a>
+            {% elif offer.status == "Accepted" %}
+            <div style="font-size: 12px; color: #34d399; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                <i class="bi bi-check-all" style="font-size: 16px;"></i> Accepted &bull; Onboarding in progress
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="rf-card">
+    <div class="rf-empty-state">
+        <div class="rf-empty-icon" style="background: rgba(245, 158, 11, .1); border-color: rgba(245, 158, 11, .25); color: #fbbf24;">
+            <i class="bi bi-gift"></i>
+        </div>
+        <div class="rf-empty-title">No job offers available yet</div>
+        <p class="rf-empty-desc">
+            Once you successfully complete your technical and HR interview rounds, formal offer letters and compensation packages will be issued to your account here.
+        </p>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('candidate_interview.interviews') }}" class="rf-btn rf-btn-outline">
+                <i class="bi bi-calendar-event"></i> View My Interviews
+            </a>
+            <a href="{{ url_for('candidate_jobs.jobs') }}" class="rf-btn rf-btn-primary">
+                <i class="bi bi-briefcase"></i> Explore Jobs
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div style="margin-top: 24px;">
+    <a href="{{ url_for('candidate_dashboard.dashboard') }}" class="rf-btn rf-btn-outline rf-btn-sm">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+{% endblock %}
